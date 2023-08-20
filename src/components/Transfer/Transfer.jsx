@@ -10,36 +10,7 @@ import { useParams } from 'react-router-dom';
 import { Player, Controls } from '@lottiefiles/react-lottie-player';
 
 
-const configuration = {
-  iceServers: [
-    {
-      urls: ["stun:stun.relay.metered.ca:80", 'stun:stun1.l.google.com:19302',
-        'stun:stun2.l.google.com:19302',],
-    },
-    {
-      urls: "turn:a.relay.metered.ca:80",
-      username: "4b9c932b54a7486d48e1ed1a",
-      credential: "RzNCeSFQKWDbmyI7",
-    },
-    {
-      urls: "turn:a.relay.metered.ca:80?transport=tcp",
-      username: "4b9c932b54a7486d48e1ed1a",
-      credential: "RzNCeSFQKWDbmyI7",
-    },
-    {
-      urls: "turn:a.relay.metered.ca:443",
-      username: "4b9c932b54a7486d48e1ed1a",
-      credential: "RzNCeSFQKWDbmyI7",
-    },
-    {
-      urls: "turn:a.relay.metered.ca:443?transport=tcp",
-      username: "4b9c932b54a7486d48e1ed1a",
-      credential: "RzNCeSFQKWDbmyI7",
-    },
-  ],
-  // To prefetch ice Candidate before setting local description range(0-255) more better but use more resource
-  iceCandidatePoolSize: 10,
-};
+
 const firebaseConfig = {
   apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
   authDomain: "signalling-28129.firebaseapp.com",
@@ -61,7 +32,6 @@ let idField = null;
 let receiveChannel = null;
 let userRef = null;
 let channel = null;
-let messageChannel = null;
 let remoteConnection = null;
 let receieveMessageChannel = null;
 let fileReader = null;
@@ -74,7 +44,7 @@ let receivedFile;
 let fileInfo = null;
 let answer = null;
 
-const Transfer = () => {
+const Transfer = ({ localConnection, remoteConnection }) => {
   const [connectionId, setConnectionId] = useState(null);
   const [isButtonDisabled, setDisabled] = useState(false);
   const [userEnteredId, setUserEnteredId] = useState('');
@@ -83,50 +53,76 @@ const Transfer = () => {
 
   let { id } = useParams();
 
+
   useEffect(() => {
-    const removeConnnection = async () => {
-      const db = firebase.firestore();
-      const userRef = await db.collection('users').doc(id);
-      const peerA = await userRef.collection('peerA').get();
-      const roomID = await userRef.get();
-
-      peerA.forEach(async candidate => {
-        await candidate.ref.delete();
-      });
-      const peerB = await userRef.collection('peerB').get();
-      peerB.forEach(async candidate => {
-        await candidate.ref.delete();
-      });
-
-      if (roomID.data().offer && roomID.data().answer) {
-        const updateData = {
-          offer: firebase.firestore.FieldValue.delete(),
-          answer: firebase.firestore.FieldValue.delete(),
-        };
-
-        userRef.update(updateData)
-          .then(() => {
-            console.log('Document updated successfully without the field');
-          })
-          .catch((error) => {
-            console.error('Error updating document:', error);
-          });
-      }
-
-    }
-    removeConnnection();
-
     let checkPeerRole = localStorage.getItem('peerRole');
     if (checkPeerRole === 'peerA') {
-      generateID();
-    } else if (checkPeerRole === 'peerB') {
-      joinRoom();
-    } else {
-      // If peerRole is not set, assume Peer B by default
-      localStorage.setItem('peerRole', 'peerB');
-      joinRoom();
+      dataChannel = localConnection.createDataChannel('fileChannel');
+      initializeDataChannelListeners(dataChannel);
     }
+    else {
+      remoteConnection.addEventListener('datachannel', (event) => {
+        channel = event.channel;
+        channel.binaryType = 'arraybuffer';
+    
+        if (channel.label === 'fileChannel') {
+          remoteConnection.dataChannel = channel;
+          channel.onmessage = recieveData;
+        }
+        channel.onopen = event => console.log(channel.label + " opened");
+        channel.onclose = event => console.log(channel.label + " closed");
+      });
+    }
+
+
+
   }, []);
+
+  // useEffect(() => {
+  //   const removeConnnection = async () => {
+  //     const db = firebase.firestore();
+  //     const userRef = await db.collection('users').doc(id);
+  //     const peerA = await userRef.collection('peerA').get();
+  //     const roomID = await userRef.get();
+
+  //     peerA.forEach(async candidate => {
+  //       await candidate.ref.delete();
+  //     });
+  //     const peerB = await userRef.collection('peerB').get();
+  //     peerB.forEach(async candidate => {
+  //       await candidate.ref.delete();
+  //     });
+
+  //     if (roomID && roomID.data().offer && roomID.data().answer) {
+  //       const updateData = {
+  //         offer: firebase.firestore.FieldValue.delete(),
+  //         answer: firebase.firestore.FieldValue.delete(),
+  //       };
+
+  //       userRef.update(updateData)
+  //         .then(() => {
+  //           console.log('Document updated successfully without the field');
+  //         })
+  //         .catch((error) => {
+  //           console.error('Error updating document:', error);
+  //         });
+  //     }
+
+  //   }
+  //   removeConnnection();
+
+  //   let checkPeerRole = localStorage.getItem('peerRole');
+  //   if (checkPeerRole === 'peerA') {
+  //     generateID();
+  //   } else if (checkPeerRole === 'peerB') {
+  //     joinRoom();
+  //   } else {
+  //     // If peerRole is not set, assume Peer B by default
+  //     localStorage.setItem('peerRole', 'peerB');
+  //     joinRoom();
+  //   }
+  // }, []);
+
 
 
 
@@ -246,8 +242,6 @@ const Transfer = () => {
         },
       };
       dataChannel.send(JSON.stringify(fileInfo));
-      // setting offer in firestore for roomID
-      // await userRef.update(fileInfo);
       console.log('Sending', file);
       send(file);
 
@@ -260,225 +254,200 @@ const Transfer = () => {
         },
       };
       remoteConnection.dataChannel.send(JSON.stringify(fileInfo));
-      // setting offer in firestore for roomID
-      // await userRef.update(fileInfo);
       console.log('Sending', file);
       sendFromRemote(file);
 
     }
   }
 
-  async function generateID() {
+  // async function generateID() {
 
-    const db = firebase.firestore();
-    userRef = await db.collection('users').doc(`${id}`);
-    console.log('generate id called');
-    console.log('Creating local connection');
-    localConnection = new RTCPeerConnection(configuration);
-    initializeIceListeners(localConnection);
-    messageChannel = localConnection.createDataChannel('messageChannel');
-    dataChannel = localConnection.createDataChannel('fileChannel');
+  //   const db = firebase.firestore();
+  //   userRef = await db.collection('users').doc(`${id}`);
+  //   console.log('generate id called');
+  //   console.log('Creating local connection');
+  //   localConnection = new RTCPeerConnection(configuration);
+  //   initializeIceListeners(localConnection);
 
+  //   dataChannel = localConnection.createDataChannel('fileChannel');
 
-    initializeDataChannelListeners(dataChannel);
-    initializeMessageChannelListeners(messageChannel);
+  //   initializeDataChannelListeners(dataChannel);
 
-    localConnection.addEventListener('icecandidate', event => {
-      if (!event.candidate) {
-        console.log('Got final candidate!');
-        return;
-      }
-      console.log('Got candidate: ', event.candidate);
-      peerA.add(event.candidate.toJSON());
-    });
-
-    const peerA = userRef.collection('peerA');
-
-    const offer = await localConnection.createOffer();
-    // console.log(offer.type);
-    await localConnection.setLocalDescription(offer);
-    console.log('Got offer: ', offer);
-    // creating room schema object 
-    const peerOffer = {
-      'offer': {
-        type: offer.type,
-        sdp: offer.sdp
-      },
-    };
-    // setting offer in firestore for roomID
-    await userRef.set(peerOffer);
-    setConnectionId(userRef.id);
-
-    userRef.onSnapshot(async (snapshot) => {
-      console.log('hello');
-      const data = snapshot.data();
-      if (data && data.answer) {
-        console.log('We got remote description: ', data.answer);
-        if (localConnection)
-          await localConnection.setRemoteDescription(data.answer);
-      }
-    });
-
-    userRef.collection('peerB').onSnapshot(async (snapshot) => {
-      snapshot.docChanges().forEach(async change => {
-        if (change.type === 'added') {
-          let data = change.doc.data();
-          console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
-          if (localConnection.remoteDescription)
-            await localConnection.addIceCandidate(new RTCIceCandidate(data));
-        }
-      });
-    });
-    localStorage.setItem('senderId', id);
-  }
-
-
-  async function joinRoom() {
-    // steps 1: create databse var and create fireebase instance
-    const db = firebase.firestore();
-    // check if id exists 
-    userRef = db.collection('users').doc(`${id}`);
-    const peerB = userRef.collection('peerB');
-    const roomId = await userRef.get();
-    console.log('Got room:', roomId.exists);
-
-    if (roomId.exists) {
-
-      remoteConnection = new RTCPeerConnection(configuration);
-      initializeIceListeners(remoteConnection);
-      remoteConnection.addEventListener('icecandidate', (event) => {
-        if (!event.candidate) {
-          console.log('Got final candidate!');
-          return;
-        }
-        console.log('Got candidate: ', event.candidate);
-        peerB.add(event.candidate.toJSON());
-
-      });
-      remoteConnection.addEventListener('datachannel', (event) => {
-        channel = event.channel;
-        channel.onmessage = recieveData;
-        if (channel.label === 'messageChannel') {
-          remoteConnection.messageChannel = channel;
-        }
-        else {
-          remoteConnection.dataChannel = channel;
-        }
-        channel.onopen = event => console.log(channel.label + " opened");
-        channel.onclose = event => console.log(channel.label + " closed");
-      });
-
-
-
-      const receivedOffer = await roomId.data().offer;
-      console.log('Got offer: ', receivedOffer);
-      if (receivedOffer) {
-        await remoteConnection.setRemoteDescription(receivedOffer);
-        answer = await remoteConnection.createAnswer();
-        await remoteConnection.setLocalDescription(answer);
-
-        const peerAnswer = {
-          answer: {
-            type: answer.type,
-            sdp: answer.sdp
-          },
-        }
-
-        await userRef.update(peerAnswer);
-      }
-
-
-      userRef.collection('peerA').onSnapshot(snapshot => {
-        snapshot.docChanges().forEach(async change => {
-          if (change.type === 'added') {
-            let data = change.doc.data();
-            console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
-            if (remoteConnection.remoteDescription) await remoteConnection.addIceCandidate(new RTCIceCandidate(data));
-          }
-        });
-      });
-    }
-  }
-  // async function sendMessage() {
-  //   if (text) {
-  //     if (isButtonDisabled == true) {
-  //       messageChannel.send(text);
-  //     } else {
-  //       remoteConnection.messageChannel.send(text);
+  //   localConnection.addEventListener('icecandidate', event => {
+  //     if (!event.candidate) {
+  //       console.log('Got final candidate!');
+  //       return;
   //     }
-  //   }
+  //     console.log('Got candidate: ', event.candidate);
+  //     peerA.add(event.candidate.toJSON());
+  //   });
+
+  //   const peerA = userRef.collection('peerA');
+
+  //   const offer = await localConnection.createOffer();
+  //   // console.log(offer.type);
+  //   await localConnection.setLocalDescription(offer);
+  //   console.log('Got offer: ', offer);
+  //   // creating room schema object 
+  //   const peerOffer = {
+  //     'offer': {
+  //       type: offer.type,
+  //       sdp: offer.sdp
+  //     },
+  //   };
+  //   // setting offer in firestore for roomID
+  //   await userRef.set(peerOffer);
+  //   setConnectionId(userRef.id);
+
+  //   userRef.onSnapshot(async (snapshot) => {
+  //     console.log('hello');
+  //     const data = snapshot.data();
+  //     if (data && data.answer) {
+  //       console.log('We got remote description: ', data.answer);
+  //       if (localConnection)
+  //         await localConnection.setRemoteDescription(data.answer);
+  //     }
+  //   });
+
+  //   userRef.collection('peerB').onSnapshot(async (snapshot) => {
+  //     snapshot.docChanges().forEach(async change => {
+  //       if (change.type === 'added') {
+  //         let data = change.doc.data();
+  //         console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
+  //         if (localConnection.remoteDescription)
+  //           await localConnection.addIceCandidate(new RTCIceCandidate(data));
+  //       }
+  //     });
+  //   });
+  //   localStorage.setItem('senderId', id);
   // }
 
+
+  // async function joinRoom() {
+  //   // steps 1: create databse var and create fireebase instance
+  //   const db = firebase.firestore();
+  //   // check if id exists 
+  //   userRef = db.collection('users').doc(`${id}`);
+  //   const peerB = userRef.collection('peerB');
+  //   const roomId = await userRef.get();
+  //   console.log('Got room:', roomId.exists);
+
+  //   if (roomId.exists) {
+
+  //     remoteConnection = new RTCPeerConnection(configuration);
+  //     initializeIceListeners(remoteConnection);
+  //     remoteConnection.addEventListener('icecandidate', (event) => {
+  //       if (!event.candidate) {
+  //         console.log('Got final candidate!');
+  //         return;
+  //       }
+  //       console.log('Got candidate: ', event.candidate);
+  //       peerB.add(event.candidate.toJSON());
+
+  //     });
+  //     remoteConnection.addEventListener('datachannel', (event) => {
+  //       channel = event.channel;
+  //       channel.onmessage = recieveData;
+  //       if (channel.label === 'messageChannel') {
+  //         remoteConnection.messageChannel = channel;
+  //       }
+  //       else {
+  //         remoteConnection.dataChannel = channel;
+  //       }
+  //       channel.onopen = event => console.log(channel.label + " opened");
+  //       channel.onclose = event => console.log(channel.label + " closed");
+  //     });
+
+
+
+  //     const receivedOffer = await roomId.data().offer;
+  //     console.log('Got offer: ', receivedOffer);
+  //     if (receivedOffer) {
+  //       await remoteConnection.setRemoteDescription(receivedOffer);
+  //       answer = await remoteConnection.createAnswer();
+  //       await remoteConnection.setLocalDescription(answer);
+
+  //       const peerAnswer = {
+  //         answer: {
+  //           type: answer.type,
+  //           sdp: answer.sdp
+  //         },
+  //       }
+
+  //       await userRef.update(peerAnswer);
+  //     }
+
+
+  //     userRef.collection('peerA').onSnapshot(snapshot => {
+  //       snapshot.docChanges().forEach(async change => {
+  //         if (change.type === 'added') {
+  //           let data = change.doc.data();
+  //           console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
+  //           if (remoteConnection.remoteDescription) await remoteConnection.addIceCandidate(new RTCIceCandidate(data));
+  //         }
+  //       });
+  //     });
+  //   }
+  // }
   async function recieveData(e) {
 
-    if (e.currentTarget.label === 'messageChannel') {
-      if (typeof (e.data) !== 'undefined') {
-        console.log("Message recieved : " + e.data);
-      }
+    if (typeof (e.data) === 'string') {
+      fileInfo = JSON.parse(e.data);
+      receivedFile = fileInfo.file.name;
+      receivedFileSize = fileInfo.file.size;
     }
     else {
-      if (typeof (e.data) === 'string') {
-        fileInfo = JSON.parse(e.data);
-        receivedFile = fileInfo.file.name;
-        receivedFileSize = fileInfo.file.size;
+      fileChunks.push(e.data);
+      receivedSize += e.data.byteLength;
+      console.log("messsage received!!!" + e.data)
+      console.log(receivedSize);
+      if (receivedFile && receivedSize === receivedFileSize) {
+        const file = new Blob(fileChunks);
+        fileChunks = []
+        receivedSize = 0;
+        const url = URL.createObjectURL(file);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = receivedFile; // Set the desired file name here
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        URL.revokeObjectURL(url);
       }
-      else {
-        fileChunks.push(e.data);
-        receivedSize += e.data.byteLength;
-        console.log("messsage received!!!" + e.data)
-        console.log(receivedSize);
-        if (receivedFile && receivedSize === receivedFileSize) {
-          const file = new Blob(fileChunks);
-          fileChunks = []
-          receivedSize = 0;
-          const url = URL.createObjectURL(file);
-          const anchor = document.createElement('a');
-          anchor.href = url;
-          anchor.download = receivedFile; // Set the desired file name here
-          document.body.appendChild(anchor);
-          anchor.click();
-          document.body.removeChild(anchor);
-          URL.revokeObjectURL(url);
-        }
-      }
-
     }
-
   }
 
 
-  function callGenerate(event) {
-    setDisabled(true);
-  }
 
 
-  function initializeIceListeners(connection) {
-    connection.addEventListener('icegatheringstatechange', () => {
-      console.log(
-        `ICE gathering state changed: ${connection.iceGatheringState}`);
-    });
 
-    // connection state change -> event for checking wheter connection failed or success
-    connection.addEventListener('connectionstatechange', () => {
-      if (connection.connectionState === 'disconnected') {
-        localStorage.removeItem('senderId');
-        document.getElementById('state').innerText = 'Disconnected';
-      }
+  // function initializeIceListeners(connection) {
+  //   connection.addEventListener('icegatheringstatechange', () => {
+  //     console.log(
+  //       `ICE gathering state changed: ${connection.iceGatheringState}`);
+  //   });
 
-      console.log(`Connection state change: ${connection.connectionState}`);
-    });
+  //   // connection state change -> event for checking wheter connection failed or success
+  //   connection.addEventListener('connectionstatechange', () => {
+  //     if (connection.connectionState === 'disconnected') {
+  //       localStorage.removeItem('senderId');
+  //       document.getElementById('state').innerText = 'Disconnected';
+  //     }
 
-    // event for checking stability of signaling
-    connection.addEventListener('signalingstatechange', () => {
-      console.log(`Signaling state change: ${connection.signalingState}`);
-    });
+  //     console.log(`Connection state change: ${connection.connectionState}`);
+  //   });
 
-    // event for noticing whenever we get new ice candidate
-    connection.addEventListener('iceconnectionstatechange', () => {
-      console.log(
-        `ICE connection state change: ${connection.iceConnectionState}`);
-    });
-  }
+  //   // event for checking stability of signaling
+  //   connection.addEventListener('signalingstatechange', () => {
+  //     console.log(`Signaling state change: ${connection.signalingState}`);
+  //   });
+
+  //   // event for noticing whenever we get new ice candidate
+  //   connection.addEventListener('iceconnectionstatechange', () => {
+  //     console.log(
+  //       `ICE connection state change: ${connection.iceConnectionState}`);
+  //   });
+  // }
   function initializeDataChannelListeners(dataChannel) {
     dataChannel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
     dataChannel.addEventListener('open', () => {
@@ -493,22 +462,7 @@ const Transfer = () => {
       console.log('Data channel closed');
     });
   }
-  function initializeMessageChannelListeners(messageChannel) {
-    messageChannel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
-    messageChannel.addEventListener('open', () => {
-      // console.log(channel);
-      console.log('Message channel opened');
-    });
-    messageChannel.addEventListener('message', (event) => {
-      if (event.data) {
-        console.log('Got message: ' + event.data);
-      }
-    });
 
-    messageChannel.addEventListener('close', (event) => {
-      console.log('Message channel closed');
-    });
-  }
   async function hangUp(event) {
     if (localConnection) localConnection.close();
     if (remoteConnection) remoteConnection.close();
