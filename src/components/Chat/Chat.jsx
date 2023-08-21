@@ -1,8 +1,24 @@
 import React, { useEffect, useState } from 'react'
-
 import axios from 'axios';
 import { name } from '../../utils/name';
+
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 import { useParams } from 'react-router-dom';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
+    authDomain: "signalling-28129.firebaseapp.com",
+    databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "signalling-28129",
+    storageBucket: "signalling-28129.appspot.com",
+    messagingSenderId: "985022221543",
+    appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
+    measurementId: "G-YJPJ8LZZXD"
+};
+
+firebase.initializeApp(firebaseConfig);
 
 
 let messageChannel;
@@ -10,9 +26,13 @@ let channel;
 // let message = null;
 
 const Chat = ({ localConnection, remoteConnection }) => {
+    let { id } = useParams();
     const [avatar, setAvatar] = useState(null);
     const [messageList, setMessageList] = useState([]);
     const [message, setMessage] = useState('');
+    const [videoCallButtonState, setVideoCallButtonState] = useState(false);
+
+
     // let {id} = useParams();
 
     useEffect(() => {
@@ -24,8 +44,8 @@ const Chat = ({ localConnection, remoteConnection }) => {
             initializeRemoteConnection();
             console.log(remoteConnection);
         }
-
     }, []);
+
 
 
     function initializeLocalConnection() {
@@ -105,6 +125,12 @@ const Chat = ({ localConnection, remoteConnection }) => {
     function handleChange(event) {
         setMessage(event.target.value);
     }
+    async function handlevideoCallButtonState(event) {
+        const db = firebase.firestore();
+        let userRef = db.collection('users').doc(`${id}`);
+        let val = localStorage.getItem('peerRole');
+        val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true } });
+    }
 
     return (
         <>
@@ -113,6 +139,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                 <header style={{ backgroundColor: 'black', height: '10%', display: 'flex', alignItems: 'center' }}>
                     <img src={avatar} alt="" style={{ height: '80%', margin: '1.5%' }} />
                     <h5 style={{ color: 'white', position: 'relative' }}>Connected to : {name}</h5>
+                    <button style={{ marginLeft: '20%' }} onClick={handlevideoCallButtonState}>Video</button>
                 </header>
 
 

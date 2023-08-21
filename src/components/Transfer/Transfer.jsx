@@ -64,7 +64,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       remoteConnection.addEventListener('datachannel', (event) => {
         channel = event.channel;
         channel.binaryType = 'arraybuffer';
-    
+
         if (channel.label === 'fileChannel') {
           remoteConnection.dataChannel = channel;
           channel.onmessage = recieveData;
@@ -530,17 +530,6 @@ const Transfer = ({ localConnection, remoteConnection }) => {
             <Controls visible={true} buttons={['play', 'repeat', 'frame', 'debug']} />
           </Player>
         </div>
-      </div>
-      <div style={{ backgroundColor: 'blue', width: '30%', height: '85vh', float: 'left' }}>
-        <div className="screen1" style={{ backgroundColor: "blue", width: '100%', height: '45%' }}>
-          <img style={{ width: '100%', height: '100%' }} src={img1}></img>
-        </div>
-
-        <div className="screen2" style={{ marginTop: '5%', backgroundColor: 'green', width: '100%', height: '45%' }}>
-          <img style={{ width: '100%', height: '100%' }} src={img1}></img>
-        </div>
-
-
       </div>
     </>
 

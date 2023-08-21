@@ -6,6 +6,9 @@ import { useParams } from 'react-router-dom'
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import VideoChat from '../Video/VideoChat'
+import Navbar from '../Navbar/Navbar'
+
 
 const configuration = {
     iceServers: [
@@ -15,23 +18,23 @@ const configuration = {
         },
         {
             urls: "turn:a.relay.metered.ca:80",
-            username: "4b9c932b54a7486d48e1ed1a",
-            credential: "RzNCeSFQKWDbmyI7",
+            username: "a1682711142862882518afae",
+            credential: "RAx91eWI7uYEsYa7",
         },
         {
             urls: "turn:a.relay.metered.ca:80?transport=tcp",
-            username: "4b9c932b54a7486d48e1ed1a",
-            credential: "RzNCeSFQKWDbmyI7",
+            username: "a1682711142862882518afae",
+            credential: "RAx91eWI7uYEsYa7",
         },
         {
             urls: "turn:a.relay.metered.ca:443",
-            username: "4b9c932b54a7486d48e1ed1a",
-            credential: "RzNCeSFQKWDbmyI7",
+            username: "a1682711142862882518afae",
+            credential: "RAx91eWI7uYEsYa7",
         },
         {
             urls: "turn:a.relay.metered.ca:443?transport=tcp",
-            username: "4b9c932b54a7486d48e1ed1a",
-            credential: "RzNCeSFQKWDbmyI7",
+            username: "a1682711142862882518afae",
+            credential: "RAx91eWI7uYEsYa7",
         },
     ],
     // To prefetch ice Candidate before setting local description range(0-255) more better but use more resource
@@ -62,36 +65,6 @@ const Room = () => {
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
-        const removeConnnection = async () => {
-            const db = firebase.firestore();
-            const userRef = await db.collection('users').doc(id);
-            const peerA = await userRef.collection('peerA').get();
-            const roomID = await userRef.get();
-
-            peerA.forEach(async candidate => {
-                await candidate.ref.delete();
-            });
-            const peerB = await userRef.collection('peerB').get();
-            peerB.forEach(async candidate => {
-                await candidate.ref.delete();
-            });
-
-            if (roomID && roomID.data().offer && roomID.data().answer) {
-                const updateData = {
-                    offer: firebase.firestore.FieldValue.delete(),
-                    answer: firebase.firestore.FieldValue.delete(),
-                };
-
-                userRef.update(updateData)
-                    .then(() => {
-                        console.log('Document updated successfully without the field');
-                    })
-                    .catch((error) => {
-                        console.error('Error updating document:', error);
-                    });
-            }
-        }
-        removeConnnection();
 
         let checkPeerRole = localStorage.getItem('peerRole');
         if (checkPeerRole === 'peerA') {
@@ -143,15 +116,21 @@ const Room = () => {
             },
         };
         // setting offer in firestore for roomID
+        const btn = { 'peerAVideoClick': false };
+        // userRef.set(btn);
         await userRef.set(peerOffer);
+        // await userRef.set({ 'peerAVideoClick': false });
         // setConnectionId(userRef.id);
 
         userRef.onSnapshot(async (snapshot) => {
             const data = snapshot.data();
             if (data && data.answer) {
                 console.log('We got remote description: ', data.answer);
-                if (localConnection)
-                    await localConnection.setRemoteDescription(data.answer);
+                if (localConnection) {
+                    const ans = new RTCSessionDescription(data.answer);
+                    await localConnection.setRemoteDescription(ans);
+                }
+
             }
         });
 
@@ -206,8 +185,8 @@ const Room = () => {
                         sdp: answer.sdp
                     },
                 }
-
                 await userRef.update(peerAnswer);
+
             }
 
             console.log(remoteConnection);
@@ -229,11 +208,13 @@ const Room = () => {
         });
 
         // connection state change -> event for checking wheter connection failed or success
-        connection.addEventListener('connectionstatechange', () => {
+        connection.addEventListener('connectionstatechange', async () => {
             if (connection.connectionState === 'disconnected') {
                 localStorage.removeItem('senderId');
             }
-            else if (connection.connectionState === 'connected') setIsConnected(true);
+            else if (connection.connectionState === 'connected') {
+                setIsConnected(true);
+            }
             console.log(`Connection state change: ${connection.connectionState}`);
         });
 
@@ -251,11 +232,15 @@ const Room = () => {
 
 
     return (
-        <div>
-            {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
-            {isConnected && <Chat localConnection={localConnection} remoteConnection={remoteConnection} />}
-            {isConnected && <Footer />}
-        </div>
+        <>
+            {isConnected && <Navbar />}
+            <div style={{ display: 'flex' }}>
+                {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
+                {isConnected && <VideoChat localConnection={localConnection} remoteConnection={remoteConnection} />}
+                {isConnected && <Chat localConnection={localConnection} remoteConnection={remoteConnection} />}
+            </div>
+            {/* {isConnected && <Footer />} */}
+        </>
     )
 }
 
