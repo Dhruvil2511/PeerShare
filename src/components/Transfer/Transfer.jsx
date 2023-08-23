@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef ,CSSProperties} from 'react'
+import React, { useEffect, useState, useRef, CSSProperties } from 'react'
 
 import img1 from '../Transfer/testing.png'
 
@@ -8,7 +8,7 @@ import 'firebase/compat/firestore';
 import '../Transfer/Transfer.css'
 import { useParams } from 'react-router-dom';
 import { Player, Controls } from '@lottiefiles/react-lottie-player';
-
+import streamSaver from "streamsaver";
 
 
 
@@ -44,6 +44,9 @@ let file = null;
 let receivedFile;
 let fileInfo = null;
 let answer = null;
+
+
+const worker = new Worker("../worker.js");
 
 const Transfer = ({ localConnection, remoteConnection }) => {
   const [connectionId, setConnectionId] = useState(null);
@@ -198,6 +201,35 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     readSlice(0);
 
   }
+  async function sendFile() {
+    // console.log(file);
+    receivedSize = 0;
+    if (dataChannel && dataChannel.readyState === 'open') {
+      file = fileInput;
+      const fileInfo = {
+        'file': {
+          name: file.name,
+          size: file.size
+        },
+      };
+      dataChannel.send(JSON.stringify(fileInfo));
+      console.log('Sending', file);
+      send(file);
+
+    } else {
+      file = fileInput;
+      const fileInfo = {
+        'file': {
+          name: file.name,
+          size: file.size
+        },
+      };
+      remoteConnection.dataChannel.send(JSON.stringify(fileInfo));
+      console.log('Sending', file);
+      sendFromRemote(file);
+
+    }
+  }
   async function sendFromRemote(file) {
 
     let fileReader = new FileReader();
@@ -230,35 +262,6 @@ const Transfer = ({ localConnection, remoteConnection }) => {
 
     readSlice(0);
 
-  }
-  async function sendFile() {
-    // console.log(file);
-    receivedSize = 0;
-    if (dataChannel && dataChannel.readyState === 'open') {
-      file = fileInput;
-      const fileInfo = {
-        'file': {
-          name: file.name,
-          size: file.size
-        },
-      };
-      dataChannel.send(JSON.stringify(fileInfo));
-      console.log('Sending', file);
-      send(file);
-
-    } else {
-      file = fileInput;
-      const fileInfo = {
-        'file': {
-          name: file.name,
-          size: file.size
-        },
-      };
-      remoteConnection.dataChannel.send(JSON.stringify(fileInfo));
-      console.log('Sending', file);
-      sendFromRemote(file);
-
-    }
   }
 
   // async function generateID() {
@@ -390,33 +393,49 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   //     });
   //   }
   // }
+
+
   async function recieveData(e) {
 
     if (typeof (e.data) === 'string') {
       fileInfo = JSON.parse(e.data);
       receivedFile = fileInfo.file.name;
       receivedFileSize = fileInfo.file.size;
+      worker.postMessage(receivedFileSize);
     }
     else {
-      fileChunks.push(e.data);
+      worker.postMessage(e.data);
       receivedSize += e.data.byteLength;
-      // console.log("messsage received!!!" + e.data)
-      console.log(receivedSize);
-      if (receivedFile && receivedSize === receivedFileSize) {
-        const file = new Blob(fileChunks);
-        fileChunks = []
-        receivedSize = 0;
-        const url = URL.createObjectURL(file);
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.download = receivedFile; // Set the desired file name here
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-        URL.revokeObjectURL(url);
-      }
+      if (receivedSize === receivedFileSize) download();
+      // if (receivedFile && receivedSize === receivedFileSize) {
+      //   const file = new Blob(fileChunks);
+      //   fileChunks = []
+      //   receivedSize = 0;
+      //   const url = URL.createObjectURL(file);
+      //   const anchor = document.createElement('a');
+      //   anchor.href = url;
+      //   anchor.download = receivedFile; // Set the desired file name here
+      //   document.body.appendChild(anchor);
+      //   anchor.click();
+      //   document.body.removeChild(anchor);
+      //   URL.revokeObjectURL(url);
+      // }
     }
   }
+  function download() {
+    worker.addEventListener('message', async (event) => {
+      const url = URL.createObjectURL(event.data);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = receivedFile; // Set the desired file name here
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+      return;
+    });
+  }
+
 
 
 

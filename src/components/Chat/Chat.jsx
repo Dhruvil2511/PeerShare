@@ -59,7 +59,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
         });
         messageChannel.addEventListener('message', (event) => {
             if (event.data) {
-                console.log(typeof (event.data));
+                console.log(event.data);
                 setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': event.data }]);
                 console.log(messageList);
             }
@@ -83,11 +83,10 @@ const Chat = ({ localConnection, remoteConnection }) => {
     }
 
     async function recieveMessage(e) {
-        if (e.currentTarget.label === 'messageChannel') {
-            if (typeof (e.data) !== 'undefined') {
-                setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': e.data }]);
-            }
-        }
+        console.log('recieved message from peerA : ' + e.data);
+        setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': e.data }]);
+
+
     }
     const sendMessage = async (e) => {
         e.preventDefault();
