@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef ,CSSProperties} from 'react'
 
 import img1 from '../Transfer/testing.png'
 
@@ -8,6 +8,7 @@ import 'firebase/compat/firestore';
 import '../Transfer/Transfer.css'
 import { useParams } from 'react-router-dom';
 import { Player, Controls } from '@lottiefiles/react-lottie-player';
+
 
 
 
@@ -61,7 +62,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       initializeDataChannelListeners(dataChannel);
     }
     else {
-      remoteConnection.addEventListener('datachannel', (event) => {
+      remoteConnection.addEventListener('datachannel', async (event) => {
         channel = event.channel;
         channel.binaryType = 'arraybuffer';
 
@@ -164,7 +165,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   // }, []);
 
 
-  function send(file) {
+  async function send(file) {
 
     let fileReader = new FileReader();
     let offset = 0;
@@ -197,7 +198,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     readSlice(0);
 
   }
-  function sendFromRemote(file) {
+  async function sendFromRemote(file) {
 
     let fileReader = new FileReader();
     let offset = 0;
@@ -399,7 +400,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     else {
       fileChunks.push(e.data);
       receivedSize += e.data.byteLength;
-      console.log("messsage received!!!" + e.data)
+      // console.log("messsage received!!!" + e.data)
       console.log(receivedSize);
       if (receivedFile && receivedSize === receivedFileSize) {
         const file = new Blob(fileChunks);
@@ -483,17 +484,6 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       window.location.href = '/join';
     }
   }
-
-  // function handleConnection(event) {
-  //   if (connectionBtnState === 'Connect') {
-  //     generateID();
-  //     setConnectionBtnState('Disconnect');
-  //   } else {
-  //     // hangUp();
-  //     setConnectionBtnState('Connect');
-  //   }
-  // }
-
 
   function handleFile(event) {
     setFileInput(event.target.files[0]);

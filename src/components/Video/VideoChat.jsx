@@ -60,6 +60,7 @@ let peerConnection = null;
 const VideoChat = ({ localConnection, remoteConnection }) => {
     let { id } = useParams();
     const [videoCaller, setVideoCaller] = useState('');
+    const [flag, setFlag] = useState(true);
     const [videoCallButtonClicked, setVideoCallButtonClicked] = useState({ clicked: false, clickedBy: null });
 
 
@@ -69,15 +70,19 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
         const unsubscribe = userRef.onSnapshot(async (snapshot) => {
             data = snapshot.data();
             if (data && data.videoCallHandle) {
-                await openUserMedia();
                 setVideoCallButtonClicked(data.videoCallHandle);
                 if (data.videoCallHandle && data.videoCallHandle.clicked) {
+                    await openUserMedia();
                     val = localStorage.getItem('peerRole');
                     if ((data.videoCallHandle.clickedBy === 'peerA' && val === 'peerA') || (data.videoCallHandle.clickedBy === 'peerB' && val === 'peerB')) {
                         initializeLocalConnection();
                     }
                     else {
-                        initializeRemoteConnection();
+                        setTimeout(() => {
+                            initializeRemoteConnection();
+                        }, 5000);
+
+
                     }
                 }
             }
@@ -116,16 +121,16 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
 
         peerConnection.addEventListener('icecandidate', event => {
             if (!event.candidate) {
-                console.log('Got final candidate!');
+                console.log('Got final video candidate!');
                 return;
             }
-            console.log('Got candidate: ', event.candidate);
+            console.log('Got video ice candidate: ', event.candidate);
             callerCandidatesCollection.add(event.candidate.toJSON());
         });
 
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
-        console.log('Created offer:', offer);
+        console.log('Created video offer:', offer);
 
         const roomWithOffer = {
             'offer': {
@@ -134,7 +139,7 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
             },
         };
         await roomRef.set(roomWithOffer);
-        id = roomRef.id;
+
         peerConnection.addEventListener('track', event => {
             console.log('Got remote track:', event.streams[0]);
             event.streams[0].getTracks().forEach(track => {
@@ -165,8 +170,9 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
         });
     }
     async function initializeRemoteConnection() {
+        setFlag(false);
         const db = firebase.firestore();
-        const roomRef = db.collection('videoCon').doc(`${id}`);
+        const roomRef = await db.collection('videoCon').doc(`${id}`);
         const roomSnapshot = await roomRef.get();
 
         if (roomSnapshot.exists) {
@@ -184,7 +190,7 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
                 }
                 console.log('Got candidate: ', event.candidate);
                 calleeCandidatesCollection.add(event.candidate.toJSON());
-            }); 
+            });
             // Code for collecting ICE candidates above
 
             peerConnection.addEventListener('track', event => {
@@ -196,21 +202,24 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
             });
 
             // Code for creating SDP answer below
-            const offer = roomSnapshot.data().offer;
-            console.log('Got offer:', offer);
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-            const answer = await peerConnection.createAnswer();
-            console.log('Created answer:', answer);
-            await peerConnection.setLocalDescription(answer);
+            const offer = await roomSnapshot.data().offer;
+            if (offer) {
+                console.log('Got video offer:', offer);
+                await peerConnection.setRemoteDescription(offer);
+                const answer = await peerConnection.createAnswer();
+                console.log('Created video answer:', answer);
+                await peerConnection.setLocalDescription(answer);
 
-            const roomWithAnswer = {
-                answer: {
-                    type: answer.type,
-                    sdp: answer.sdp,
-                },
-            };
-            await roomRef.update(roomWithAnswer);
-            // Code for creating SDP answer above
+                const roomWithAnswer = {
+                    answer: {
+                        type: answer.type,
+                        sdp: answer.sdp,
+                    },
+                };
+                await roomRef.update(roomWithAnswer);
+
+            }
+
 
             // Listening for remote ICE candidates below
             roomRef.collection('callerCandidates').onSnapshot(snapshot => {
@@ -227,26 +236,26 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
         }
     }
     async function hangVideoCall() {
-        const db = firebase.firestore();
-        let userRef = await db.collection('users').doc(`${id}`);
+        const dbUser = firebase.firestore();
+        let userRef = await dbUser.collection('users').doc(`${id}`);
         await userRef.set({ videoCallHandle: { clickedBy: null, clicked: false } });
+
+
+        const dbVideo = firebase.firestore();
+        const roomRef = await dbVideo.collection('videoCon').doc(`${id}`);
+        const calleeCandidates = await roomRef.collection('calleeCandidates').get();
+        calleeCandidates.forEach(async candidate => {
+            await candidate.ref.delete();
+        });
+        const callerCandidates = await roomRef.collection('callerCandidates').get();
+        callerCandidates.forEach(async candidate => {
+            await candidate.ref.delete();
+        });
+        await roomRef.delete();
+
         const tracks = document.querySelector('#localVideo').srcObject.getTracks();
         document.querySelector('#localVideo').srcObject = null;
         document.querySelector('#remoteVideo').srcObject = null;
-        // if (peerConnection) peerConnection.close();
-        if (id) {
-            const db = firebase.firestore();
-            const roomRef = await db.collection('videoCon').doc(`${id}`);
-            const calleeCandidates = await roomRef.collection('calleeCandidates').get();
-            calleeCandidates.forEach(async candidate => {
-                await candidate.ref.delete();
-            });
-            const callerCandidates = await roomRef.collection('callerCandidates').get();
-            callerCandidates.forEach(async candidate => {
-                await candidate.ref.delete();
-            });
-            await roomRef.delete();
-        }
         if (remoteStream) {
             remoteStream.getTracks().forEach(track => track.stop());
         }

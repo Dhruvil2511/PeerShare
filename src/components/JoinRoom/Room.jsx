@@ -8,7 +8,7 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import VideoChat from '../Video/VideoChat'
 import Navbar from '../Navbar/Navbar'
-
+import ClipLoader from 'react-spinners/ClipLoader'
 
 const configuration = {
     iceServers: [
@@ -189,7 +189,7 @@ const Room = () => {
 
             }
 
-            console.log(remoteConnection);
+            // console.log(remoteConnection);
             userRef.collection('peerA').onSnapshot(snapshot => {
                 snapshot.docChanges().forEach(async change => {
                     if (change.type === 'added') {
@@ -233,13 +233,14 @@ const Room = () => {
 
     return (
         <>
+            {/* {!isConnected && <ClipLoader style={{ color: '1AF1A0', display: "block", margin: "0 auto", borderColor: "red", }} />} */}
             {isConnected && <Navbar />}
             <div style={{ display: 'flex' }}>
                 {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && <VideoChat localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && <Chat localConnection={localConnection} remoteConnection={remoteConnection} />}
             </div>
-            {/* {isConnected && <Footer />} */}
+        
         </>
     )
 }

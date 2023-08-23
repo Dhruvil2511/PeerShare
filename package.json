@@ -19,6 +19,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.15.0",
     "react-scripts": "5.0.1",
+    "react-spinners": "^0.13.8",
     "socket.io-client": "^4.7.2",
     "socketio": "^1.0.0",
     "styled-components": "^6.0.7",

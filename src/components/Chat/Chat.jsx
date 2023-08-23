@@ -42,13 +42,13 @@ const Chat = ({ localConnection, remoteConnection }) => {
             initializeLocalConnection();
         } else {
             initializeRemoteConnection();
-            console.log(remoteConnection);
+            // console.log(remoteConnection);
         }
     }, []);
 
 
 
-    function initializeLocalConnection() {
+    async function initializeLocalConnection() {
         console.log(localConnection)
             ;
         messageChannel = localConnection.createDataChannel('messageChannel');
@@ -60,7 +60,6 @@ const Chat = ({ localConnection, remoteConnection }) => {
         messageChannel.addEventListener('message', (event) => {
             if (event.data) {
                 console.log(typeof (event.data));
-                // messageList.push({ id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': event.data });
                 setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': event.data }]);
                 console.log(messageList);
             }
@@ -70,9 +69,9 @@ const Chat = ({ localConnection, remoteConnection }) => {
             console.log('Message channel closed');
         });
     }
-    function initializeRemoteConnection() {
+    async function initializeRemoteConnection() {
 
-        remoteConnection.addEventListener('datachannel', (event) => {
+        remoteConnection.addEventListener('datachannel', async (event) => {
             channel = event.channel;
             if (channel.label === 'messageChannel') {
                 remoteConnection.messageChannel = channel;
@@ -86,13 +85,11 @@ const Chat = ({ localConnection, remoteConnection }) => {
     async function recieveMessage(e) {
         if (e.currentTarget.label === 'messageChannel') {
             if (typeof (e.data) !== 'undefined') {
-                // console.log(typeof (e.data));
                 setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': e.data }]);
-                // console.log(messageList);
             }
         }
     }
-    const sendMessage = (e) => {
+    const sendMessage = async (e) => {
         e.preventDefault();
         if (message === ' ' || message === '') return;
 
@@ -101,8 +98,6 @@ const Chat = ({ localConnection, remoteConnection }) => {
         if (val === 'peerA') {
             // setMessageList([...messageList, { 'role': 'peerA', 'message': message }]);
             setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': message }]);
-
-            console.log(messageList);
             messageChannel.send(message);
 
         } else {
@@ -122,7 +117,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
             console.log(error)
         });
     }
-    function handleChange(event) {
+    async function handleChange(event) {
         setMessage(event.target.value);
     }
     async function handlevideoCallButtonState(event) {
