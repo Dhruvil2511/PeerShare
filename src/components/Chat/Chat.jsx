@@ -83,12 +83,12 @@ const Chat = ({ localConnection, remoteConnection }) => {
         });
     }
 
-    function recieveMessage(e) {
+    async function recieveMessage(e) {
         if (e.currentTarget.label === 'messageChannel') {
             if (typeof (e.data) !== 'undefined') {
-                console.log(typeof (e.data));
+                // console.log(typeof (e.data));
                 setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': e.data }]);
-                console.log(messageList);
+                // console.log(messageList);
             }
         }
     }
@@ -147,7 +147,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                     {
                         messageList.map((value) => {
                             let checkPeerRole = localStorage.getItem('peerRole');
-                            console.log(value);
+                            // console.log(value);
                             if (checkPeerRole === 'peerA') {
                                 if (value.role === 'peerA') {
                                     return (
