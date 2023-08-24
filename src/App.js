@@ -4,7 +4,7 @@ import RoomPage from './components/JoinRoom/RoomPage';
 import Room from './components/JoinRoom/Room';
 function App() {
   return (
-    <div>
+    <>
       <Router>
         <Routes>
           {/* <Route path='/'><></></Route> */}
@@ -12,8 +12,7 @@ function App() {
           <Route path='/room/:id' exact Component={Room}></Route>
         </Routes>
       </Router>
-
-    </div>
+    </>
   );
 }
 

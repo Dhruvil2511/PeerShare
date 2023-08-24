@@ -38,7 +38,7 @@ let receieveMessageChannel = null;
 let fileReader = null;
 let receivedSize = 0;
 let receivedFileSize = null;
-const chunkSize = 64 * 1024;
+const chunkSize = 16 * 1024;
 let fileChunks = [];
 let file = null;
 let receivedFile;

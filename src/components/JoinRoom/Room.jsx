@@ -240,7 +240,6 @@ const Room = () => {
                 {isConnected && <VideoChat localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && <Chat localConnection={localConnection} remoteConnection={remoteConnection} />}
             </div>
-
         </>
     )
 }

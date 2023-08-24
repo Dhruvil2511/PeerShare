@@ -49,11 +49,8 @@ const Chat = ({ localConnection, remoteConnection }) => {
 
 
     async function initializeLocalConnection() {
-        console.log(localConnection)
-            ;
+        console.log(localConnection);
         messageChannel = localConnection.createDataChannel('messageChannel');
-
-        messageChannel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
         messageChannel.addEventListener('open', () => {
             console.log('Message channel opened');
         });
@@ -61,7 +58,6 @@ const Chat = ({ localConnection, remoteConnection }) => {
             if (event.data) {
                 console.log(event.data);
                 setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': event.data }]);
-                console.log(messageList);
             }
         });
 
@@ -85,8 +81,6 @@ const Chat = ({ localConnection, remoteConnection }) => {
     async function recieveMessage(e) {
         console.log('recieved message from peerA : ' + e.data);
         setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': e.data }]);
-
-
     }
     const sendMessage = async (e) => {
         e.preventDefault();
