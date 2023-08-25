@@ -9,6 +9,7 @@ import 'firebase/compat/firestore';
 import VideoChat from '../Video/VideoChat'
 import Navbar from '../Navbar/Navbar'
 import ClipLoader from 'react-spinners/ClipLoader'
+import Preloader from '../Loader/Preloader'
 
 const configuration = {
     iceServers: [
@@ -233,7 +234,7 @@ const Room = () => {
 
     return (
         <>
-            {!isConnected && <ClipLoader />}
+            {!isConnected && <Preloader />}
             {isConnected && <Navbar />}
             <div style={{ display: 'flex' }}>
                 {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}

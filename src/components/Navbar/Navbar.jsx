@@ -1,14 +1,13 @@
 import React from 'react'
-import FacebookIcon  from '@mui/icons-material/Facebook';
+import FacebookIcon from '@mui/icons-material/Facebook';
 import GitHubIcon from '@mui/icons-material/GitHub';
-// import GitHubIcon from '@mui/icons-material/GitHub';
-
+import '../Navbar/Navbar.scss'
 const Navbar = () => {
     return (
         <>
-            <nav className="navbar navbar-expand-lg navbar-light bg-info p-3">
+            <nav className="navbar navbar-expand-lg navbar-dark navigation">
                 <div className="container-fluid">
-                    <a className="navbar-brand" href="#">PeerShare logo</a>
+                    <a className="navbar-brand" href="#">PeerShare</a>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>

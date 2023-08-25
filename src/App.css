@@ -1,5 +1,14 @@
 .App {
   text-align: center;
+
+}
+
+body {
+  font-family: sans-serif;
+  background-image: url('../assets/background_grainy.jpg');
+  background-size: cover;
+  background-repeat: repeat;
+  overflow: hidden;
 }
 
 .App-logo {
@@ -32,6 +41,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
