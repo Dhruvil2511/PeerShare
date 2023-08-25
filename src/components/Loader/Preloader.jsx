@@ -4,11 +4,11 @@ import '../Loader/Preloader.scss'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
 import { ToastContainer, toast } from 'react-toastify';
-
+let val;
 const Preloader = () => {
     const [peer, setPeer] = useState('');
     useEffect(() => {
-        let val = localStorage.getItem('peerRole');
+        val = localStorage.getItem('peerRole');
         if (val === 'peerA') setPeer('Peer B');
         else if (val === 'peerB') setPeer('Peer A');
 

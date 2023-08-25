@@ -4,17 +4,17 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { useParams } from 'react-router-dom';
+import '../Video/VideoChat.scss'
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
-    authDomain: "signalling-28129.firebaseapp.com",
-    databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "signalling-28129",
-    storageBucket: "signalling-28129.appspot.com",
-    messagingSenderId: "985022221543",
-    appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
-    measurementId: "G-YJPJ8LZZXD"
-};
+    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
+    authDomain: "peershare2425.firebaseapp.com",
+    projectId: "peershare2425",
+    storageBucket: "peershare2425.appspot.com",
+    messagingSenderId: "308108699413",
+    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
+    measurementId: "G-721QV10KH1"
+  };
 const configuration = {
     iceServers: [
         {
@@ -54,7 +54,7 @@ let data = null;
 let val = null;
 let dummyCH;
 let peerConnection = null;
-// let roomId = null;
+
 
 
 const VideoChat = ({ localConnection, remoteConnection }) => {
@@ -285,21 +285,24 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
 
     return (
         <>
+            {videoCallButtonClicked &&
+                <div className="video" >
+                    <video id="localVideo" muted autoPlay playsInline></video>
+                    <video id="remoteVideo" autoPlay playsInline></video>
+                    {/* {videoCallButtonClicked ? (
+                <>
 
-            <div className="video" style={{ width: '30%' }}>
-                <video style={{ height: '45%' }} id="localVideo" muted autoPlay playsInline></video>
-                <video style={{ height: '45%' }} id="remoteVideo" autoPlay playsInline></video>
-                {/* {videoCallButtonClicked ? (
-                    <>
-
-                    </>) : (<p>Waiting for video call initiation...</p>)
-                } */}
-                <div style={{ height: '10%', width: '100%' }}>
-                    <div className="footer" style={{ backgroundColor: 'purple', height: '100%', width: '100%' }}>
-                        <button onClick={hangVideoCall}>Hang up</button>
+                </>) : (<p>Waiting for video call initiation...</p>)
+            } */}
+                    <div className="footer" >
+                        <div className='footer-in'>
+                            <button onClick={hangVideoCall}>Hang up</button>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+            }
+
 
         </>
     )

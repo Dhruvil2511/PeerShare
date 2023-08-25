@@ -1,21 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import { name } from '../../utils/name';
-
+import SendIcon from '@mui/icons-material/Send';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { useParams } from 'react-router-dom';
+import '../Chat/Chat.scss'
+import VideoCallIcon from '@mui/icons-material/VideoCall';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import AddReactionIcon from '@mui/icons-material/AddReaction';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
-    authDomain: "signalling-28129.firebaseapp.com",
-    databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "signalling-28129",
-    storageBucket: "signalling-28129.appspot.com",
-    messagingSenderId: "985022221543",
-    appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
-    measurementId: "G-YJPJ8LZZXD"
+    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
+    authDomain: "peershare2425.firebaseapp.com",
+    projectId: "peershare2425",
+    storageBucket: "peershare2425.appspot.com",
+    messagingSenderId: "308108699413",
+    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
+    measurementId: "G-721QV10KH1"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -31,7 +34,9 @@ const Chat = ({ localConnection, remoteConnection }) => {
     const [messageList, setMessageList] = useState([]);
     const [message, setMessage] = useState('');
     const [videoCallButtonState, setVideoCallButtonState] = useState(false);
-
+    const [isEmojiClicked, setIsEmojiClicked] = useState(false);
+    // const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const chatbox = document.querySelector(".chatBox");
 
     // let {id} = useParams();
 
@@ -45,8 +50,6 @@ const Chat = ({ localConnection, remoteConnection }) => {
             // console.log(remoteConnection);
         }
     }, []);
-
-
 
     async function initializeLocalConnection() {
         console.log(localConnection);
@@ -86,6 +89,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
         e.preventDefault();
         if (message === ' ' || message === '') return;
 
+
         document.getElementById('input-field').value = '';
         let val = localStorage.getItem('peerRole');
         if (val === 'peerA') {
@@ -98,6 +102,10 @@ const Chat = ({ localConnection, remoteConnection }) => {
             setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': message }]);
             remoteConnection.messageChannel.send(message);
         }
+        setTimeout(() => {
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }, 100);
+
         setMessage('');
     }
 
@@ -120,18 +128,31 @@ const Chat = ({ localConnection, remoteConnection }) => {
         val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true } });
     }
 
+    async function handleCopy(event) {
+        event.preventDefault();
+        let copied = await navigator.clipboard.readText();
+        setMessage(copied);
+        document.querySelector('#input-field').focus();
+    }
+
+
     return (
         <>
+            <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '5%', height: '85vh', width: '30%', float: 'left' }}>
+                <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+                    <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <img src={avatar} alt="" style={{ height: '80%', marginRight: '5%' }} />
+                        <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>Connected to: {name}</span>
+                    </div>
+                    <div className="video-button">
+                        <button style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
+                            <VideoCallIcon style={{ transform: `scale(${2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                        </button>
+                    </div>
+                </div>
 
-            <div style={{ backgroundColor: 'blanchedalmond', height: '85vh', width: '30%', float: 'left' }}>
-                <header style={{ backgroundColor: 'black', height: '10%', display: 'flex', alignItems: 'center' }}>
-                    <img src={avatar} alt="" style={{ height: '80%', margin: '1.5%' }} />
-                    <h5 style={{ color: 'white', position: 'relative' }}>Connected to : {name}</h5>
-                    <button style={{ marginLeft: '20%' }} onClick={handlevideoCallButtonState}>Video</button>
-                </header>
 
-
-                <div className="chatBox" style={{ backgroundColor: 'white', height: '80%' }}>
+                <div className="chatBox" style={{ height: '80%', overflow: 'scroll', overflowX: 'hidden', position: 'relative' }}>
                     {
                         messageList.map((value) => {
                             let checkPeerRole = localStorage.getItem('peerRole');
@@ -140,7 +161,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ backgroundColor: 'red' }}>
+                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.8%', borderRadius: '15px' }}>
                                                 {`${value.message}`}
                                             </div>
 
@@ -150,7 +171,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ backgroundColor: 'pink' }}>{`${value.message}`}</div>
+                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.8%', borderRadius: '15px' }}>{`${value.message}`}</div>
 
                                         </div>
                                     )
@@ -160,7 +181,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ backgroundColor: 'red' }}>
+                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.8%', borderRadius: '15px' }}>
                                                 {`${value.message}`}
                                             </div>
 
@@ -170,7 +191,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ backgroundColor: 'pink' }}>{`${value.message}`}</div>
+                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.8%', borderRadius: '15px' }}>{`${value.message}`}</div>
                                         </div>
                                     )
                                 }
@@ -180,12 +201,17 @@ const Chat = ({ localConnection, remoteConnection }) => {
                     }
                 </div>
 
-                <footer style={{ backgroundColor: 'pink', width: '100%', height: '10%' }}>
-
-                    <input id='input-field' style={{ width: '70%', align: 'center' }} type='text' onChange={handleChange}></input>
-                    <button id='sendBtn' value='send' onClick={sendMessage}>Send</button>
-
-                </footer>
+                <form action="" onSubmit={sendMessage} style={{ backgroundColor: '#1a1a1a', width: '100%', height: '10%' }}>
+                    <footer style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                        <button type='button' onClick={handleCopy} className='copyBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginRight: '4%' }}>
+                            <ContentPasteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                        </button>
+                        <input id='input-field' style={{ fontSize: '1.2vw', color: 'white', width: '70%', backgroundColor: '#333333', border: 'none', borderRadius: '5px' }} type='text' value={message} onChange={handleChange}></input>
+                        <button type="submit" id='sendBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginLeft: '4%' }}>
+                            <SendIcon style={{ transform: `scale(${1.5})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                        </button>
+                    </footer>z
+                </form>
             </div>
         </>
     );

@@ -42,15 +42,14 @@ const configuration = {
     iceCandidatePoolSize: 10,
 };
 const firebaseConfig = {
-    apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
-    authDomain: "signalling-28129.firebaseapp.com",
-    databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "signalling-28129",
-    storageBucket: "signalling-28129.appspot.com",
-    messagingSenderId: "985022221543",
-    appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
-    measurementId: "G-YJPJ8LZZXD"
-};
+    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
+    authDomain: "peershare2425.firebaseapp.com",
+    projectId: "peershare2425",
+    storageBucket: "peershare2425.appspot.com",
+    messagingSenderId: "308108699413",
+    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
+    measurementId: "G-721QV10KH1"
+  };
 
 firebase.initializeApp(firebaseConfig);
 
@@ -229,14 +228,15 @@ const Room = () => {
             console.log(
                 `ICE connection state change: ${connection.iceConnectionState}`);
         });
-    }
+    }   
 
 
     return (
         <>
             {!isConnected && <Preloader />}
+            {/* {<Navbar />} */}
             {isConnected && <Navbar />}
-            <div style={{ display: 'flex' }}>
+            <div className='room-wrapper' style={{ display: 'flex', padding: '2%' }}>
                 {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && <VideoChat localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && <Chat localConnection={localConnection} remoteConnection={remoteConnection} />}

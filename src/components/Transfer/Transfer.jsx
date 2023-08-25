@@ -1,26 +1,20 @@
 import React, { useEffect, useState, useRef, CSSProperties } from 'react'
 
-import img1 from '../Transfer/testing.png'
-
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import '../Transfer/Transfer.css'
 import { useParams } from 'react-router-dom';
-import { Player, Controls } from '@lottiefiles/react-lottie-player';
-import streamSaver from "streamsaver";
-
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
-  authDomain: "signalling-28129.firebaseapp.com",
-  databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "signalling-28129",
-  storageBucket: "signalling-28129.appspot.com",
-  messagingSenderId: "985022221543",
-  appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
-  measurementId: "G-YJPJ8LZZXD"
+  apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
+  authDomain: "peershare2425.firebaseapp.com",
+  projectId: "peershare2425",
+  storageBucket: "peershare2425.appspot.com",
+  messagingSenderId: "308108699413",
+  appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
+  measurementId: "G-721QV10KH1"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -530,14 +524,6 @@ const Transfer = ({ localConnection, remoteConnection }) => {
 
 
           <span style={{ backgroundColor: 'white' }}>Animation to check ui lag</span>
-          <Player
-            autoplay
-            loop
-            src="https://lottie.host/2534c503-7643-4575-a5d5-1eac232a8004/Q7y3wRvx93.json"
-            style={{ height: '300px', width: '300px' }}
-          >
-            <Controls visible={true} buttons={['play', 'repeat', 'frame', 'debug']} />
-          </Player>
         </div>
       </div>
     </>

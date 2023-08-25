@@ -1,0 +1,21 @@
+.video {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+
+    #localVideo,
+    #remoteVideo {
+        width: 100%;
+    }
+
+    .footer {
+        height: 10%;
+        width: 100%;
+
+        .footer-in {
+            height: 100%;
+            width: 100%;
+            background-color: aquamarine;
+        }
+    }
+}
