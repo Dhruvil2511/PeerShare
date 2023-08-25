@@ -126,6 +126,8 @@ const Chat = ({ localConnection, remoteConnection }) => {
         let userRef = db.collection('users').doc(`${id}`);
         let val = localStorage.getItem('peerRole');
         val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true } });
+        if(document.querySelector('.videoBtn').disabled = false)
+        document.querySelector('.videoBtn').disabled =true;
     }
 
     async function handleCopy(event) {
@@ -138,14 +140,14 @@ const Chat = ({ localConnection, remoteConnection }) => {
 
     return (
         <>
-            <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '5%', height: '85vh', width: '30%', float: 'left' }}>
+            <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '5%', height: '80vh', width: '30%', float: 'left' }}>
                 <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <img src={avatar} alt="" style={{ height: '80%', marginRight: '5%' }} />
                         <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>Connected to: {name}</span>
                     </div>
                     <div className="video-button">
-                        <button style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
+                        <button className='videoBtn' style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
                             <VideoCallIcon style={{ transform: `scale(${2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
                     </div>

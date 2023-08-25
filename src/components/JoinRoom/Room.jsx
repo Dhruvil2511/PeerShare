@@ -49,7 +49,7 @@ const firebaseConfig = {
     messagingSenderId: "308108699413",
     appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
     measurementId: "G-721QV10KH1"
-  };
+};
 
 firebase.initializeApp(firebaseConfig);
 
@@ -228,7 +228,7 @@ const Room = () => {
             console.log(
                 `ICE connection state change: ${connection.iceConnectionState}`);
         });
-    }   
+    }
 
 
     return (
@@ -236,7 +236,7 @@ const Room = () => {
             {!isConnected && <Preloader />}
             {/* {<Navbar />} */}
             {isConnected && <Navbar />}
-            <div className='room-wrapper' style={{ display: 'flex', padding: '2%' }}>
+            <div className='room-wrapper' style={{ display: 'flex', padding: '1%' }}>
                 {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && <VideoChat localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && <Chat localConnection={localConnection} remoteConnection={remoteConnection} />}
