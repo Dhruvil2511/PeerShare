@@ -33,7 +33,7 @@ const RoomPage = () => {
         document.querySelector('.instant-room-join').hidden = true;
         setId(userRef.id);
         setGenerateIDClicked(true);
-        localStorage.setItem('peerRole', 'peerA');
+        sessionStorage.setItem('peerRole', 'peerA');
     }
     function copyURL() {
         var url = `https://signalling-28129.web.app/room/${id}`;
@@ -48,7 +48,7 @@ const RoomPage = () => {
             return;
         }
         setId(roomName);
-        localStorage.setItem('peerRole', 'peerA');
+        sessionStorage.setItem('peerRole', 'peerA');
     }
 
     return (

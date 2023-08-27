@@ -63,29 +63,18 @@ const Room = () => {
 
     useEffect(() => {
 
-        let checkPeerRole = localStorage.getItem('peerRole');
+        let checkPeerRole = sessionStorage.getItem('peerRole');
         if (checkPeerRole === 'peerA') {
             generateID();
         } else if (checkPeerRole === 'peerB') {
             joinRoom();
         } else {
-            // If peerRole is not set, assume Peer B by default
-            localStorage.setItem('peerRole', 'peerB');
+            sessionStorage.setItem('peerRole', 'peerB');
             joinRoom();
         }
     }, []);
 
-    useEffect(() => {
-
-        window.addEventListener('beforeunload', () => {
-
-            localStorage.removeItem('peerRole');
-            localStorage.removeItem('senderId');
-            return '';
-        });
-    }, []);
-
-
+ 
     async function generateID() {
 
         const db = firebase.firestore();
@@ -151,7 +140,6 @@ const Room = () => {
                 }
             });
         });
-        localStorage.setItem('senderId', id);
     }
 
 

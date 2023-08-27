@@ -41,7 +41,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
 
     useEffect(() => {
         fetchAvatar();
-        let checkPeerRole = localStorage.getItem('peerRole');
+        let checkPeerRole = sessionStorage.getItem('peerRole');
         if (checkPeerRole === 'peerA') {
             initializeLocalConnection();
         } else {
@@ -90,7 +90,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
 
 
         document.getElementById('input-field').value = '';
-        let val = localStorage.getItem('peerRole');
+        let val = sessionStorage.getItem('peerRole');
         if (val === 'peerA') {
             setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': message }]);
             messageChannel.send(message);
@@ -122,7 +122,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
     async function handlevideoCallButtonState(event) {
         const db = firebase.firestore();
         let userRef = db.collection('users').doc(`${id}`);
-        let val = localStorage.getItem('peerRole');
+        let val = sessionStorage.getItem('peerRole');
         val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true } });
         if (document.querySelector('.videoBtn').disabled = false)
             document.querySelector('.videoBtn').disabled = true;
@@ -155,7 +155,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                 <div className="chatBox" style={{ height: '80%', overflow: 'scroll', overflowX: 'hidden', position: 'relative' }}>
                     {
                         messageList.map((value) => {
-                            let checkPeerRole = localStorage.getItem('peerRole');
+                            let checkPeerRole = sessionStorage.getItem('peerRole');
                             // console.log(value);
                             if (checkPeerRole === 'peerA') {
                                 if (value.role === 'peerA') {

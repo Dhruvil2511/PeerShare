@@ -8,9 +8,9 @@ let val;
 const Preloader = () => {
     const [peer, setPeer] = useState('');
     useEffect(() => {
-        val = localStorage.getItem('peerRole');
+        val = sessionStorage.getItem('peerRole');
         if (val === 'peerA') setPeer('Peer B');
-        else if (val === 'peerB') setPeer('Peer A');
+        else setPeer('Peer A');
 
         anime({
             targets: '#loader-svg path',

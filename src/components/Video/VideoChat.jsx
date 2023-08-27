@@ -81,7 +81,7 @@ const VideoChat = () => {
                 if (data.videoCallHandle && data.videoCallHandle.clicked) {
                     setTimeout(async () => {
                         await openUserMedia();
-                        val = localStorage.getItem('peerRole');
+                        val = sessionStorage.getItem('peerRole');
                         if ((data.videoCallHandle.clickedBy === 'peerA' && val === 'peerA') || (data.videoCallHandle.clickedBy === 'peerB' && val === 'peerB')) {
                             initializeLocalConnection();
                         }

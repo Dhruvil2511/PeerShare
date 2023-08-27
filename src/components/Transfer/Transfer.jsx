@@ -42,7 +42,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
 
 
   useEffect(() => {
-    let checkPeerRole = localStorage.getItem('peerRole');
+    let checkPeerRole = sessionStorage.getItem('peerRole');
     if (checkPeerRole === 'peerA') {
       dataChannel = localConnection.createDataChannel('fileChannel');
       initializeDataChannelListeners(dataChannel);
@@ -226,8 +226,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     if (localConnection) localConnection.close();
     if (remoteConnection) remoteConnection.close();
 
-    await localStorage.removeItem('senderId');
-    await localStorage.removeItem('peerRole');
+    await sessionStorage.removeItem('peerRole');
 
     if (id) {
       const db = firebase.firestore();
