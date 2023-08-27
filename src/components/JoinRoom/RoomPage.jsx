@@ -16,7 +16,7 @@ const firebaseConfig = {
     messagingSenderId: "308108699413",
     appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
     measurementId: "G-721QV10KH1"
-  };
+};
 firebase.initializeApp(firebaseConfig);
 let userRef = null;
 
@@ -30,7 +30,6 @@ const RoomPage = () => {
 
         const db = firebase.firestore();
         userRef = await db.collection('users').doc();
-        console.log(userRef.id);
         document.querySelector('.instant-room-join').hidden = true;
         setId(userRef.id);
         setGenerateIDClicked(true);
@@ -48,6 +47,8 @@ const RoomPage = () => {
             event.preventDefault();
             return;
         }
+        setId(roomName);
+        localStorage.setItem('peerRole', 'peerA');
     }
 
     return (

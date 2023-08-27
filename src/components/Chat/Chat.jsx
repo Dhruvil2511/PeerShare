@@ -9,7 +9,6 @@ import { useParams } from 'react-router-dom';
 import '../Chat/Chat.scss'
 import VideoCallIcon from '@mui/icons-material/VideoCall';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import AddReactionIcon from '@mui/icons-material/AddReaction';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
@@ -93,12 +92,10 @@ const Chat = ({ localConnection, remoteConnection }) => {
         document.getElementById('input-field').value = '';
         let val = localStorage.getItem('peerRole');
         if (val === 'peerA') {
-            // setMessageList([...messageList, { 'role': 'peerA', 'message': message }]);
             setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': message }]);
             messageChannel.send(message);
 
         } else {
-            // setMessageList([...messageList, { 'role': 'peerB', 'message': message }]);
             setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': message }]);
             remoteConnection.messageChannel.send(message);
         }
@@ -118,6 +115,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
             console.log(error)
         });
     }
+
     async function handleChange(event) {
         setMessage(event.target.value);
     }
@@ -126,8 +124,8 @@ const Chat = ({ localConnection, remoteConnection }) => {
         let userRef = db.collection('users').doc(`${id}`);
         let val = localStorage.getItem('peerRole');
         val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true } });
-        if(document.querySelector('.videoBtn').disabled = false)
-        document.querySelector('.videoBtn').disabled =true;
+        if (document.querySelector('.videoBtn').disabled = false)
+            document.querySelector('.videoBtn').disabled = true;
     }
 
     async function handleCopy(event) {
@@ -142,9 +140,9 @@ const Chat = ({ localConnection, remoteConnection }) => {
         <>
             <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '5%', height: '80vh', width: '30%', float: 'left' }}>
                 <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
-                    <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <img src={avatar} alt="" style={{ height: '80%', marginRight: '5%' }} />
-                        <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>Connected to: {name}</span>
+                    <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                        <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%' }} />
+                        <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>{name}</span>
                     </div>
                     <div className="video-button">
                         <button className='videoBtn' style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
@@ -163,7 +161,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.8%', borderRadius: '15px' }}>
+                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
                                                 {`${value.message}`}
                                             </div>
 
@@ -173,7 +171,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.8%', borderRadius: '15px' }}>{`${value.message}`}</div>
+                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>{`${value.message}`}</div>
 
                                         </div>
                                     )
@@ -183,7 +181,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.8%', borderRadius: '15px' }}>
+                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
                                                 {`${value.message}`}
                                             </div>
 
@@ -193,7 +191,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.8%', borderRadius: '15px' }}>{`${value.message}`}</div>
+                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>{`${value.message}`}</div>
                                         </div>
                                     )
                                 }

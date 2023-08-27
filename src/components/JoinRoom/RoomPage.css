@@ -1,0 +1,158 @@
+.Toastify__progress-bar {
+  background: rgb(26, 240, 161) !important;
+  /* Change this color to your desired color */
+}
+
+.main {
+  height: 100vh;
+  width: 100vw;
+}
+.main .flex-room-box {
+  margin-top: 5%;
+}
+.main .flex-room-box .create-room-box {
+  margin: auto;
+  padding: 2%;
+  height: -moz-fit-content;
+  height: fit-content;
+  border: 2px solid rgb(26, 240, 161);
+  box-shadow: 0 0 25px rgb(26, 240, 161);
+  color: white;
+  border-radius: 25px;
+  width: 50%;
+  background-color: rgb(0, 0, 0) !important;
+}
+.main .flex-room-box .create-room-box .content {
+  display: flex;
+  flex-direction: column;
+}
+.main .flex-room-box .create-room-box .content .custom-room {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.main .flex-room-box .create-room-box .content .custom-room .custom-room-title {
+  font-size: 2vw;
+  text-transform: capitalize;
+}
+.main .flex-room-box .create-room-box .content .custom-room .custom-room-description {
+  margin-left: 3%;
+  margin-right: 3%;
+}
+.main .flex-room-box .create-room-box .content .custom-room .custom-room-description .custom-room-description-text {
+  font-size: 1.2vw;
+}
+.main .flex-room-box .create-room-box .content .custom-room .custom-room-input {
+  border: 1px solid rgb(77, 76, 76);
+  background-color: rgb(30, 29, 29);
+  border-radius: 5px;
+  width: 50%;
+  padding: 0.5%;
+  color: white;
+  font-size: 1.2vw;
+}
+.main .flex-room-box .create-room-box .content .custom-room .custom-room-input::-moz-placeholder {
+  color: white;
+  opacity: 0.8;
+}
+.main .flex-room-box .create-room-box .content .custom-room .custom-room-input::placeholder {
+  color: white;
+  opacity: 0.8;
+}
+.main .flex-room-box .create-room-box .content .custom-room .custom-room-input::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: rgb(255, 255, 255);
+  opacity: 0.8;
+}
+.main .flex-room-box .create-room-box .content .custom-room .custom-room-join {
+  display: inline-block;
+  margin-top: 2%;
+  padding: 0.5%;
+  width: 50%;
+  text-align: center;
+  font-size: 1.5vw;
+  background-color: rgb(26, 240, 161);
+  color: black;
+  font-family: sans-serif;
+  text-decoration: none;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.main .flex-room-box .create-room-box .content .custom-room .custom-room-join:hover {
+  box-shadow: 0 0 15px rgb(26, 240, 161);
+}
+.main .flex-room-box .create-room-box .content .instant-room {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.main .flex-room-box .create-room-box .content .instant-room .instant-room-title {
+  font-size: 2vw;
+  text-transform: capitalize;
+}
+.main .flex-room-box .create-room-box .content .instant-room .instant-room-description {
+  margin-left: 3%;
+  margin-right: 3%;
+}
+.main .flex-room-box .create-room-box .content .instant-room .instant-room-description .instant-room-description-text {
+  font-size: 1.2vw;
+}
+.main .flex-room-box .create-room-box .content .instant-room .instant-room-join {
+  display: inline-block;
+  margin-top: 2%;
+  padding: 0.5%;
+  width: 50%;
+  text-align: center;
+  font-size: 1.5vw;
+  background-color: rgb(26, 240, 161);
+  color: black;
+  font-family: sans-serif;
+  text-decoration: none;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.main .flex-room-box .create-room-box .content .instant-room .instant-room-join:hover {
+  box-shadow: 0 0 15px rgb(26, 240, 161);
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 140px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -75px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}/*# sourceMappingURL=RoomPage.css.map */

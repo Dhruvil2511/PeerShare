@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import Transfer from '../Transfer/Transfer'
 import Chat from '../Chat/Chat'
-import Footer from '../Footer/Footer'
 import { useParams } from 'react-router-dom'
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import VideoChat from '../Video/VideoChat'
 import Navbar from '../Navbar/Navbar'
-import ClipLoader from 'react-spinners/ClipLoader'
 import Preloader from '../Loader/Preloader'
 
 const configuration = {
@@ -57,7 +55,6 @@ let userRef = null;
 let answer = null;
 let localConnection = null;
 let remoteConnection = null;
-let channel = null;
 let dummyChannel = null;
 
 const Room = () => {
@@ -76,6 +73,16 @@ const Room = () => {
             localStorage.setItem('peerRole', 'peerB');
             joinRoom();
         }
+    }, []);
+
+    useEffect(() => {
+
+        window.addEventListener('beforeunload', () => {
+
+            localStorage.removeItem('peerRole');
+            localStorage.removeItem('senderId');
+            return '';
+        });
     }, []);
 
 
@@ -202,6 +209,7 @@ const Room = () => {
         }
     }
 
+
     function initializeIceListeners(connection) {
         connection.addEventListener('icegatheringstatechange', () => {
             console.log(`ICE gathering state changed: ${connection.iceGatheringState}`);
@@ -209,10 +217,7 @@ const Room = () => {
 
         // connection state change -> event for checking wheter connection failed or success
         connection.addEventListener('connectionstatechange', async () => {
-            if (connection.connectionState === 'disconnected') {
-                localStorage.removeItem('senderId');
-            }
-            else if (connection.connectionState === 'connected') {
+            if (connection.connectionState === 'connected') {
                 setIsConnected(true);
             }
             console.log(`Connection state change: ${connection.connectionState}`);

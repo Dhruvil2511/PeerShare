@@ -9,6 +9,7 @@
   align-items: center;
   overflow: hidden;
   box-shadow: 0px 0px 100px rgb(1, 235, 252), inset 0px 0px 10px rgb(1, 235, 252), 0px 0px 5px rgb(255, 255, 255);
+
 }
 
 .input-div:hover {
@@ -29,6 +30,8 @@
   cursor: pointer !important;
 }
 
+
+
 .shrinkable-div {
   background: transparent;
   float: left;
@@ -37,6 +40,7 @@
   width: 70%;
   height: 80vh;
   transition: all 2s ease;
+
 }
 
 .shrink {
@@ -46,4 +50,4 @@
   background: transparent;
   width: 40%;
   height: 80vh;
-}/*# sourceMappingURL=Transfer.css.map */
+}

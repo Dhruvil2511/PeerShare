@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import Footer from '../Footer/Footer';
+import CallEndIcon from '@mui/icons-material/CallEnd';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { useParams } from 'react-router-dom';
 import '../Video/VideoChat.scss'
+import VideocamIcon from '@mui/icons-material/Videocam';
+import MicIcon from '@mui/icons-material/Mic';
+import VideocamOffIcon from '@mui/icons-material/VideocamOff';
+import MicOffIcon from '@mui/icons-material/MicOff';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
@@ -14,7 +18,7 @@ const firebaseConfig = {
     messagingSenderId: "308108699413",
     appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
     measurementId: "G-721QV10KH1"
-  };
+};
 const configuration = {
     iceServers: [
         {
@@ -53,14 +57,17 @@ let localStream = null;
 let data = null;
 let val = null;
 let dummyCH;
-let peerConnection = null;
+let localConnection = null;
+let remoteConnection = null;
 
 
 
-const VideoChat = ({ localConnection, remoteConnection }) => {
+const VideoChat = () => {
     let { id } = useParams();
     const [videoCaller, setVideoCaller] = useState('');
     const [flag, setFlag] = useState(true);
+    const [isVideoOn, setIsVideoOn] = useState(true);
+    const [isMicOn, setIsMicOn] = useState(true);
     const [videoCallButtonClicked, setVideoCallButtonClicked] = useState({ clicked: false, clickedBy: null });
 
 
@@ -72,18 +79,19 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
             if (data && data.videoCallHandle) {
                 setVideoCallButtonClicked(data.videoCallHandle);
                 if (data.videoCallHandle && data.videoCallHandle.clicked) {
-                    await openUserMedia();
-                    val = localStorage.getItem('peerRole');
-                    if ((data.videoCallHandle.clickedBy === 'peerA' && val === 'peerA') || (data.videoCallHandle.clickedBy === 'peerB' && val === 'peerB')) {
-                        initializeLocalConnection();
-                    }
-                    else {
-                        setTimeout(() => {
-                            initializeRemoteConnection();
-                        }, 5000);
+                    setTimeout(async () => {
+                        await openUserMedia();
+                        val = localStorage.getItem('peerRole');
+                        if ((data.videoCallHandle.clickedBy === 'peerA' && val === 'peerA') || (data.videoCallHandle.clickedBy === 'peerB' && val === 'peerB')) {
+                            initializeLocalConnection();
+                        }
+                        else {
+                            setTimeout(() => {
+                                initializeRemoteConnection();
+                            }, 6000);
 
-
-                    }
+                        }
+                    }, 1000);
                 }
             }
         });
@@ -100,8 +108,6 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
         localStream = stream;
         remoteStream = new MediaStream();
         document.querySelector('#remoteVideo').srcObject = remoteStream;
-
-        console.log('Stream:', document.querySelector('#localVideo').srcObject);
     }
 
 
@@ -109,17 +115,17 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
         const db = firebase.firestore();
         const roomRef = await db.collection('videoCon').doc(`${id}`);
 
-        console.log('Create PeerConnection with configuration: ', configuration);
-        peerConnection = new RTCPeerConnection(configuration);
-        registerPeerConnectionListeners();
+        console.log('Create local with configuration: ', configuration);
+        localConnection = new RTCPeerConnection(configuration);
+        registerPeerConnectionListeners(localConnection);
 
         localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localStream);
+            localConnection.addTrack(track, localStream);
         });
 
         const callerCandidatesCollection = roomRef.collection('callerCandidates');
 
-        peerConnection.addEventListener('icecandidate', event => {
+        localConnection.addEventListener('icecandidate', event => {
             if (!event.candidate) {
                 console.log('Got final video candidate!');
                 return;
@@ -128,8 +134,8 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
             callerCandidatesCollection.add(event.candidate.toJSON());
         });
 
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
+        const offer = await localConnection.createOffer();
+        await localConnection.setLocalDescription(offer);
         console.log('Created video offer:', offer);
 
         const roomWithOffer = {
@@ -140,7 +146,7 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
         };
         await roomRef.set(roomWithOffer);
 
-        peerConnection.addEventListener('track', event => {
+        localConnection.addEventListener('track', event => {
             console.log('Got remote track:', event.streams[0]);
             event.streams[0].getTracks().forEach(track => {
                 console.log('Add a track to the remoteStream:', track);
@@ -150,10 +156,10 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
 
         roomRef.onSnapshot(async snapshot => {
             const data = snapshot.data();
-            if (!peerConnection.currentRemoteDescription && data && data.answer) {
+            if (!localConnection.currentRemoteDescription && data && data.answer) {
                 console.log('Got remote description: ', data.answer);
                 const rtcSessionDescription = new RTCSessionDescription(data.answer);
-                await peerConnection.setRemoteDescription(rtcSessionDescription);
+                await localConnection.setRemoteDescription(rtcSessionDescription);
             }
         });
         // Listening for remote session description above
@@ -164,7 +170,7 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
                 if (change.type === 'added') {
                     let data = change.doc.data();
                     console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(data));
+                    await localConnection.addIceCandidate(new RTCIceCandidate(data));
                 }
             });
         });
@@ -176,14 +182,14 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
         const roomSnapshot = await roomRef.get();
 
         if (roomSnapshot.exists) {
-            peerConnection = new RTCPeerConnection(configuration);
-            registerPeerConnectionListeners();
+            remoteConnection = new RTCPeerConnection(configuration);
+            registerPeerConnectionListeners(remoteConnection);
             localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, localStream);
+                remoteConnection.addTrack(track, localStream);
             });
             const calleeCandidatesCollection = roomRef.collection('calleeCandidates');
 
-            peerConnection.addEventListener('icecandidate', event => {
+            remoteConnection.addEventListener('icecandidate', event => {
                 if (!event.candidate) {
                     console.log('Got final candidate!');
                     return;
@@ -193,7 +199,7 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
             });
             // Code for collecting ICE candidates above
 
-            peerConnection.addEventListener('track', event => {
+            remoteConnection.addEventListener('track', event => {
                 console.log('Got remote track:', event.streams[0]);
                 event.streams[0].getTracks().forEach(track => {
                     console.log('Add a track to the remoteStream:', track);
@@ -205,10 +211,10 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
             const offer = await roomSnapshot.data().offer;
             if (offer) {
                 console.log('Got video offer:', offer);
-                await peerConnection.setRemoteDescription(offer);
-                const answer = await peerConnection.createAnswer();
+                await remoteConnection.setRemoteDescription(offer);
+                const answer = await remoteConnection.createAnswer();
                 console.log('Created video answer:', answer);
-                await peerConnection.setLocalDescription(answer);
+                await remoteConnection.setLocalDescription(answer);
 
                 const roomWithAnswer = {
                     answer: {
@@ -227,7 +233,7 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
                     if (change.type === 'added') {
                         let data = change.doc.data();
                         console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(data));
+                        await remoteConnection.addIceCandidate(new RTCIceCandidate(data));
                     }
                 });
             });
@@ -253,57 +259,81 @@ const VideoChat = ({ localConnection, remoteConnection }) => {
         });
         await roomRef.delete();
 
-        const tracks = document.querySelector('#localVideo').srcObject.getTracks();
-        document.querySelector('#localVideo').srcObject = null;
-        document.querySelector('#remoteVideo').srcObject = null;
+        if (localConnection) localConnection.close();
+        if (remoteConnection) remoteConnection.close();
+
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream.getVideoTracks()[0].stop();
+        }
         if (remoteStream) {
             remoteStream.getTracks().forEach(track => track.stop());
+            remoteStream.getVideoTracks()[0].stop();
         }
-        tracks.forEach(track => {
-            track.stop();
+    }
+    function registerPeerConnectionListeners(connection) {
+        connection.addEventListener('icegatheringstatechange', () => {
+            console.log(
+                `ICE gathering state changed: ${connection.iceGatheringState}`);
+        });
+
+        connection.addEventListener('connectionstatechange', () => {
+            console.log(`Connection state change: ${connection.connectionState}`);
+        });
+
+        connection.addEventListener('signalingstatechange', () => {
+            console.log(`Signaling state change: ${connection.signalingState}`);
+        });
+
+        connection.addEventListener('iceconnectionstatechange ', () => {
+            console.log(
+                `ICE connection state change: ${connection.iceConnectionState}`);
         });
     }
-    function registerPeerConnectionListeners() {
-        peerConnection.addEventListener('icegatheringstatechange', () => {
-            console.log(
-                `ICE gathering state changed: ${peerConnection.iceGatheringState}`);
-        });
 
-        peerConnection.addEventListener('connectionstatechange', () => {
-            console.log(`Connection state change: ${peerConnection.connectionState}`);
-        });
-
-        peerConnection.addEventListener('signalingstatechange', () => {
-            console.log(`Signaling state change: ${peerConnection.signalingState}`);
-        });
-
-        peerConnection.addEventListener('iceconnectionstatechange ', () => {
-            console.log(
-                `ICE connection state change: ${peerConnection.iceConnectionState}`);
-        });
+    async function handleVideoOn() {
+        if (localStream) {
+            localStream.getVideoTracks()[0].enabled = !isVideoOn;
+        }
+        setIsVideoOn(!isVideoOn);
+    }
+    async function handleMicOn() {
+        if (localStream) {
+            localStream.getAudioTracks()[0].enabled = !isMicOn;
+        }
+        setIsMicOn(!isMicOn);
     }
 
     return (
         <>
-            {videoCallButtonClicked &&
+            {videoCallButtonClicked.clicked &&
                 <div className="video" >
                     <video id="localVideo" muted autoPlay playsInline></video>
                     <video id="remoteVideo" autoPlay playsInline></video>
-                    {/* {videoCallButtonClicked ? (
-                <>
-
-                </>) : (<p>Waiting for video call initiation...</p>)
-            } */}
                     <div className="footer" >
                         <div className='footer-in'>
-                            <button onClick={hangVideoCall}>Hang up</button>
+                            {isVideoOn ?
+                                <button className='video-on-button' onClick={handleVideoOn}>
+                                    <VideocamIcon className='video-on' />
+                                </button> : <button className='video-off-button' onClick={handleVideoOn}>
+                                    <VideocamOffIcon className='video-off' />
+                                </button>
+                            }
+                            {isMicOn ?
+                                <button className='mic-on-button' onClick={handleMicOn}>
+                                    <MicIcon className='mic-on' />
+                                </button> : <button className='mic-off-button' onClick={handleMicOn}>
+                                    <MicOffIcon className='mic-off' />
+                                </button>
+                            }
+
+                            <button className='end-call-button' onClick={hangVideoCall}>
+                                <CallEndIcon className='end-call' />
+                            </button>
                         </div>
                     </div>
                 </div>
-
             }
-
-
         </>
     )
 }

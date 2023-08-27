@@ -1,0 +1,23 @@
+/* Hide scrollbar for IE, Edge and Firefox */
+.chatBox {
+  /* Track */
+  /* Handle */
+  /* Handle on hover */
+  /* Firefox */
+}
+.chatBox::-webkit-scrollbar {
+  width: 5px;
+}
+.chatBox::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey;
+  border-radius: 5px;
+}
+.chatBox::-webkit-scrollbar-thumb {
+  background: rgb(26, 240, 161);
+  border-radius: 5px;
+}
+.chatBox::-webkit-scrollbar-thumb:hover {
+  background: rgb(26, 240, 161);
+}
+
+/* width *//*# sourceMappingURL=Chat.css.map */
