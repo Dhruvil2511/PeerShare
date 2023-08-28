@@ -25,6 +25,9 @@ const RoomPage = () => {
     const [roomName, setRoomName] = useState('');
     const [id, setId] = useState(null);
     const [generateIDClicked, setGenerateIDClicked] = useState(false);
+    useEffect(() => {
+        sessionStorage.clear();
+    },[]);
 
     async function generateID(event) {
 

@@ -1,45 +1,196 @@
-.input-div {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 2px solid rgb(1, 235, 252);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  box-shadow: 0px 0px 100px rgb(1, 235, 252), inset 0px 0px 10px rgb(1, 235, 252), 0px 0px 5px rgb(255, 255, 255);
-
-}
-
-.input-div:hover {
-  opacity: 0.5;
-}
-
-.icon {
-  color: rgb(1, 235, 252);
-  font-size: 2rem;
-  cursor: pointer;
-}
-
-.input {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer !important;
-}
-
-
-
 .shrinkable-div {
   background: transparent;
   float: left;
-  padding-top: 2%;
+  margin-right: 2%;
   position: relative;
   width: 70%;
   height: 80vh;
   transition: all 2s ease;
+  border: 1px solid white;
+  border-radius: 3%;
+
+  .input-flex {
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    height: 75%;
+    width: 100%;
+
+    .file-history {
+      margin-left: 2%;
+      height: 15.5vw;
+      width:20vw;
+      background: transparent;
+      border: 1px solid rgb(255, 255, 255);
+      border-radius: 10px;
+    }
+
+    .progress-wrapper {
+      height: 80%;
+      width: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-direction: row;
+     
+
+      .input-div {
+        position: absolute;
+        width: 11.2vw;
+        height: 11.2vw;
+        border-radius: 50%;
+        border: 2px solid rgb(26, 240, 161);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        box-shadow: 0px 0px 10px rgb(26, 240, 161), inset 0px 0px 10px rgb(26, 240, 161);
+
+        &:hover {
+          opacity: 0.5;
+        }
+
+        .input {
+          position: absolute;
+          opacity: 0;
+          width: 100%;
+          height: 100%;
+          cursor: pointer !important;
+        }
+
+        .icon {
+          color: rgb(26, 240, 161);
+          font-size: 3vw;
+          cursor: pointer;
+        }
+
+      }
+
+    }
+
+    .video-call-accept{
+      // display: none;
+      margin-right: 2%;
+      height: 60%;
+      width: 30%;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+
+    }
+
+  }
+
+
+
+
+
+  .send-flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .send-btn-div {
+      width: 20%;
+      margin-bottom: 2%;
+
+      #sendFileBtn {
+        width: 100%;
+        text-align: center;
+        font-size: 1.5vw;
+        background-color: rgb(26, 240, 161);
+        color: black;
+        font-family: sans-serif;
+        text-decoration: none;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+
+        &:hover {
+          -webkit-box-shadow: 0 0 15px rgb(26, 240, 161);
+          ;
+          box-shadow: 0 0 15px rgb(26, 240, 161);
+        }
+
+      }
+
+    }
+
+  }
+
+
+
+
+
+
+  .state-flex {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 20%;
+    width: 100%;
+
+    .leave-btn-div {
+      width: 20%;
+      margin-bottom: 5%;
+
+      .leave-btn {
+        width: 100%;
+        text-align: center;
+        font-size: 1.5vw;
+        // margin-top: 10%;
+        background-color: red;
+        color: black;
+        font-family: sans-serif;
+        text-decoration: none;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+
+        &:hover {
+          -webkit-box-shadow: 0 0 15px red;
+          ;
+          box-shadow: 0 0 15px red;
+        }
+      }
+    }
+
+    .refresh-btn-div {
+      width: 20%;
+      margin-bottom: 5%;
+
+      .refresh-btn {
+        width: 100%;
+        text-align: center;
+        font-size: 1.5vw;
+        // margin-top: 10%;
+        background-color: #0A82FD;
+        color: black;
+        font-family: sans-serif;
+        text-decoration: none;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+
+        &:hover {
+          -webkit-box-shadow: 0 0 15px #0A82FD;
+          ;
+          box-shadow: 0 0 15px #0A82FD;
+        }
+
+      }
+
+    }
+  }
+
+
 
 }
 
