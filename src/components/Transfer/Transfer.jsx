@@ -5,16 +5,19 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { useParams } from 'react-router-dom';
 import '../Transfer/Transfer.scss'
+import LinearProgress from '@mui/material/LinearProgress';
+import { v4 } from 'uuid';
+import { toast, ToastContainer } from 'react-toastify';
 
-import { CircularProgress } from '@mui/material';
 const firebaseConfig = {
-  apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
-  authDomain: "peershare2425.firebaseapp.com",
-  projectId: "peershare2425",
-  storageBucket: "peershare2425.appspot.com",
-  messagingSenderId: "308108699413",
-  appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
-  measurementId: "G-721QV10KH1"
+  apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
+  authDomain: "signalling-28129.firebaseapp.com",
+  databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "signalling-28129",
+  storageBucket: "signalling-28129.appspot.com",
+  messagingSenderId: "985022221543",
+  appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
+  measurementId: "G-YJPJ8LZZXD"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -30,15 +33,15 @@ let file = null;
 let receivedFile;
 let fileInfo = null;
 let data;
-
+let fileSize = ''
 
 const worker = new Worker("../worker.js");
-
 const Transfer = ({ localConnection, remoteConnection }) => {
-  const [fileInput, setFileInput] = useState([]);
+  const [fileInput, setFileInput] = useState('');
   const [isShrunk, setIsShrunk] = useState(false);
   const [videoCallButtonClicked, setVideoCallButtonClicked] = useState({ clicked: false, clickedBy: null });
-  var percentage = 66;
+  const [isFileHistory, setIsFileHistory] = useState(false)
+  const [fileHistory, setFileHistory] = useState([]);
   let { id } = useParams();
 
 
@@ -111,13 +114,17 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       const slice = file.slice(offset, o + chunkSize);
       fileReader.readAsArrayBuffer(slice);
     }
-
     readSlice(0);
 
   }
   async function sendFile() {
-    // console.log(file);
+
     receivedSize = 0;
+    if (fileInput === '') {
+      toast('Please select a file', { theme: 'dark' });
+      return;
+    };
+
     if (dataChannel && dataChannel.readyState === 'open') {
       file = fileInput;
       const fileInfo = {
@@ -129,7 +136,8 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       dataChannel.send(JSON.stringify(fileInfo));
       console.log('Sending', file);
       send(file);
-
+      setIsFileHistory(true)
+      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: 'green' }]);
     } else {
       file = fileInput;
       const fileInfo = {
@@ -141,8 +149,10 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       remoteConnection.dataChannel.send(JSON.stringify(fileInfo));
       console.log('Sending', file);
       sendFromRemote(file);
-
+      setIsFileHistory(true);
+      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: 'green' }])
     }
+    setFileInput('');
   }
   async function sendFromRemote(file) {
 
@@ -179,12 +189,13 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   }
 
   async function recieveData(e) {
-
     if (typeof (e.data) === 'string') {
       fileInfo = JSON.parse(e.data);
       receivedFile = fileInfo.file.name;
       receivedFileSize = fileInfo.file.size;
       worker.postMessage(receivedFileSize);
+      setIsFileHistory(true);
+      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: fileInfo.file.name, filesize: fileInfo.file.size / 1000000, color: 'red' }]);
     }
     else {
       worker.postMessage(e.data);
@@ -193,11 +204,12 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     }
   }
   function download() {
+    setIsFileHistory(true);
     worker.addEventListener('message', async (event) => {
       const url = URL.createObjectURL(event.data);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = receivedFile; // Set the desired file name here
+      anchor.download = receivedFile;
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
@@ -211,7 +223,6 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   function initializeDataChannelListeners(dataChannel) {
     dataChannel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
     dataChannel.addEventListener('open', () => {
-      // console.log(channel);
       console.log('Data channel opened');
     });
     dataChannel.addEventListener('message', (event) => {
@@ -252,35 +263,84 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   function retryConnect(event) {
     window.location.reload();
   }
+  function dragAndDrop(event) {
+    event.preventDefault();
+    setFileInput(event.dataTransfer.files[0]);
+    document.querySelector('.input-div').classList.remove('blur');
+  }
+
+  function convert(size) {
+    if (!size) return '';
+    if (parseInt(size) === 0) return ` | ${parseFloat(size * 1000).toFixed(2)}KB`;
+    else if (parseInt(size) < 1000) return ` | ${parseFloat(size).toFixed(2)}MB`;
+    else return `| ${parseFloat(size / 1000).toFixed(2)}GB`;
+  }
+  function removeFileHistory(fileid) {
+    setFileHistory(fileHistory.filter((file) => file.id !== fileid));
+
+  }
   return (
     <>
-
       <div className={`shrinkable-div ${isShrunk ? 'shrink' : ''}`}>
-        <div className="input-flex">
-          <div className="file-history">
-            hello
-          </div>
-          <div className="progress-wrapper">
-            <CircularProgress variant='determinate' size={'15.5vw'} value={100} />
-            <div className="input-div">
-              <input className="input" id="fileInput" multiple name="file" type="file" onChange={handleFile} />
-              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" strokeLinejoin="round" strokeLinecap="round" viewBox="0 0 24 24" strokeWidth="2" fill="none" stroke="currentColor" className="icon"><polyline points="16 16 12 12 8 16"></polyline><line y2="21" x2="12" y1="12" x1="12"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path><polyline points="16 16 12 12 8 16"></polyline></svg>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss={false}
+          draggable
+          pauseOnHover={false}
+          theme="dark"
+        />
+        <div style={{ height: '100%' }}>
+          <div className="input-div" onDragOver={(event) => {
+            event.preventDefault();
+            document.querySelector('.input-div').classList.add('blur');
+          }} onDrop={dragAndDrop} onDragLeave={(event) => {
+            event.preventDefault();
+            document.querySelector('.input-div').classList.remove('blur');
+          }}>
+            <label htmlFor="actual-btn" style={{ backgroundColor: 'red', width: '50%', alignSelf: 'center', cursor: 'pointer', height: '40%', marginBottom: '0.5%', marginTop: '1%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div>Select A File From Here</div></label>
+            <input multiple type='file' className='fileInput' id='actual-btn' onChange={handleFile} />
+            <div id='file-selected' style={{ alignSelf: 'center' }}>{fileInput.name}{convert(fileInput.size / 1000000)}</div>
+            <button className='sendFileBtn' onClick={sendFile}>Send</button>
+            <div style={{ display: 'flex' }}>
+              <div style={{ fontSize: '2vw', marginLeft: '2%' }}>Sender</div>
+              <LinearProgress variant="buffer" value={70} valueBuffer={70 + 5} style={{ height: '30%', width: '72%', marginTop: '1%', alignSelf: 'center', marginLeft: '4.1%' }} />
             </div>
           </div>
-          <div className="video-call-accept" >
-          </div>
-        </div>
-        <div className="send-flex">
-          <div className="send-btn-div">
-            <button id='sendFileBtn' onClick={sendFile}> Send</button>
-          </div>
-        </div>
-        <div className="state-flex">
-          <div className="refresh-btn-div">
-            <button className='refresh-btn' onClick={retryConnect}> Refresh </button>
-          </div>
-          <div className="leave-btn-div">
-            <button className='leave-btn' onClick={hangUp} style={{ backgroundColor: 'red' }} > Leave </button>
+          <div className='flexTransferBottom'>
+            <div className='fileHistory'>
+              {
+                isFileHistory ? <div className='fileHistoryDiv'>{
+                  fileHistory.map((v) => {
+
+                    if (parseInt(v.filesize) == 0) fileSize = `${parseFloat(v.filesize * 1000).toFixed(2)}KB`
+
+                    else if (parseInt(v.filesize) < 1000) fileSize = `${parseFloat(v.filesize).toFixed(2)}MB`
+
+                    else fileSize = `${parseFloat(v.filesize / 1000).toFixed(2)}GB`
+
+                    return (
+                      <div className='fileHistorySingleComponent' style={{ backgroundColor: v.color }}>
+                        <div className="file-info">
+                          <div className="file-name"> File Name : {v.filename} </div>
+                          <div className="file-size">  File Size : {fileSize}</div>
+                        </div>
+                        <div className="delete-file">
+                          <button className='delete-file-btn' onClick={() => removeFileHistory(v.id)}>X</button>
+                        </div>
+                      </div>
+                    )
+                  })}</div> : <div style={{ color: 'white' }}>No File History</div>
+              }
+            </div>
+            <div className='leaveRef'>
+              <button id='hangUpBtn' onClick={hangUp} style={{ backgroundColor: 'red' }} className='leaveBtn'> Leave </button>
+              <button className='btn-danger' id='retry' onClick={retryConnect}> Retry </button>
+            </div>
           </div>
         </div>
       </div>

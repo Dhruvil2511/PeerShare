@@ -20,9 +20,12 @@ const Preloader = () => {
             direction: 'alternate-reverse',
             loop: true
         });
-        setInterval(async () => {
+        const interval = setInterval(async () => {
             toast("Reload page to initiate connection again", { theme: 'dark' });
         }, 15000);
+
+        return () => clearInterval(interval);
+
     }, []);
     function handleBack(event) {
         window.history.back();

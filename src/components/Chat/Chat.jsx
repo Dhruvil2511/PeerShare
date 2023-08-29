@@ -11,14 +11,15 @@ import VideoCallIcon from '@mui/icons-material/VideoCall';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
-    authDomain: "peershare2425.firebaseapp.com",
-    projectId: "peershare2425",
-    storageBucket: "peershare2425.appspot.com",
-    messagingSenderId: "308108699413",
-    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
-    measurementId: "G-721QV10KH1"
-};
+    apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
+    authDomain: "signalling-28129.firebaseapp.com",
+    databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "signalling-28129",
+    storageBucket: "signalling-28129.appspot.com",
+    messagingSenderId: "985022221543",
+    appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
+    measurementId: "G-YJPJ8LZZXD"
+  };
 
 firebase.initializeApp(firebaseConfig);
 
