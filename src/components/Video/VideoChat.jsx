@@ -315,21 +315,21 @@ const VideoChat = () => {
                         <div className='footer-in'>
                             {isVideoOn ?
                                 <button className='video-on-button' onClick={handleVideoOn}>
-                                    <VideocamIcon className='video-on' />
+                                    <VideocamIcon sx={{fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }}  className='video-on' />
                                 </button> : <button className='video-off-button' onClick={handleVideoOn}>
-                                    <VideocamOffIcon className='video-off' />
+                                    <VideocamOffIcon sx={{fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='video-off' />
                                 </button>
                             }
                             {isMicOn ?
                                 <button className='mic-on-button' onClick={handleMicOn}>
-                                    <MicIcon className='mic-on' />
+                                    <MicIcon sx={{fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='mic-on' />
                                 </button> : <button className='mic-off-button' onClick={handleMicOn}>
                                     <MicOffIcon className='mic-off' />
                                 </button>
                             }
 
                             <button className='end-call-button' onClick={hangVideoCall}>
-                                <CallEndIcon className='end-call' />
+                                <CallEndIcon sx={{fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='end-call' />
                             </button>
                         </div>
                     </div>

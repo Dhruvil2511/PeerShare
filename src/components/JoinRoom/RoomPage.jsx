@@ -8,6 +8,7 @@ import '../JoinRoom/RoomPage.scss'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Tooltip } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 const firebaseConfig = {
     apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
     authDomain: "signalling-28129.firebaseapp.com",
@@ -17,7 +18,7 @@ const firebaseConfig = {
     messagingSenderId: "985022221543",
     appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
     measurementId: "G-YJPJ8LZZXD"
-  };
+};
 firebase.initializeApp(firebaseConfig);
 let userRef = null;
 
@@ -28,7 +29,7 @@ const RoomPage = () => {
     const [generateIDClicked, setGenerateIDClicked] = useState(false);
     useEffect(() => {
         sessionStorage.clear();
-    },[]);
+    }, []);
 
     async function generateID(event) {
 
@@ -91,7 +92,7 @@ const RoomPage = () => {
                                         <span style={{ color: 'rgb(239,209,118)', marginTop: '5px', fontSize: '1vw' }}>{`https://signalling-28129.web.app/room/${id}`}</span>
                                         <Tooltip title='Copy link'>
                                             <button onClick={copyURL} style={{ backgroundColor: 'rgb(26, 240, 161)', marginLeft: '2%', width: '8%', borderRadius: '10px' }} >
-                                                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none" /><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" /></svg>
+                                                <ContentCopyIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} />
                                             </button>
                                         </Tooltip>
                                     </div>

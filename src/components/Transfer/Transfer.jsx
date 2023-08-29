@@ -8,6 +8,8 @@ import '../Transfer/Transfer.scss'
 import LinearProgress from '@mui/material/LinearProgress';
 import { v4 } from 'uuid';
 import { toast, ToastContainer } from 'react-toastify';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
@@ -43,6 +45,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   const [isFileHistory, setIsFileHistory] = useState(false)
   const [fileHistory, setFileHistory] = useState([]);
   let { id } = useParams();
+
 
 
   useEffect(() => {
@@ -137,7 +140,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       console.log('Sending', file);
       send(file);
       setIsFileHistory(true)
-      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: 'green' }]);
+      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: '#0A82FD' }]);
     } else {
       file = fileInput;
       const fileInfo = {
@@ -150,7 +153,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       console.log('Sending', file);
       sendFromRemote(file);
       setIsFileHistory(true);
-      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: 'green' }])
+      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: '#0A82FD' }])
     }
     setFileInput('');
   }
@@ -195,7 +198,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       receivedFileSize = fileInfo.file.size;
       worker.postMessage(receivedFileSize);
       setIsFileHistory(true);
-      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: fileInfo.file.name, filesize: fileInfo.file.size / 1000000, color: 'red' }]);
+      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: fileInfo.file.name, filesize: fileInfo.file.size / 1000000, color: '#333333' }]);
     }
     else {
       worker.postMessage(e.data);
@@ -266,7 +269,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   function dragAndDrop(event) {
     event.preventDefault();
     setFileInput(event.dataTransfer.files[0]);
-    document.querySelector('.input-div').classList.remove('blur');
+    document.querySelector('.input-label').classList.remove('blur');
   }
 
   function convert(size) {
@@ -295,52 +298,64 @@ const Transfer = ({ localConnection, remoteConnection }) => {
           theme="dark"
         />
         <div style={{ height: '100%' }}>
-          <div className="input-div" onDragOver={(event) => {
-            event.preventDefault();
-            document.querySelector('.input-div').classList.add('blur');
-          }} onDrop={dragAndDrop} onDragLeave={(event) => {
-            event.preventDefault();
-            document.querySelector('.input-div').classList.remove('blur');
-          }}>
-            <label htmlFor="actual-btn" style={{ backgroundColor: 'red', width: '50%', alignSelf: 'center', cursor: 'pointer', height: '40%', marginBottom: '0.5%', marginTop: '1%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div>Select A File From Here</div></label>
+          <div className="input-div">
+            <label className='input-label' onDragOver={(event) => {
+              event.preventDefault();
+              document.querySelector('.fileInput').classList.add('blur');
+            }} onDrop={dragAndDrop} onDragLeave={(event) => {
+              event.preventDefault();
+              document.querySelector('.fileInput').classList.remove('blur');
+            }}
+              htmlFor="actual-btn">
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <AddCircleOutlineIcon sx={{ fontSize: { xs: 20, sm: 25, md: 30, lg: 40 } }} color='primary' />
+                <span style={{ padding: '2% 5% 2% 5%', fontSize: '1vw' }}>
+                  Click to browse or drag files to start sharing
+                </span>
+              </div>
+            </label>
             <input multiple type='file' className='fileInput' id='actual-btn' onChange={handleFile} />
             <div id='file-selected' style={{ alignSelf: 'center' }}>{fileInput.name}{convert(fileInput.size / 1000000)}</div>
-            <button className='sendFileBtn' onClick={sendFile}>Send</button>
+            <div className="buttons">
+              <button className='retry-btn' id='retry' onClick={retryConnect}> Retry </button>
+              <button className='sendFileBtn' onClick={sendFile}>Send</button>
+              <button id='hangUpBtn' onClick={hangUp} style={{ backgroundColor: 'red' }} className='leaveBtn'> Leave </button>
+            </div>
+
             <div style={{ display: 'flex' }}>
               <div style={{ fontSize: '2vw', marginLeft: '2%' }}>Sender</div>
               <LinearProgress variant="buffer" value={70} valueBuffer={70 + 5} style={{ height: '30%', width: '72%', marginTop: '1%', alignSelf: 'center', marginLeft: '4.1%' }} />
             </div>
           </div>
           <div className='flexTransferBottom'>
-            <div className='fileHistory'>
-              {
-                isFileHistory ? <div className='fileHistoryDiv'>{
-                  fileHistory.map((v) => {
+            {isFileHistory ?
+              <div className='fileHistory'>
+                {
+                  <div className='fileHistoryDiv'>{
+                    fileHistory.map((v) => {
 
-                    if (parseInt(v.filesize) == 0) fileSize = `${parseFloat(v.filesize * 1000).toFixed(2)}KB`
+                      if (parseInt(v.filesize) === 0) fileSize = `${parseFloat(v.filesize * 1000).toFixed(2)}KB`
 
-                    else if (parseInt(v.filesize) < 1000) fileSize = `${parseFloat(v.filesize).toFixed(2)}MB`
+                      else if (parseInt(v.filesize) < 1000) fileSize = `${parseFloat(v.filesize).toFixed(2)}MB`
 
-                    else fileSize = `${parseFloat(v.filesize / 1000).toFixed(2)}GB`
+                      else fileSize = `${parseFloat(v.filesize / 1000).toFixed(2)}GB`
 
-                    return (
-                      <div className='fileHistorySingleComponent' style={{ backgroundColor: v.color }}>
-                        <div className="file-info">
-                          <div className="file-name"> File Name : {v.filename} </div>
-                          <div className="file-size">  File Size : {fileSize}</div>
+                      return (
+                        <div className='fileHistorySingleComponent' style={{ backgroundColor: v.color }}>
+                          <div className="file-info">
+                            <div className="file-name"> File Name : {v.filename} </div>
+                            <div className="file-size">  File Size : {fileSize}</div>
+                          </div>
+                          <div className="delete-file">
+                            <button className='delete-file-btn' onClick={() => removeFileHistory(v.id)}>X</button>
+                          </div>
                         </div>
-                        <div className="delete-file">
-                          <button className='delete-file-btn' onClick={() => removeFileHistory(v.id)}>X</button>
-                        </div>
-                      </div>
-                    )
-                  })}</div> : <div style={{ color: 'white' }}>No File History</div>
-              }
-            </div>
-            <div className='leaveRef'>
-              <button id='hangUpBtn' onClick={hangUp} style={{ backgroundColor: 'red' }} className='leaveBtn'> Leave </button>
-              <button className='btn-danger' id='retry' onClick={retryConnect}> Retry </button>
-            </div>
+                      )
+                    })}</div>
+                }
+              </div>
+              : <div style={{ color: 'white' }}>No File History</div>
+            }
           </div>
         </div>
       </div>
