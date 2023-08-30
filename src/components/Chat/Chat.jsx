@@ -109,8 +109,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
 
     const fetchAvatar = () => {
         axios.get(`https://api.multiavatar.com/1.png?apikey=GlfxOwCHERyz56`).then((response) => {
-            console.log(response)
-            setAvatar(response.config.url)
+            setAvatar(response.config.url);
 
         }).catch((error) => {
             console.log(error)

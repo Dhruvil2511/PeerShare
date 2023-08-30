@@ -36,7 +36,7 @@ let receivedFile;
 let fileInfo = null;
 let data;
 let fileSize = ''
-
+let totalFileSize = 0;
 const worker = new Worker("../worker.js");
 const Transfer = ({ localConnection, remoteConnection }) => {
   const [fileInput, setFileInput] = useState('');
@@ -44,11 +44,17 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   const [videoCallButtonClicked, setVideoCallButtonClicked] = useState({ clicked: false, clickedBy: null });
   const [isFileHistory, setIsFileHistory] = useState(false)
   const [fileHistory, setFileHistory] = useState([]);
+  const [fileProgress, setFileProgress] = useState(0);
+  const [recvFileProgress, setRecvFileProgress] = useState(0)
+  // const [totalFileSize,setTotalFileSize]=useState(null)
   let { id } = useParams();
 
 
 
   useEffect(() => {
+    worker.addEventListener('message', (event) => {
+      download(event.data);
+    });
     let checkPeerRole = sessionStorage.getItem('peerRole');
     if (checkPeerRole === 'peerA') {
       dataChannel = localConnection.createDataChannel('fileChannel');
@@ -98,6 +104,13 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     fileReader.onload = function () {
       dataChannel.send(this.result);
       offset += chunkSize;
+      setFileProgress((offset / totalFileSize) * 100)
+      if (parseInt((offset / totalFileSize) * 100) >= 100) {
+        setTimeout(() => {
+          setFileProgress(0)
+        }, 1000)
+      }
+      console.log(parseInt((offset / totalFileSize) * 100))
       if (offset < file.size) {
         if (dataChannel.bufferedAmount > chunkSize * 8) {
           dataChannel.addEventListener('bufferedamountlow', () => {
@@ -118,10 +131,8 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       fileReader.readAsArrayBuffer(slice);
     }
     readSlice(0);
-
   }
   async function sendFile() {
-
     receivedSize = 0;
     if (fileInput === '') {
       toast('Please select a file', { theme: 'dark' });
@@ -136,6 +147,8 @@ const Transfer = ({ localConnection, remoteConnection }) => {
           size: file.size
         },
       };
+      console.log(fileInput.size, typeof (fileInput.size))
+      totalFileSize = fileInput.size;
       dataChannel.send(JSON.stringify(fileInfo));
       console.log('Sending', file);
       send(file);
@@ -150,6 +163,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
         },
       };
       remoteConnection.dataChannel.send(JSON.stringify(fileInfo));
+      totalFileSize = fileInput.size;
       console.log('Sending', file);
       sendFromRemote(file);
       setIsFileHistory(true);
@@ -167,6 +181,12 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     fileReader.onload = function () {
       remoteConnection.dataChannel.send(this.result);
       offset += chunkSize;
+      setFileProgress((offset / totalFileSize) * 100)
+      if (parseInt((offset / totalFileSize) * 100) >= 100) {
+        setTimeout(() => {
+          setFileProgress(0)
+        }, 1000)
+      }
       if (offset < file.size) {
         if (remoteConnection.dataChannel.bufferedAmount > chunkSize * 8) {
           remoteConnection.dataChannel.addEventListener('bufferedamountlow', () => {
@@ -196,6 +216,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       fileInfo = JSON.parse(e.data);
       receivedFile = fileInfo.file.name;
       receivedFileSize = fileInfo.file.size;
+      totalFileSize = fileInfo.file.size;
       worker.postMessage(receivedFileSize);
       setIsFileHistory(true);
       setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: fileInfo.file.name, filesize: fileInfo.file.size / 1000000, color: '#333333' }]);
@@ -203,22 +224,29 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     else {
       worker.postMessage(e.data);
       receivedSize += e.data.byteLength;
-      if (receivedSize === receivedFileSize) download();
+      setRecvFileProgress((receivedSize / totalFileSize) * 100)
+      console.log(parseInt((receivedSize / totalFileSize) * 100))
+      if (parseInt((receivedSize / totalFileSize) * 100) >= 100) {
+        setTimeout(() => {
+          setRecvFileProgress(0)
+        }, 1000)
+      }
+      if (receivedSize === receivedFileSize) {
+        receivedSize = 0;
+      }
     }
   }
-  function download() {
+  function download(data) {
     setIsFileHistory(true);
-    worker.addEventListener('message', async (event) => {
-      const url = URL.createObjectURL(event.data);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = receivedFile;
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-      URL.revokeObjectURL(url);
-      return;
-    });
+    const url = URL.createObjectURL(data);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = receivedFile;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+    return;
   }
 
 
@@ -315,7 +343,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
               </div>
             </label>
             <input multiple type='file' className='fileInput' id='actual-btn' onChange={handleFile} />
-            <div id='file-selected' style={{ alignSelf: 'center' }}>{fileInput.name}{convert(fileInput.size / 1000000)}</div>
+            <div id='file-selected' style={{ alignSelf: 'center', fontSize: '1vw' }}>{fileInput.name}{convert(fileInput.size / 1000000)}</div>
             <div className="buttons">
               <button className='retry-btn' id='retry' onClick={retryConnect}> Retry </button>
               <button className='sendFileBtn' onClick={sendFile}>Send</button>
@@ -323,8 +351,12 @@ const Transfer = ({ localConnection, remoteConnection }) => {
             </div>
 
             <div style={{ display: 'flex' }}>
-              <div style={{ fontSize: '2vw', marginLeft: '2%' }}>Sender</div>
-              <LinearProgress variant="buffer" value={70} valueBuffer={70 + 5} style={{ height: '30%', width: '72%', marginTop: '1%', alignSelf: 'center', marginLeft: '4.1%' }} />
+              <div style={{ fontSize: '1.8vw', marginLeft: '2%', marginTop: '2%' }}>Sender</div>
+              <LinearProgress variant="buffer" value={fileProgress} valueBuffer={fileProgress + 5} style={{ height: '20%', width: '72%', marginTop: '2.3%', alignSelf: 'center', marginLeft: '6%' }} />
+            </div>
+            <div style={{ display: 'flex' }}>
+              <div style={{ fontSize: '1.8vw', marginLeft: '2%' }}>Receiver</div>
+              <LinearProgress variant="buffer" value={recvFileProgress} valueBuffer={recvFileProgress + 5} style={{ height: '30%', width: '72%', marginTop: '1%', alignSelf: 'center', marginLeft: '4.1%' }} />
             </div>
           </div>
           <div className='flexTransferBottom'>
