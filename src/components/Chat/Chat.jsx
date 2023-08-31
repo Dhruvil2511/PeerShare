@@ -19,7 +19,7 @@ const firebaseConfig = {
     messagingSenderId: "985022221543",
     appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
     measurementId: "G-YJPJ8LZZXD"
-  };
+};
 
 firebase.initializeApp(firebaseConfig);
 
@@ -47,7 +47,6 @@ const Chat = ({ localConnection, remoteConnection }) => {
             initializeLocalConnection();
         } else {
             initializeRemoteConnection();
-            // console.log(remoteConnection);
         }
     }, []);
 
@@ -75,9 +74,9 @@ const Chat = ({ localConnection, remoteConnection }) => {
             if (channel.label === 'messageChannel') {
                 remoteConnection.messageChannel = channel;
                 channel.onmessage = recieveMessage;
+                channel.onopen = event => console.log(channel.label + " opened");
+                channel.onclose = event => console.log(channel.label + " closed");
             }
-            channel.onopen = event => console.log(channel.label + " opened");
-            channel.onclose = event => console.log(channel.label + " closed");
         });
     }
 
@@ -88,7 +87,6 @@ const Chat = ({ localConnection, remoteConnection }) => {
     const sendMessage = async (e) => {
         e.preventDefault();
         if (message === ' ' || message === '') return;
-
 
         document.getElementById('input-field').value = '';
         let val = sessionStorage.getItem('peerRole');
@@ -138,7 +136,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
 
     return (
         <>
-            <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '5%', height: '80vh', width: '30%', float: 'left' }}>
+            <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '15px', height: '80vh', width: '30%', float: 'left' }}>
                 <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                         <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%' }} />

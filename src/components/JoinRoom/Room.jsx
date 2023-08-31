@@ -48,7 +48,7 @@ const firebaseConfig = {
     messagingSenderId: "985022221543",
     appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
     measurementId: "G-YJPJ8LZZXD"
-  };
+};
 
 firebase.initializeApp(firebaseConfig);
 
@@ -68,14 +68,20 @@ const Room = () => {
         if (checkPeerRole === 'peerA') {
             generateID();
         } else if (checkPeerRole === 'peerB') {
-            joinRoom();
+            setTimeout(() => {
+                joinRoom();
+            }, 2000);
+
         } else {
             sessionStorage.setItem('peerRole', 'peerB');
-            joinRoom();
+            setTimeout(() => {
+                joinRoom();
+            }, 2000);
+
         }
     }, []);
 
- 
+
     async function generateID() {
 
         const db = firebase.firestore();
@@ -87,7 +93,6 @@ const Room = () => {
         initializeIceListeners(localConnection);
 
         dummyChannel = localConnection.createDataChannel('dummyChannel');
-        // initializeDataChannelListeners(dataChannel);
 
         localConnection.addEventListener('icecandidate', event => {
             if (!event.candidate) {

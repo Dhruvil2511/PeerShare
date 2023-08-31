@@ -26,24 +26,27 @@
   flex-direction: column;
   justify-content: center;
   margin-right: 2%;
+  width: 100%;
 
-  .input-label{ 
+  .input-label {
     background: #1a1a1a;
     width: 50%;
     padding: 2%;
+    margin-right: 0.5%;
     height: 50%;
     border-radius: 10px;
     align-self: center;
     cursor: pointer;
-     margin-bottom: 0.5%;
-     margin-top: 1%;
-     border: 3px dashed white;
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     &:hover{
+    margin-bottom: 0.5%;
+    margin-top: 1%;
+    border: 3px dashed white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
       background-color: #7fabd6;
-     }
+    }
   }
 
   .fileInput {
@@ -53,75 +56,194 @@
     border-radius: 10px;
   }
 
-  .buttons{
+  .buttons {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
+    width: 100%;
 
-  .sendFileBtn {
-    width: 50%;
-    align-self: center;
-    background-color: rgb(26, 240, 161);
-    display: inline-block;
-    margin-top: 0.8%;
-    padding: 0.2%;
-    text-align: center;
-    font-size: 1.5vw;
-    color: black;
-    font-family: sans-serif;
-    text-decoration: none;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    .sendFileBtn {
+      width: 50%;
+      align-self: center;
+      background-color: rgb(26, 240, 161);
+      display: inline-block;
+      margin-top: 0.8%;
+      padding: 0.2%;
+      text-align: center;
+      font-size: 1.5vw;
+      color: black;
+      font-family: sans-serif;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
 
-    &:hover {
-      -webkit-box-shadow: 0 0 15px rgb(26, 240, 161);
-      box-shadow: 0 0 15px rgb(26, 240, 161);
-    }
-  }
-  .leaveBtn{
-    width: 10%;
-    background-color: red;
-    margin-top: 0.8%;
-    padding: 0.2%;
-    text-align: center;
-    font-size: 1.2vw;
-    color: white;
-    font-family: sans-serif;
-    text-decoration: none;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+      &:disabled {
+        opacity: 0.5;
+        background-color: rgb(26, 240, 161);
 
-    &:hover {
-      -webkit-box-shadow: 0 0 15px red;
-      box-shadow: 0 0 15px red;
+        &:hover {
+          cursor: not-allowed;
+        }
+      }
+
+      &:enabled:hover {
+        -webkit-box-shadow: 0 0 15px rgb(26, 240, 161);
+        box-shadow: 0 0 15px rgb(26, 240, 161);
+      }
     }
 
-  }
-  .retry-btn{
-    width: 10%;
-    background-color: #0A82FD;
-    margin-top: 0.8%;
-    padding: 0.2%;
-    text-align: center;
-    font-size: 1.2vw;
-    color: white;
-    font-family: sans-serif;
-    text-decoration: none;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    .abort-receiving-file {
+      width: fit-content;
+      background-color: #0A82FD;
+      margin-top: 0.8%;
+      padding: 0.5% 0.8% 0.5% 0.8%;
+      text-align: center;
+      font-size: 1.1vw;
+      color: white;
+      font-family: sans-serif;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
 
-    &:hover {
-      -webkit-box-shadow: 0 0 15px #0A82FD;
-      box-shadow: 0 0 15px #0A82FD;
+      &:disabled {
+        opacity: 0.5;
+        background-color: #0A82FD;
+
+        &:hover {
+          cursor: not-allowed;
+        }
+      }
+
+      &:enabled:hover {
+        -webkit-box-shadow: 0 0 15px #0A82FD;
+        box-shadow: 0 0 15px #0A82FD;
+      }
+
+    }
+
+    .abort-sending-file {
+      width: fit-content;
+      background-color: red;
+      margin-top: 0.8%;
+      padding: 0.5% 0.8% 0.5% 0.8%;
+      text-align: center;
+      font-size: 1.1vw;
+      color: white;
+      font-family: sans-serif;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+
+      &:disabled {
+        opacity: 0.5;
+        background-color: red;
+
+        &:hover {
+          cursor: not-allowed;
+        }
+      }
+
+      &:enabled:hover {
+        -webkit-box-shadow: 0 0 15px red;
+        box-shadow: 0 0 15px red;
+      }
+    }
+
+    .leaveBtn {
+      width: fit-content;
+      background-color: red;
+      margin-top: 0.8%;
+      padding: 0.5% 0.8% 0.5% 0.8%;
+      text-align: center;
+      font-size: 1.1vw;
+      color: white;
+      font-family: sans-serif;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+
+      &:hover {
+        -webkit-box-shadow: 0 0 15px red;
+        box-shadow: 0 0 15px red;
+      }
+
+    }
+
+    .retry-btn {
+      width: fit-content;
+      background-color: #0A82FD;
+      margin-top: 0.8%;
+      padding: 0.5% 0.8% 0.5% 0.8%;
+      text-align: center;
+      font-size: 1.1vw;
+      color: white;
+      font-family: sans-serif;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+
+      &:hover {
+        -webkit-box-shadow: 0 0 15px #0A82FD;
+        box-shadow: 0 0 15px #0A82FD;
+      }
     }
   }
-}
+
+  .progress-bar {
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 2%;
+    // align-items: center;
+
+    .send-bar {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      align-items: center;
+
+      .sender-label {
+        font-size: 1.1vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sender-percentage {
+        width: 10%;
+        // margin-left: 2%;
+      }
+    }
+
+    .receive-bar {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      align-items: center;
+
+      .receiver-label {
+        font-size: 1.1vw;
+      }
+
+      .receiver-percentage {
+        width: 10%;
+        // margin-left: 2%;
+      }
+
+    }
+
+  }
 }
 
 .input-div.blur {
@@ -140,9 +262,10 @@
   margin-top: 2%;
   height: 35vh;
   width: 100%;
+  padding: 1.5%;
 
   .fileHistory {
-    height: 96%;
+    height: 100%;
     width: 62vw;
     border-radius: 10px;
     overflow: scroll;
@@ -176,7 +299,7 @@
       margin-right: 2%;
 
       .fileHistorySingleComponent {
-        padding: 2%;
+        padding: 1.5%;
         border-radius: 10px;
         color: white;
         margin-bottom: 1.2%;
@@ -184,21 +307,29 @@
         justify-content: space-between;
         align-items: center;
         flex-direction: row;
-        .file-info{
+
+        .file-info {
           display: flex;
           flex-direction: column;
-          .file-name{
+
+          .file-name {
             width: auto;
           }
-          .file-size{
+
+          .file-size {
             width: auto;
           }
         }
-        .delete-file-btn{
+
+        .delete-file-btn {
           width: auto;
           border: none;
           background: transparent;
           color: white;
+
+          &:hover {
+            color: red;
+          }
         }
       }
     }

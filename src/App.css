@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-
+ 
 }
 
 
@@ -10,6 +10,7 @@ body {
   background-size: cover;
   background-repeat: repeat;
   overflow: hidden;
+
 }
 
 .App-logo {

@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef, CSSProperties } from 'react'
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { useParams } from 'react-router-dom';
+import { json, useParams } from 'react-router-dom';
 import '../Transfer/Transfer.scss'
 import LinearProgress from '@mui/material/LinearProgress';
 import { v4 } from 'uuid';
@@ -21,7 +21,6 @@ const firebaseConfig = {
   appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
   measurementId: "G-YJPJ8LZZXD"
 };
-
 firebase.initializeApp(firebaseConfig);
 
 
@@ -37,31 +36,39 @@ let fileInfo = null;
 let data;
 let fileSize = ''
 let totalFileSize = 0;
+let fileReader = null;
+let signalChannel = null;
+let val = '';
+
 const worker = new Worker("../worker.js");
 const Transfer = ({ localConnection, remoteConnection }) => {
+
   const [fileInput, setFileInput] = useState('');
   const [isShrunk, setIsShrunk] = useState(false);
   const [videoCallButtonClicked, setVideoCallButtonClicked] = useState({ clicked: false, clickedBy: null });
   const [isFileHistory, setIsFileHistory] = useState(false)
   const [fileHistory, setFileHistory] = useState([]);
   const [fileProgress, setFileProgress] = useState(0);
-  const [recvFileProgress, setRecvFileProgress] = useState(0)
-  // const [totalFileSize,setTotalFileSize]=useState(null)
+  const [recvFileProgress, setRecvFileProgress] = useState(0);
   let { id } = useParams();
 
 
 
   useEffect(() => {
+    val = sessionStorage.getItem('peerRole');
     worker.addEventListener('message', (event) => {
       download(event.data);
     });
     let checkPeerRole = sessionStorage.getItem('peerRole');
     if (checkPeerRole === 'peerA') {
       dataChannel = localConnection.createDataChannel('fileChannel');
+      signalChannel = localConnection.createDataChannel('signallingChannel');
       initializeDataChannelListeners(dataChannel);
+      initializeDataChannelListeners(signalChannel);
     }
     else {
-      remoteConnection.addEventListener('datachannel', async (event) => {
+
+      remoteConnection.addEventListener('datachannel', (event) => {
         channel = event.channel;
         channel.binaryType = 'arraybuffer';
 
@@ -69,9 +76,15 @@ const Transfer = ({ localConnection, remoteConnection }) => {
           remoteConnection.dataChannel = channel;
           channel.onmessage = recieveData;
         }
+        else if (channel.label === 'signallingChannel') {
+          remoteConnection.signalChannel = channel;
+          channel.onmessage = handleSignalling;
+        }
         channel.onopen = event => console.log(channel.label + " opened");
         channel.onclose = event => console.log(channel.label + " closed");
       });
+
+
     }
   }, []);
 
@@ -96,7 +109,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
 
   async function send(file) {
 
-    let fileReader = new FileReader();
+    fileReader = new FileReader();
     let offset = 0;
 
     dataChannel.bufferedAmountLowThreshold = chunkSize * 8;
@@ -104,8 +117,9 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     fileReader.onload = function () {
       dataChannel.send(this.result);
       offset += chunkSize;
-      setFileProgress((offset / totalFileSize) * 100)
+      setFileProgress((offset / totalFileSize) * 100);
       if (parseInt((offset / totalFileSize) * 100) >= 100) {
+        setFileProgress(100);
         setTimeout(() => {
           setFileProgress(0)
         }, 1000)
@@ -132,6 +146,48 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     }
     readSlice(0);
   }
+  async function sendFromRemote(file) {
+
+
+    fileReader = new FileReader();
+    let offset = 0;
+
+    remoteConnection.dataChannel.bufferedAmountLowThreshold = chunkSize * 8;
+
+    fileReader.onload = function () {
+      remoteConnection.dataChannel.send(this.result);
+      offset += chunkSize;
+      setFileProgress((offset / totalFileSize) * 100);
+      if (parseInt((offset / totalFileSize) * 100) >= 100) {
+        setFileProgress(100);
+        setTimeout(() => {
+          setFileProgress(0)
+        }, 1000)
+      }
+      if (offset < file.size) {
+        if (remoteConnection.dataChannel.bufferedAmount > chunkSize * 8) {
+          remoteConnection.dataChannel.addEventListener('bufferedamountlow', () => {
+            readSlice(offset);
+          }, { once: true });
+        } else {
+          readSlice(offset);
+        }
+      }
+    };
+
+    fileReader.onerror = function (err) {
+      console.error('FileReader error' + err);
+    };
+
+    function readSlice(o) {
+      const slice = file.slice(offset, o + chunkSize);
+      fileReader.readAsArrayBuffer(slice);
+    }
+
+    readSlice(0);
+
+  }
+
   async function sendFile() {
     receivedSize = 0;
     if (fileInput === '') {
@@ -171,46 +227,27 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     }
     setFileInput('');
   }
-  async function sendFromRemote(file) {
 
-    let fileReader = new FileReader();
-    let offset = 0;
-
-    remoteConnection.dataChannel.bufferedAmountLowThreshold = chunkSize * 8;
-
-    fileReader.onload = function () {
-      remoteConnection.dataChannel.send(this.result);
-      offset += chunkSize;
-      setFileProgress((offset / totalFileSize) * 100)
-      if (parseInt((offset / totalFileSize) * 100) >= 100) {
+  async function handleSignalling(event) {
+    const message = JSON.parse(event.data);
+    if (message.type === 'sender_file_aborted') {
+      toast(`File Aborted by ${message.clickedBy} `, { theme: 'dark' });
+      worker.postMessage('file aborted');
+      receivedSize = 0;
+      setTimeout(() => {
+        setRecvFileProgress(0)
+      }, 1000)
+    }
+    else if (message.type === 'receiver_file_aborted') {
+      if (fileReader) {
+        toast(`File Aborted by ${message.clickedBy} `, { theme: 'dark' });
+        fileReader.abort();
         setTimeout(() => {
           setFileProgress(0)
-        }, 1000)
+        }, 1000);
       }
-      if (offset < file.size) {
-        if (remoteConnection.dataChannel.bufferedAmount > chunkSize * 8) {
-          remoteConnection.dataChannel.addEventListener('bufferedamountlow', () => {
-            readSlice(offset);
-          }, { once: true });
-        } else {
-          readSlice(offset);
-        }
-      }
-    };
-
-    fileReader.onerror = function (err) {
-      console.error('FileReader error' + err);
-    };
-
-    function readSlice(o) {
-      const slice = file.slice(offset, o + chunkSize);
-      fileReader.readAsArrayBuffer(slice);
     }
-
-    readSlice(0);
-
   }
-
   async function recieveData(e) {
     if (typeof (e.data) === 'string') {
       fileInfo = JSON.parse(e.data);
@@ -224,9 +261,10 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     else {
       worker.postMessage(e.data);
       receivedSize += e.data.byteLength;
-      setRecvFileProgress((receivedSize / totalFileSize) * 100)
+      setRecvFileProgress((receivedSize / totalFileSize) * 100);
       console.log(parseInt((receivedSize / totalFileSize) * 100))
       if (parseInt((receivedSize / totalFileSize) * 100) >= 100) {
+        setRecvFileProgress(100)
         setTimeout(() => {
           setRecvFileProgress(0)
         }, 1000)
@@ -249,19 +287,43 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     return;
   }
 
-
-
-  function initializeDataChannelListeners(dataChannel) {
-    dataChannel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
-    dataChannel.addEventListener('open', () => {
-      console.log('Data channel opened');
+  function initializeDataChannelListeners(channel) {
+    channel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
+    channel.addEventListener('open', () => {
+      if (channel.label === 'fileChannel')
+        console.log('Data channel opened');
+      else console.log('signalling channel opened');
     });
-    dataChannel.addEventListener('message', (event) => {
-      recieveData(event);
+    channel.addEventListener('message', (event) => {
+      if (channel.label === 'fileChannel')
+        recieveData(event);
+      else if (channel.label === 'signallingChannel') {
+        const message = JSON.parse(event.data);
+        if (message.type === 'sender_file_aborted') {
+          receivedSize = 0;
+          toast(`File Aborted by ${message.clickedBy} `, { theme: 'dark' });
+          worker.postMessage('file aborted');
+          setTimeout(() => {
+            setRecvFileProgress(0);
+          }, 1000);
+        }
+        else if (message.type === 'receiver_file_aborted') {
+          if (fileReader) {
+            fileReader.abort();
+            toast(`File Aborted by ${message.clickedBy} `, { theme: 'dark' });
+            setTimeout(() => {
+              setFileProgress(0);
+            }, 1000);
+          }
+        }
+      }
+
     });
 
-    dataChannel.addEventListener('close', (event) => {
-      console.log('Data channel closed');
+    channel.addEventListener('close', (event) => {
+      if (channel.label === 'fileChannel')
+        console.log('Data channel closed');
+      else console.log('signalling channel closed');
     });
   }
 
@@ -290,12 +352,14 @@ const Transfer = ({ localConnection, remoteConnection }) => {
 
   function handleFile(event) {
     setFileInput(event.target.files[0]);
+    document.querySelector('.fileInput').value = '';
   }
   function retryConnect(event) {
     window.location.reload();
   }
   function dragAndDrop(event) {
     event.preventDefault();
+    event.stopPropagation();
     setFileInput(event.dataTransfer.files[0]);
     document.querySelector('.input-label').classList.remove('blur');
   }
@@ -308,6 +372,40 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   }
   function removeFileHistory(fileid) {
     setFileHistory(fileHistory.filter((file) => file.id !== fileid));
+  }
+  async function handleSendAbort(event) {
+    event.preventDefault();
+    if (fileReader) {
+      fileReader.abort();
+      setTimeout(() => {
+        setFileProgress(0)
+      }, 1000);
+
+      val = sessionStorage.getItem('peerRole');
+      const abortMessage = {
+        type: 'sender_file_aborted',
+        clickedBy: val,
+      };
+      if (val === 'peerA') signalChannel.send(JSON.stringify(abortMessage));
+      else remoteConnection.signalChannel.send(JSON.stringify(abortMessage));
+    }
+  }
+  async function handleReceiveAbort(event) {
+    event.preventDefault();
+    const abortMessage = {
+      type: 'receiver_file_aborted',
+      clickedBy: val,
+    };
+    if (val === 'peerA') await signalChannel.send(JSON.stringify(abortMessage));
+    else await remoteConnection.signalChannel.send(JSON.stringify(abortMessage));
+
+    setTimeout(() => {
+      setRecvFileProgress(0);
+    }, 1000);
+    setTimeout(() => {
+      receivedSize = 0;
+      worker.postMessage('file aborted');
+    }, 1000);
 
   }
   return (
@@ -329,8 +427,10 @@ const Transfer = ({ localConnection, remoteConnection }) => {
           <div className="input-div">
             <label className='input-label' onDragOver={(event) => {
               event.preventDefault();
+              event.stopPropagation();
               document.querySelector('.fileInput').classList.add('blur');
             }} onDrop={dragAndDrop} onDragLeave={(event) => {
+              event.stopPropagation();
               event.preventDefault();
               document.querySelector('.fileInput').classList.remove('blur');
             }}
@@ -342,21 +442,28 @@ const Transfer = ({ localConnection, remoteConnection }) => {
                 </span>
               </div>
             </label>
-            <input multiple type='file' className='fileInput' id='actual-btn' onChange={handleFile} />
-            <div id='file-selected' style={{ alignSelf: 'center', fontSize: '1vw' }}>{fileInput.name}{convert(fileInput.size / 1000000)}</div>
+            <input type='file' className='fileInput' id='actual-btn' onChange={handleFile} />
+            <div id='file-selected' style={{ alignSelf: 'center', fontSize: '1vw' }}>{fileInput && fileInput.name}{fileInput && convert(fileInput.size / 1000000)}</div>
             <div className="buttons">
-              <button className='retry-btn' id='retry' onClick={retryConnect}> Retry </button>
-              <button className='sendFileBtn' onClick={sendFile}>Send</button>
-              <button id='hangUpBtn' onClick={hangUp} style={{ backgroundColor: 'red' }} className='leaveBtn'> Leave </button>
+              <button disabled={!parseInt(fileProgress)} className='abort-sending-file' onClick={handleSendAbort}>Stop sending</button>
+              {/* <button className='retry-btn' id='retry' onClick={retryConnect}> Retry Connection </button> */}
+              <button disabled={parseInt(fileProgress) || parseInt(recvFileProgress)} className='sendFileBtn' onClick={sendFile}>Send</button>
+              <button disabled={!parseInt(recvFileProgress)} className='abort-receiving-file' onClick={handleReceiveAbort}>Stop receiving</button>
+              {/* <button id='hangUpBtn' onClick={hangUp} style={{ backgroundColor: 'red' }} className='leaveBtn'> Leave Room </button> */}
             </div>
 
-            <div style={{ display: 'flex' }}>
-              <div style={{ fontSize: '1.8vw', marginLeft: '2%', marginTop: '2%' }}>Sender</div>
-              <LinearProgress variant="buffer" value={fileProgress} valueBuffer={fileProgress + 5} style={{ height: '20%', width: '72%', marginTop: '2.3%', alignSelf: 'center', marginLeft: '6%' }} />
-            </div>
-            <div style={{ display: 'flex' }}>
-              <div style={{ fontSize: '1.8vw', marginLeft: '2%' }}>Receiver</div>
-              <LinearProgress variant="buffer" value={recvFileProgress} valueBuffer={recvFileProgress + 5} style={{ height: '30%', width: '72%', marginTop: '1%', alignSelf: 'center', marginLeft: '4.1%' }} />
+
+            <div className="progress-bar">
+              <div className="send-bar">
+                <div className='sender-label'><pre style={{ margin: '0%' }}>Sender  </pre></div>
+                <LinearProgress variant="determinate" value={fileProgress} style={{ height: '30%', width: '72%', alignSelf: 'center' }} />
+                <div className='sender-percentage'>{parseInt(fileProgress)} %</div>
+              </div>
+              <div className="receive-bar">
+                <div className='receiver-label'><pre style={{ margin: '0%' }}>Receiver</pre></div>
+                <LinearProgress variant="determinate" value={recvFileProgress} style={{ height: '30%', width: '72%', alignSelf: 'center' }} />
+                <div className='receiver-percentage'>{parseInt(recvFileProgress)} %</div>
+              </div>
             </div>
           </div>
           <div className='flexTransferBottom'>
