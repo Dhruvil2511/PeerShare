@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
-import { name } from '../../utils/name';
 import SendIcon from '@mui/icons-material/Send';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
@@ -28,7 +27,7 @@ let messageChannel;
 let channel;
 // let message = null;
 
-const Chat = ({ localConnection, remoteConnection }) => {
+const Chat = ({ userName, localConnection, remoteConnection }) => {
     let { id } = useParams();
     const [avatar, setAvatar] = useState(null);
     const [messageList, setMessageList] = useState([]);
@@ -140,7 +139,7 @@ const Chat = ({ localConnection, remoteConnection }) => {
                 <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                         <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%' }} />
-                        <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>{name}</span>
+                        <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>{userName}</span>
                     </div>
                     <div className="video-button">
                         <button className='videoBtn' style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>

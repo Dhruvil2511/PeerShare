@@ -327,35 +327,11 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     });
   }
 
-  async function hangUp() {
-    if (localConnection) localConnection.close();
-    if (remoteConnection) remoteConnection.close();
-
-    await sessionStorage.removeItem('peerRole');
-
-    if (id) {
-      const db = firebase.firestore();
-      const userRef = db.collection('users').doc(id);
-      const peerA = await userRef.collection('peerA').get();
-      peerA.forEach(async candidate => {
-        await candidate.ref.delete();
-      });
-      const peerB = await userRef.collection('peerB').get();
-      peerB.forEach(async candidate => {
-        await candidate.ref.delete();
-      });
-      await userRef.delete();
-      alert('Disconnecting');
-      window.location.href = '/join';
-    }
-  }
+  
 
   function handleFile(event) {
     setFileInput(event.target.files[0]);
     document.querySelector('.fileInput').value = '';
-  }
-  function retryConnect(event) {
-    window.location.reload();
   }
   function dragAndDrop(event) {
     event.preventDefault();

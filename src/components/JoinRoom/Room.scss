@@ -1,0 +1,71 @@
+.navbar {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100vw;
+    height: 5vh;
+    margin-top: 0.5%;
+    margin-bottom: 2%;
+
+    .logo {
+        padding-left: 2%;
+        font-size: 1.5vw;
+        flex: 1;
+        width: 33%;
+        color: rgb(26, 240, 161);
+
+    }
+
+    .both {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 33%;
+        height: 5vh;
+
+
+        .user-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: inherit;
+
+            .user-pfp {
+                height: 110%;
+                margin-right: 2.5%;
+            }
+
+            .text {
+                font-size: 1.3vw;
+                color: #FFD700;
+            }
+        }
+    }
+
+    .room-buttons {
+        display: flex;
+        width: 33%;
+        margin-right: 2%;
+        justify-content: flex-end;
+        align-items: center;
+
+        .retry-button {
+            width: auto;
+            border: none;
+            background: transparent;
+            color: #0A82FD;
+            padding: 0% 2% 0% 2%;
+        }
+
+        .leave-button {
+            width: auto;
+            border: none;
+            color: red;
+            padding: 0% 2% 0% 2%;
+            background: transparent;
+        }
+
+
+    }
+}

@@ -6,8 +6,12 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import VideoChat from '../Video/VideoChat'
-import Navbar from '../Navbar/Navbar'
 import Preloader from '../Loader/Preloader'
+import { name } from '../../utils/name';
+import LogoutIcon from '@mui/icons-material/Logout';
+import '../JoinRoom/Room.scss'
+import ReplayIcon from '@mui/icons-material/Replay';
+import axios from 'axios';
 
 const configuration = {
     iceServers: [
@@ -61,6 +65,7 @@ let dummyChannel = null;
 const Room = () => {
     let { id } = useParams();
     const [isConnected, setIsConnected] = useState(false);
+    const [avatar, setAvatar] = useState('');
 
     useEffect(() => {
 
@@ -80,6 +85,15 @@ const Room = () => {
 
         }
     }, []);
+
+    useEffect(() => {
+        axios.get(`https://api.multiavatar.com/1.png?apikey=GlfxOwCHERyz56`).then((response) => {
+            setAvatar(response.config.url);
+
+        }).catch((error) => {
+            console.log(error)
+        });
+    }, [])
 
 
     async function generateID() {
@@ -230,15 +244,57 @@ const Room = () => {
     }
 
 
+    async function leaveRoom() {
+        if (localConnection) localConnection.close();
+        if (remoteConnection) remoteConnection.close();
+
+        await sessionStorage.removeItem('peerRole');
+
+        if (id) {
+            const db = firebase.firestore();
+            const userRef = db.collection('users').doc(id);
+            const peerA = await userRef.collection('peerA').get();
+            peerA.forEach(async candidate => {
+                await candidate.ref.delete();
+            });
+            const peerB = await userRef.collection('peerB').get();
+            peerB.forEach(async candidate => {
+                await candidate.ref.delete();
+            });
+            await userRef.delete();
+            alert('Disconnecting');
+            window.location.href = '/join';
+        }
+    }
+    function retryConnect(event) {
+        window.location.reload();
+    }
+
+
     return (
         <>
             {!isConnected && <Preloader />}
             {/* {<Navbar />} */}
-            {isConnected && <Navbar />}
+            {isConnected
+                &&
+                <div className="navbar">
+                    <div className="logo">PeerShare</div>
+                    <div className="both">
+                        <div className="user-info">
+                            <img className='user-pfp' src={avatar} alt="X" />
+                            <span className='text'>{name}</span>
+                        </div>
+                    </div>
+                    <div className="room-buttons">
+                        <button className="retry-button" title='retry connection' onClick={retryConnect}><ReplayIcon /></button>
+                        <button className="leave-button" title='exit' onClick={leaveRoom}><LogoutIcon /></button>
+                    </div>
+                </div>
+            }
             <div className='room-wrapper' style={{ display: 'flex', padding: '1%' }}>
                 {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && <VideoChat localConnection={localConnection} remoteConnection={remoteConnection} />}
-                {isConnected && <Chat localConnection={localConnection} remoteConnection={remoteConnection} />}
+                {isConnected && <Chat userName={name} localConnection={localConnection} remoteConnection={remoteConnection} />}
             </div>
         </>
     )
