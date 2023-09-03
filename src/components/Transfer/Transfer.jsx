@@ -41,7 +41,7 @@ let signalChannel = null;
 let val = '';
 
 const worker = new Worker("../worker.js");
-const Transfer = ({ localConnection, remoteConnection }) => {
+const Transfer = ({  localConnection, remoteConnection }) => {
 
   const [fileInput, setFileInput] = useState('');
   const [isShrunk, setIsShrunk] = useState(false);
@@ -50,6 +50,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   const [fileHistory, setFileHistory] = useState([]);
   const [fileProgress, setFileProgress] = useState(0);
   const [recvFileProgress, setRecvFileProgress] = useState(0);
+  const [peerBstopped, setPeerBStopped] = useState(false);
   let { id } = useParams();
 
 
@@ -61,12 +62,12 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     });
     let checkPeerRole = sessionStorage.getItem('peerRole');
     if (checkPeerRole === 'peerA') {
-      dataChannel = localConnection.createDataChannel('fileChannel');
       signalChannel = localConnection.createDataChannel('signallingChannel');
+      dataChannel = localConnection.createDataChannel('fileChannel');
       initializeDataChannelListeners(dataChannel);
       initializeDataChannelListeners(signalChannel);
     }
-    else {
+    if (checkPeerRole === 'peerB') {
 
       remoteConnection.addEventListener('datachannel', (event) => {
         channel = event.channel;
@@ -75,16 +76,16 @@ const Transfer = ({ localConnection, remoteConnection }) => {
         if (channel.label === 'fileChannel') {
           remoteConnection.dataChannel = channel;
           channel.onmessage = recieveData;
+          channel.onopen = event => console.log(channel.label + " opened");
+          channel.onclose = event => console.log(channel.label + " closed");
         }
         else if (channel.label === 'signallingChannel') {
           remoteConnection.signalChannel = channel;
           channel.onmessage = handleSignalling;
+          channel.onopen = event => console.log(channel.label + " opened");
+          channel.onclose = event => console.log(channel.label + " closed");
         }
-        channel.onopen = event => console.log(channel.label + " opened");
-        channel.onclose = event => console.log(channel.label + " closed");
       });
-
-
     }
   }, []);
 
@@ -155,6 +156,8 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     remoteConnection.dataChannel.bufferedAmountLowThreshold = chunkSize * 8;
 
     fileReader.onload = function () {
+      if (remoteConnection.dataChannel.readyState !== 'open')
+        return;
       remoteConnection.dataChannel.send(this.result);
       offset += chunkSize;
       setFileProgress((offset / totalFileSize) * 100);
@@ -183,9 +186,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       const slice = file.slice(offset, o + chunkSize);
       fileReader.readAsArrayBuffer(slice);
     }
-
     readSlice(0);
-
   }
 
   async function sendFile() {
@@ -229,23 +230,26 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   }
 
   async function handleSignalling(event) {
+
     const message = JSON.parse(event.data);
-    if (message.type === 'sender_file_aborted') {
-      toast(`File Aborted by ${message.clickedBy} `, { theme: 'dark' });
-      worker.postMessage('file aborted');
+    if (message.type === 'peerA_aborted_file') {
       receivedSize = 0;
+      toast('File aborted by peer A', { theme: 'dark' });
       setTimeout(() => {
-        setRecvFileProgress(0)
-      }, 1000)
+        setRecvFileProgress(0);
+        worker.postMessage('file aborted');
+      }, 1000);
     }
-    else if (message.type === 'receiver_file_aborted') {
-      if (fileReader) {
-        toast(`File Aborted by ${message.clickedBy} `, { theme: 'dark' });
+    else if (message.type === 'peerA_aborted_receiving_file') {
+      toast(`file aborted by peer A `, { theme: 'dark' });
+      if (fileReader != null) {
+        fileReader.onload = null;
         fileReader.abort();
-        setTimeout(() => {
-          setFileProgress(0)
-        }, 1000);
+        fileReader = null;
       }
+      setTimeout(() => {
+        setFileProgress(0)
+      }, 1000);
     }
   }
   async function recieveData(e) {
@@ -259,10 +263,12 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: fileInfo.file.name, filesize: fileInfo.file.size / 1000000, color: '#333333' }]);
     }
     else {
+
       worker.postMessage(e.data);
       receivedSize += e.data.byteLength;
+
       setRecvFileProgress((receivedSize / totalFileSize) * 100);
-      console.log(parseInt((receivedSize / totalFileSize) * 100))
+      console.log(parseInt((receivedSize / totalFileSize) * 100));
       if (parseInt((receivedSize / totalFileSize) * 100) >= 100) {
         setRecvFileProgress(100)
         setTimeout(() => {
@@ -275,6 +281,10 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     }
   }
   function download(data) {
+    setTimeout(() => {
+      setFileProgress(0);
+      setRecvFileProgress(0)
+    }, 1000)
     setIsFileHistory(true);
     const url = URL.createObjectURL(data);
     const anchor = document.createElement('a');
@@ -294,40 +304,51 @@ const Transfer = ({ localConnection, remoteConnection }) => {
         console.log('Data channel opened');
       else console.log('signalling channel opened');
     });
-    channel.addEventListener('message', (event) => {
-      if (channel.label === 'fileChannel')
-        recieveData(event);
+    channel.addEventListener('message', async (event) => {
+
+      if (channel.label === 'fileChannel') recieveData(event);
+
       else if (channel.label === 'signallingChannel') {
+
         const message = JSON.parse(event.data);
-        if (message.type === 'sender_file_aborted') {
+
+        if (message.type === 'peerB_aborted_file') {
+          await dataChannel.close();
           receivedSize = 0;
-          toast(`File Aborted by ${message.clickedBy} `, { theme: 'dark' });
-          worker.postMessage('file aborted');
+          toast(`File aborted by peer B `, { theme: 'dark' });
           setTimeout(() => {
             setRecvFileProgress(0);
+            worker.postMessage('file aborted');
           }, 1000);
         }
-        else if (message.type === 'receiver_file_aborted') {
-          if (fileReader) {
+        else if (message.type === 'peerB_aborted_receiving_file') {
+          await dataChannel.close();
+          if (fileReader != null) {
+            fileReader.onload = null;
             fileReader.abort();
-            toast(`File Aborted by ${message.clickedBy} `, { theme: 'dark' });
-            setTimeout(() => {
-              setFileProgress(0);
-            }, 1000);
+            fileReader = null;
           }
+          toast(`File aborted by peer B `, { theme: 'dark' });
+          setTimeout(() => {
+            setFileProgress(0);
+          }, 1000);
         }
       }
 
     });
 
     channel.addEventListener('close', (event) => {
-      if (channel.label === 'fileChannel')
-        console.log('Data channel closed');
+      if (channel.label === 'fileChannel') {
+        setTimeout(() => {
+          dataChannel = localConnection.createDataChannel('fileChannel');
+          initializeDataChannelListeners(dataChannel);
+        }, 1000);
+      }
       else console.log('signalling channel closed');
     });
   }
 
-  
+
 
   function handleFile(event) {
     setFileInput(event.target.files[0]);
@@ -348,40 +369,71 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   }
   function removeFileHistory(fileid) {
     setFileHistory(fileHistory.filter((file) => file.id !== fileid));
+    if (fileHistory.length === 1) setIsFileHistory(false);
   }
+
   async function handleSendAbort(event) {
     event.preventDefault();
-    if (fileReader) {
-      fileReader.abort();
-      setTimeout(() => {
-        setFileProgress(0)
-      }, 1000);
+    val = sessionStorage.getItem('peerRole');
 
-      val = sessionStorage.getItem('peerRole');
+    if (val === 'peerA') {
+      setTimeout(() => {
+        setFileProgress(0);
+      }, 1000);
+      await dataChannel.close();
+      if (fileReader != null) {
+        fileReader.onload = null;
+        fileReader.abort();
+        fileReader = null;
+      }
       const abortMessage = {
-        type: 'sender_file_aborted',
-        clickedBy: val,
+        type: 'peerA_aborted_file',
       };
-      if (val === 'peerA') signalChannel.send(JSON.stringify(abortMessage));
-      else remoteConnection.signalChannel.send(JSON.stringify(abortMessage));
+      signalChannel.send(JSON.stringify(abortMessage));
+    }
+    else {
+      const abortMessage = {
+        type: 'peerB_aborted_file',
+      };
+      if (fileReader != null) {
+        fileReader.onload = null;
+        fileReader.abort();
+        fileReader = null;
+      }
+      remoteConnection.signalChannel.send(JSON.stringify(abortMessage));
+      setTimeout(() => {
+        setFileProgress(0);
+      }, 1000);
     }
   }
+
   async function handleReceiveAbort(event) {
     event.preventDefault();
-    const abortMessage = {
-      type: 'receiver_file_aborted',
-      clickedBy: val,
-    };
-    if (val === 'peerA') await signalChannel.send(JSON.stringify(abortMessage));
-    else await remoteConnection.signalChannel.send(JSON.stringify(abortMessage));
 
-    setTimeout(() => {
-      setRecvFileProgress(0);
-    }, 1000);
-    setTimeout(() => {
+    val = sessionStorage.getItem('peerRole');
+    if (val === 'peerB') {
+      const abortMessage = {
+        type: 'peerB_aborted_receiving_file',
+      };
+      await remoteConnection.signalChannel.send(JSON.stringify(abortMessage));
       receivedSize = 0;
-      worker.postMessage('file aborted');
-    }, 1000);
+      setTimeout(() => {
+        setRecvFileProgress(0);
+        worker.postMessage('file aborted');
+      }, 1000);
+    }
+    else {
+      await dataChannel.close();
+      const abortMessage = {
+        type: 'peerA_aborted_receiving_file',
+      };
+      signalChannel.send(JSON.stringify(abortMessage));
+      receivedSize = 0;
+      setTimeout(() => {
+        setRecvFileProgress(0);
+        worker.postMessage('file aborted');
+      }, 1000);
+    }
 
   }
   return (

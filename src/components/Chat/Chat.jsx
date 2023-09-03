@@ -27,26 +27,26 @@ let messageChannel;
 let channel;
 // let message = null;
 
-const Chat = ({ userName, localConnection, remoteConnection }) => {
+const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, remoteConnection }) => {
     let { id } = useParams();
     const [avatar, setAvatar] = useState(null);
     const [messageList, setMessageList] = useState([]);
     const [message, setMessage] = useState('');
-    const [videoCallButtonState, setVideoCallButtonState] = useState(false);
-    const [isEmojiClicked, setIsEmojiClicked] = useState(false);
+    const [videoCallButtonState, setVideoCallButtonState] = useState(true);
     // const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const chatbox = document.querySelector(".chatBox");
 
     // let {id} = useParams();
 
     useEffect(() => {
-        fetchAvatar();
         let checkPeerRole = sessionStorage.getItem('peerRole');
         if (checkPeerRole === 'peerA') {
             initializeLocalConnection();
         } else {
             initializeRemoteConnection();
         }
+
+        fetchAvatar();
     }, []);
 
     async function initializeLocalConnection() {
@@ -55,6 +55,7 @@ const Chat = ({ userName, localConnection, remoteConnection }) => {
         messageChannel.addEventListener('open', () => {
             console.log('Message channel opened');
         });
+
         messageChannel.addEventListener('message', (event) => {
             if (event.data) {
                 console.log(event.data);
@@ -73,9 +74,9 @@ const Chat = ({ userName, localConnection, remoteConnection }) => {
             if (channel.label === 'messageChannel') {
                 remoteConnection.messageChannel = channel;
                 channel.onmessage = recieveMessage;
-                channel.onopen = event => console.log(channel.label + " opened");
-                channel.onclose = event => console.log(channel.label + " closed");
             }
+            channel.onopen = event => console.log(channel.label + " opened");
+            channel.onclose = event => console.log(channel.label + " closed");
         });
     }
 
@@ -105,7 +106,9 @@ const Chat = ({ userName, localConnection, remoteConnection }) => {
     }
 
     const fetchAvatar = () => {
-        axios.get(`https://api.multiavatar.com/1.png?apikey=GlfxOwCHERyz56`).then((response) => {
+        let key = '';
+        sessionStorage.getItem('peerRole') === 'peerA' ? key = peerBpfpId : key = peerApfpId
+        axios.get(`https://api.multiavatar.com/${key}.png?apikey=GlfxOwCHERyz56`).then((response) => {
             setAvatar(response.config.url);
 
         }).catch((error) => {
@@ -119,10 +122,25 @@ const Chat = ({ userName, localConnection, remoteConnection }) => {
     async function handlevideoCallButtonState(event) {
         const db = firebase.firestore();
         let userRef = db.collection('users').doc(`${id}`);
+
+        userRef.onSnapshot(async (snapshot) => {
+            var data = snapshot.data();
+            console.log(data);
+            if (data && data.videoCallHandle) {
+                if (data.videoCallHandle && data.videoCallHandle.clickedBy === null) {
+                    document.querySelector('.videoBtn').disabled = false;
+                    setVideoCallButtonState(false);
+                }
+            }
+        });
+
+        if (videoCallButtonState) {
+            document.querySelector('.videoBtn').disabled = true;
+        }
+
         let val = sessionStorage.getItem('peerRole');
         val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true } });
-        if (document.querySelector('.videoBtn').disabled = false)
-            document.querySelector('.videoBtn').disabled = true;
+
     }
 
     async function handleCopy(event) {
@@ -139,7 +157,9 @@ const Chat = ({ userName, localConnection, remoteConnection }) => {
                 <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                         <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%' }} />
-                        <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>{userName}</span>
+                        <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>
+                            {sessionStorage.getItem('peerRole') === 'peerA' ? peerBName : peerAName}
+                        </span>
                     </div>
                     <div className="video-button">
                         <button className='videoBtn' style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>

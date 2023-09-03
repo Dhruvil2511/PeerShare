@@ -12,6 +12,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import '../JoinRoom/Room.scss'
 import ReplayIcon from '@mui/icons-material/Replay';
 import axios from 'axios';
+import { v4 } from 'uuid';
+import { FadeLoader } from 'react-spinners';
 
 const configuration = {
     iceServers: [
@@ -61,17 +63,28 @@ let answer = null;
 let localConnection = null;
 let remoteConnection = null;
 let dummyChannel = null;
-
+let channel = null;
+let peerAName = '';
+let peerApfpId = '';
+let peerBName = '';
+let peerBpfpId = '';
 const Room = () => {
     let { id } = useParams();
     const [isConnected, setIsConnected] = useState(false);
     const [avatar, setAvatar] = useState('');
+    const [showChat, setShowChat] = useState(false);
 
+    // const [peerAName, setPeerAName] = useState('');
+    // const [peerBName, setPeerBName] = useState('');
+    // const [peerApfpId, setPeerApfpId] = useState('');
+    // const [peerBpfpId, setPeerBpfpId] = useState('');
+
+    let checkPeerRole = sessionStorage.getItem('peerRole');
     useEffect(() => {
 
-        let checkPeerRole = sessionStorage.getItem('peerRole');
         if (checkPeerRole === 'peerA') {
             generateID();
+
         } else if (checkPeerRole === 'peerB') {
             setTimeout(() => {
                 joinRoom();
@@ -86,16 +99,17 @@ const Room = () => {
         }
     }, []);
 
-    useEffect(() => {
-        axios.get(`https://api.multiavatar.com/1.png?apikey=GlfxOwCHERyz56`).then((response) => {
-            setAvatar(response.config.url);
 
+
+    async function fetchAvatar() {
+        let key = '';
+        sessionStorage.getItem('peerRole') === 'peerA' ? key = peerApfpId : key = peerBpfpId;
+        axios.get(`https://api.multiavatar.com/${key}.png?apikey=GlfxOwCHERyz56`).then((response) => {
+            setAvatar(response.config.url);
         }).catch((error) => {
             console.log(error)
         });
-    }, [])
-
-
+    }
     async function generateID() {
 
         const db = firebase.firestore();
@@ -107,7 +121,28 @@ const Room = () => {
         initializeIceListeners(localConnection);
 
         dummyChannel = localConnection.createDataChannel('dummyChannel');
+        peerAName = name;
+        peerApfpId = v4();
 
+        dummyChannel.addEventListener('open', () => {
+            console.log('Dummy channel opened');
+            const detail = {
+                name: peerAName,
+                id: peerApfpId
+            }
+            dummyChannel.send(JSON.stringify(detail));
+            fetchAvatar();
+        });
+
+        dummyChannel.addEventListener('message', async (event) => {
+            if (event.data) {
+                let details = JSON.parse(event.data);
+                peerBName = await details.name;
+                peerBpfpId = await details.id;
+                console.log('details are: ' + JSON.stringify(details));
+                setShowChat(true);
+            }
+        });
         localConnection.addEventListener('icecandidate', event => {
             if (!event.candidate) {
                 console.log('Got final candidate!');
@@ -184,6 +219,36 @@ const Room = () => {
                 }
                 console.log('Got candidate: ', event.candidate);
                 peerB.add(event.candidate.toJSON());
+
+            });
+            peerBName = name;
+            peerBpfpId = v4();
+
+            remoteConnection.addEventListener('datachannel', async (event) => {
+                channel = event.channel;
+                if (channel.label === 'dummyChannel') {
+                    remoteConnection.dummyChannel = channel;
+
+                    channel.onmessage = async (e) => {
+                        let details = JSON.parse(e.data);
+                        peerAName = await details.name;
+                        peerApfpId = await details.id;
+                        fetchAvatar();
+                        setShowChat(true);
+                        console.log('details are: ' + JSON.stringify(details));
+                    };
+                }
+
+                channel.onopen = async (e) => {
+                    console.log('dummy open hui? ');
+                    setTimeout(() => {
+                        const detail = {
+                            name: peerBName,
+                            id: peerBpfpId
+                        }
+                        remoteConnection.dummyChannel.send(JSON.stringify(detail));
+                    }, 500);
+                };
 
             });
 
@@ -270,11 +335,9 @@ const Room = () => {
         window.location.reload();
     }
 
-
     return (
         <>
             {!isConnected && <Preloader />}
-            {/* {<Navbar />} */}
             {isConnected
                 &&
                 <div className="navbar">
@@ -282,7 +345,12 @@ const Room = () => {
                     <div className="both">
                         <div className="user-info">
                             <img className='user-pfp' src={avatar} alt="X" />
-                            <span className='text'>{name}</span>
+                            <span className='text'>
+                                {
+                                    sessionStorage.getItem('peerRole') === 'peerA' ? peerAName : peerBName
+                                }
+                            </span>
+
                         </div>
                     </div>
                     <div className="room-buttons">
@@ -293,8 +361,10 @@ const Room = () => {
             }
             <div className='room-wrapper' style={{ display: 'flex', padding: '1%' }}>
                 {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
-                {isConnected && <VideoChat localConnection={localConnection} remoteConnection={remoteConnection} />}
-                {isConnected && <Chat userName={name} localConnection={localConnection} remoteConnection={remoteConnection} />}
+                {isConnected && showChat && <VideoChat peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />}
+                {isConnected && showChat &&
+                    <Chat peerAName={peerAName} peerBName={peerBName} peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />
+                }
             </div>
         </>
     )

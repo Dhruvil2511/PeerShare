@@ -9,6 +9,7 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import MicIcon from '@mui/icons-material/Mic';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import MicOffIcon from '@mui/icons-material/MicOff';
+import axios from 'axios';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
@@ -19,7 +20,7 @@ const firebaseConfig = {
     messagingSenderId: "985022221543",
     appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
     measurementId: "G-YJPJ8LZZXD"
-  };
+};
 const configuration = {
     iceServers: [
         {
@@ -47,23 +48,21 @@ const configuration = {
             credential: "RAx91eWI7uYEsYa7",
         },
     ],
-    // To prefetch ice Candidate before setting local description range(0-255) more better but use more resource
     iceCandidatePoolSize: 10,
 };
 
 firebase.initializeApp(firebaseConfig);
-let userRef = null;
 let remoteStream = null;
 let localStream = null;
 let data = null;
 let val = null;
-let dummyCH;
 let localConnection = null;
 let remoteConnection = null;
+let channel = null;
+let videoSignalChannel = null;
 
 
-
-const VideoChat = () => {
+const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     let { id } = useParams();
     const [videoCaller, setVideoCaller] = useState('');
     const [flag, setFlag] = useState(true);
@@ -111,6 +110,17 @@ const VideoChat = () => {
         document.querySelector('#remoteVideo').srcObject = remoteStream;
     }
 
+    const fetchAvatar = () => {
+        let key = '';
+        sessionStorage.getItem('peerRole') === 'peerA' ? key = peerApfpId : key = peerBpfpId
+        axios.get(`https://api.multiavatar.com/${key}.png?apikey=GlfxOwCHERyz56`).then((response) => {
+            // setAvatar(response.config.url);
+
+        }).catch((error) => {
+            console.log(error)
+        });
+    }
+
 
     async function initializeLocalConnection() {
         const db = firebase.firestore();
@@ -119,6 +129,10 @@ const VideoChat = () => {
         console.log('Create local with configuration: ', configuration);
         localConnection = new RTCPeerConnection(configuration);
         registerPeerConnectionListeners(localConnection);
+
+        videoSignalChannel = localConnection.createDataChannel('videoSignalChannel');
+        initializeChannelListeners(videoSignalChannel);
+
 
         localStream.getTracks().forEach(track => {
             localConnection.addTrack(track, localStream);
@@ -176,6 +190,34 @@ const VideoChat = () => {
             });
         });
     }
+
+
+    function initializeChannelListeners(channel) {
+        channel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
+        channel.addEventListener('open', () => {
+            if (channel.label === 'videoSignalChannel')
+                console.log('video signal channel opened');
+        });
+        channel.addEventListener('message', (event) => {
+            if (channel.label === 'videoSignalChannel') {
+                const message = event.data;
+                if (message === 'video_off') {
+                    document.getElementById('remoteVideo').style.display = "none";
+                    document.querySelector('.remote-pfp').style.display = "block";
+
+                }
+                else if (message === 'video_on') {
+                    document.getElementById('remoteVideo').style.display = "block";
+                    document.querySelector('.remote-pfp').style.display = "none";
+                }
+            }
+        });
+
+        channel.addEventListener('close', (event) => {
+            if (channel.label === 'videoSignalChannel')
+                console.log('video signal channel closed');
+        });
+    }
     async function initializeRemoteConnection() {
         setFlag(false);
         const db = firebase.firestore();
@@ -185,6 +227,33 @@ const VideoChat = () => {
         if (roomSnapshot.exists) {
             remoteConnection = new RTCPeerConnection(configuration);
             registerPeerConnectionListeners(remoteConnection);
+
+
+
+            remoteConnection.addEventListener('datachannel', (event) => {
+
+                channel = event.channel;
+                if (channel.label === 'videoSignalChannel') {
+                    remoteConnection.videoSignalChannel = channel;
+                }
+
+                channel.addEventListener('message', (event) => {
+
+                    if (channel.label === 'videoSignalChannel') {
+                        const message = event.data;
+                        if (message === 'video_off') {
+                            document.getElementById('remoteVideo').style.display = "none";
+                            document.querySelector('.remote-pfp').style.display = "block";
+
+                        } else if (message === 'video_on') {
+                            document.getElementById('remoteVideo').style.display = "block";
+                            document.querySelector('.remote-pfp').style.display = "none";
+
+                        }
+                    }
+                });
+
+            });
             localStream.getTracks().forEach(track => {
                 remoteConnection.addTrack(track, localStream);
             });
@@ -293,15 +362,30 @@ const VideoChat = () => {
     }
 
     async function handleVideoOn() {
-        if (localStream) {
-            localStream.getVideoTracks()[0].enabled = !isVideoOn;
+        let val = sessionStorage.getItem('peerRole');
+        if (localStream) localStream.getVideoTracks()[0].enabled = !isVideoOn;
+
+        let message;
+        if (isVideoOn) {
+            message = 'video_off';
+            document.getElementById('localVideo').style.display = "none";
+            document.querySelector('.local-pfp').style.display = "block";
         }
+        else {
+            document.querySelector('.local-pfp').style.display = "none";
+            document.getElementById('localVideo').style.display = "block";
+            message = 'video_on';
+        }
+
+        if (val === 'peerA') videoSignalChannel.send(message);
+        else remoteConnection.videoSignalChannel.send(message);
+
         setIsVideoOn(!isVideoOn);
     }
     async function handleMicOn() {
-        if (localStream) {
-            localStream.getAudioTracks()[0].enabled = !isMicOn;
-        }
+
+        if (localStream) localStream.getAudioTracks()[0].enabled = !isMicOn;
+
         setIsMicOn(!isMicOn);
     }
 
@@ -309,27 +393,40 @@ const VideoChat = () => {
         <>
             {videoCallButtonClicked.clicked &&
                 <div className="video" >
-                    <video id="localVideo" muted autoPlay playsInline></video>
-                    <video id="remoteVideo" autoPlay playsInline></video>
-                    <div className="footer" >
+                    <div className="first">
+                        {
+                            sessionStorage.getItem('peerRole') === 'peerA' ? <img className='local-pfp' src={`https://api.multiavatar.com/${peerApfpId}.png?apikey=GlfxOwCHERyz56`} alt="X" /> : <img className='local-pfp' src={`https://api.multiavatar.com/${peerBpfpId}.png?apikey=GlfxOwCHERyz56`} alt="X" />
+                        }
+
+                        <video id="localVideo" muted autoPlay playsInline></video>
+                    </div>
+                    <div className="second">
+                        {
+                            sessionStorage.getItem('peerRole') === 'peerA' ? <img className='remote-pfp' src={`https://api.multiavatar.com/${peerBpfpId}.png?apikey=GlfxOwCHERyz56`} alt="X" /> : <img className='remote-pfp' src={`https://api.multiavatar.com/${peerApfpId}.png?apikey=GlfxOwCHERyz56`} alt="X" />
+                        }
+                        <video id="remoteVideo" autoPlay playsInline></video>
+                    </div>
+
+
+                    <div className="footer">
                         <div className='footer-in'>
                             {isVideoOn ?
                                 <button className='video-on-button' onClick={handleVideoOn}>
-                                    <VideocamIcon sx={{fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }}  className='video-on' />
+                                    <VideocamIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='video-on' />
                                 </button> : <button className='video-off-button' onClick={handleVideoOn}>
-                                    <VideocamOffIcon sx={{fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='video-off' />
+                                    <VideocamOffIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='video-off' />
                                 </button>
                             }
                             {isMicOn ?
                                 <button className='mic-on-button' onClick={handleMicOn}>
-                                    <MicIcon sx={{fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='mic-on' />
+                                    <MicIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='mic-on' />
                                 </button> : <button className='mic-off-button' onClick={handleMicOn}>
-                                    <MicOffIcon className='mic-off' />
+                                    <MicOffIcon className='mic-off' sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} />
                                 </button>
                             }
 
                             <button className='end-call-button' onClick={hangVideoCall}>
-                                <CallEndIcon sx={{fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='end-call' />
+                                <CallEndIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='end-call' />
                             </button>
                         </div>
                     </div>
