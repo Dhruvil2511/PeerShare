@@ -8,12 +8,48 @@
     margin-bottom: 2%;
 
     .logo {
-        padding-left: 2%;
-        font-size: 1.5vw;
-        flex: 1;
+        height: 100%;
         width: 33%;
-        color: rgb(26, 240, 161);
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
 
+
+        .logo_name {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding-left: 3%;
+            margin-left: 3%;
+            width: 100%;
+
+            img {
+                height: 6vh;
+                width: 3vw;
+            }
+
+
+            .name-motive {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                width: fit-content;
+                word-wrap: normal;
+                margin-left: 3%;
+
+                .name {
+                    font-weight: bold;
+                    font-size: 1.2vw;
+                    color: rgb(26, 240, 161);
+
+                }
+
+                .motive {
+                    font-size: 0.6vw;
+                    color: rgb(26, 240, 161);
+                }
+            }
+        }
     }
 
     .both {
@@ -31,41 +67,67 @@
             width: 100%;
             height: inherit;
 
+
             .user-pfp {
                 height: 110%;
                 margin-right: 2.5%;
+                padding: 0.5%;
+                border-radius: 100%;
+                -webkit-box-shadow: 0 0 25px rgb(26, 240, 161);
+                box-shadow: 0 0 25px rgb(26, 240, 161);
             }
 
             .text {
                 font-size: 1.3vw;
                 color: #FFD700;
             }
+
+        }
+
+        .room-buttons {
+            display: flex;
+            width: fit-content;
+            justify-content: flex-end;
+            align-items: center;
+            margin-left: 5%;
+
+            .retry-button {
+                width: auto;
+                border: none;
+                background: transparent;
+                color: #0A82FD;
+                padding: 0% 2% 0% 2%;
+                // margin-right: 20%;
+            }
+
+            .leave-button {
+                border: none;
+                padding: 5% !important;
+                border-radius: 100%;
+                color: white;
+                padding: 0% 2% 0% 2%;
+                background: red;
+
+            }
+
+
         }
     }
 
-    .room-buttons {
-        display: flex;
+
+
+    .connection-status {
         width: 33%;
-        margin-right: 2%;
+        display: flex;
         justify-content: flex-end;
         align-items: center;
 
-        .retry-button {
-            width: auto;
-            border: none;
-            background: transparent;
-            color: #0A82FD;
-            padding: 0% 2% 0% 2%;
+        .status {
+            margin-right: 10%;
+            width: fit-content;
+            padding: 2%;
+            color: white;
+
         }
-
-        .leave-button {
-            width: auto;
-            border: none;
-            color: red;
-            padding: 0% 2% 0% 2%;
-            background: transparent;
-        }
-
-
     }
 }

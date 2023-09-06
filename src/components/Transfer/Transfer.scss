@@ -321,16 +321,44 @@
           }
         }
 
-        .delete-file-btn {
-          width: auto;
-          border: none;
-          background: transparent;
-          color: white;
+        .delete-file {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-right: 2%;
 
-          &:hover {
-            color: red;
+          .accept-file-icon {
+            background-color: #3EA64F;
+            color: white;
+            border: none;
+            border-radius: 100%;
+            padding: 6%;
+            margin-right: 30%;
           }
+
+          .reject-file-icon {
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 100%;
+            padding: 6%;
+
+          }
+
+          .delete-file-btn {
+            width: auto;
+            border: none;
+            background: transparent;
+            color: white;
+            padding: 6%;
+
+            &:hover {
+              color: red;
+            }
+          }
+
         }
+
       }
     }
   }

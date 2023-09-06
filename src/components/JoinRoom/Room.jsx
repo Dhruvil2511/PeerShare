@@ -8,13 +8,13 @@ import 'firebase/compat/firestore';
 import VideoChat from '../Video/VideoChat'
 import Preloader from '../Loader/Preloader'
 import { name } from '../../utils/name';
-import LogoutIcon from '@mui/icons-material/Logout';
 import '../JoinRoom/Room.scss'
-import ReplayIcon from '@mui/icons-material/Replay';
 import axios from 'axios';
 import { v4 } from 'uuid';
-import { FadeLoader } from 'react-spinners';
-
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import CircleIcon from '@mui/icons-material/Circle';
+import logo from './icon.png'
+import {ReactComponent as ReactLogo} from './logo.svg';
 const configuration = {
     iceServers: [
         {
@@ -72,12 +72,8 @@ const Room = () => {
     let { id } = useParams();
     const [isConnected, setIsConnected] = useState(false);
     const [avatar, setAvatar] = useState('');
+    const [userConnected, setUserConnected] = useState(true);
     const [showChat, setShowChat] = useState(false);
-
-    // const [peerAName, setPeerAName] = useState('');
-    // const [peerBName, setPeerBName] = useState('');
-    // const [peerApfpId, setPeerApfpId] = useState('');
-    // const [peerBpfpId, setPeerBpfpId] = useState('');
 
     let checkPeerRole = sessionStorage.getItem('peerRole');
     useEffect(() => {
@@ -175,7 +171,7 @@ const Room = () => {
 
         userRef.onSnapshot(async (snapshot) => {
             const data = snapshot.data();
-            if (data && data.answer) {
+            if (data && data.answer && !data.file) {
                 console.log('We got remote description: ', data.answer);
                 if (localConnection) {
                     const ans = new RTCSessionDescription(data.answer);
@@ -293,6 +289,7 @@ const Room = () => {
             if (connection.connectionState === 'connected') {
                 setIsConnected(true);
             }
+            else if (connection.connectionState === 'disconnected') setUserConnected(false);
             console.log(`Connection state change: ${connection.connectionState}`);
         });
 
@@ -331,9 +328,6 @@ const Room = () => {
             window.location.href = '/join';
         }
     }
-    function retryConnect(event) {
-        window.location.reload();
-    }
 
     return (
         <>
@@ -341,7 +335,18 @@ const Room = () => {
             {isConnected
                 &&
                 <div className="navbar">
-                    <div className="logo">PeerShare</div>
+                    <div className="logo">
+                        <div className="logo_name">
+                            {/* <img src={logo} alt="X" /> */}
+                            <ReactLogo className='.img'/>
+                            <div className="name-motive">
+                                <span className='name'>PeerShare</span>
+                                <span className='motive'>Your Files, Your Way, PeerShare Today!</span>
+                            </div>
+
+                        </div>
+
+                    </div>
                     <div className="both">
                         <div className="user-info">
                             <img className='user-pfp' src={avatar} alt="X" />
@@ -350,16 +355,25 @@ const Room = () => {
                                     sessionStorage.getItem('peerRole') === 'peerA' ? peerAName : peerBName
                                 }
                             </span>
-
+                            <div className="room-buttons">
+                                {/* <button className="retry-button" title='retry connection' onClick={retryConnect}><ReplayIcon /></button> */}
+                                <button className="leave-button" title='exit' onClick={leaveRoom}><PowerSettingsNewIcon sx={{ fontSize: { xs: 10, sm: 14, md: 22, lg: 28 } }} /></button>
+                            </div>
                         </div>
+
                     </div>
-                    <div className="room-buttons">
-                        <button className="retry-button" title='retry connection' onClick={retryConnect}><ReplayIcon /></button>
-                        <button className="leave-button" title='exit' onClick={leaveRoom}><LogoutIcon /></button>
+                    <div className="connection-status">
+                        <div className='status'>
+                            {
+                                userConnected ? <><CircleIcon sx={{ fontSize: { xs: 5, sm: 8, md: 10, lg: 15 } }} color='success' style={{ marginBottom: '5%' }} /> <span style={{ fontSize: '1.1vw' }}>Connected</span> </> : <><CircleIcon sx={{ fontSize: { xs: 10, sm: 14, md: 22, lg: 28 } }} color='error' style={{ marginBottom: '5%' }} /> <span style={{ fontSize: '1.1vw' }}>Disconnected</span> </>
+                            }
+                        </div>
                     </div>
                 </div>
             }
+            {/* {(isConnected && !peerAName || !peerApfpId || !peerBName || !peerBpfpId) && <Lottie animationData={connecting}/>} */}
             <div className='room-wrapper' style={{ display: 'flex', padding: '1%' }}>
+                {isConnected && <audio autoPlay={true} src='/connection.mp3'></audio>}
                 {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && showChat && <VideoChat peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />}
                 {isConnected && showChat &&

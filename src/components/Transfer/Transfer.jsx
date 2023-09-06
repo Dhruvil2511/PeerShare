@@ -9,6 +9,8 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { v4 } from 'uuid';
 import { toast, ToastContainer } from 'react-toastify';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 
 const firebaseConfig = {
@@ -41,7 +43,7 @@ let signalChannel = null;
 let val = '';
 
 const worker = new Worker("../worker.js");
-const Transfer = ({  localConnection, remoteConnection }) => {
+const Transfer = ({ localConnection, remoteConnection }) => {
 
   const [fileInput, setFileInput] = useState('');
   const [isShrunk, setIsShrunk] = useState(false);
@@ -50,7 +52,10 @@ const Transfer = ({  localConnection, remoteConnection }) => {
   const [fileHistory, setFileHistory] = useState([]);
   const [fileProgress, setFileProgress] = useState(0);
   const [recvFileProgress, setRecvFileProgress] = useState(0);
-  const [peerBstopped, setPeerBStopped] = useState(false);
+  const [sendBtnClicked, setSendBtnClicked] = useState('');
+  const [fileAccept, setFileAccept] = useState(false);
+  const [fileDownloaded, setFileDownloaded] = useState(false);
+  const [disableSendBtn, setDisableSendBtn] = useState(false);
   let { id } = useParams();
 
 
@@ -108,7 +113,32 @@ const Transfer = ({  localConnection, remoteConnection }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const db = firebase.firestore();
+    let userRef = db.collection('users').doc(`${id}`);
+    val = sessionStorage.getItem('peerRole');
+    userRef.onSnapshot(async (snapshot) => {
+      data = snapshot.data();
+      if (data && data.file && file) {
+        if (data.file.verdict === 'accepted') {
+          if (val === 'peerA' && data.file.clickedBy === 'peerB') send(file);
+          else if (val === 'peerB' && data.file.clickedBy === 'peerA') sendFromRemote(file);
+        }
+        else if (data.file.verdict === 'rejected') {
+          if (val === 'peerA' && data.file.clickedBy === 'peerB') toast('File rejected by Peer B ', { theme: 'dark' });
+          else if (val === 'peerB' && data.file.clickedBy === 'peerA') toast('File rejected by Peer A ', { theme: 'dark' });
+          await userRef.update({ file: { verdict: '', clickedBy: '' } });
+        }
+      }
+    });
+
+  }, []);
+
   async function send(file) {
+    const db = firebase.firestore();
+    let userRef = db.collection('users').doc(`${id}`);
+    await userRef.update({ file: { verdict: '', clickedBy: '' } });
+
 
     fileReader = new FileReader();
     let offset = 0;
@@ -146,8 +176,12 @@ const Transfer = ({  localConnection, remoteConnection }) => {
       fileReader.readAsArrayBuffer(slice);
     }
     readSlice(0);
+
   }
   async function sendFromRemote(file) {
+    const db = firebase.firestore();
+    let userRef = db.collection('users').doc(`${id}`);
+    await userRef.update({ file: { verdict: '', clickedBy: '' } });
 
 
     fileReader = new FileReader();
@@ -187,9 +221,15 @@ const Transfer = ({  localConnection, remoteConnection }) => {
       fileReader.readAsArrayBuffer(slice);
     }
     readSlice(0);
+
   }
 
   async function sendFile() {
+    val = sessionStorage.getItem('peerRole');
+    if (val === 'peerA') setSendBtnClicked('peerA');
+    else if (val === 'peerB') setSendBtnClicked('peerB');
+    const db = firebase.firestore();
+    let userRef = db.collection('users').doc(`${id}`);
     receivedSize = 0;
     if (fileInput === '') {
       toast('Please select a file', { theme: 'dark' });
@@ -208,9 +248,9 @@ const Transfer = ({  localConnection, remoteConnection }) => {
       totalFileSize = fileInput.size;
       dataChannel.send(JSON.stringify(fileInfo));
       console.log('Sending', file);
-      send(file);
+
       setIsFileHistory(true)
-      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: '#0A82FD' }]);
+      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: '#0A82FD', sender: 'peerA', receiver: 'peerB', downloaded: false }]);
     } else {
       file = fileInput;
       const fileInfo = {
@@ -222,11 +262,11 @@ const Transfer = ({  localConnection, remoteConnection }) => {
       remoteConnection.dataChannel.send(JSON.stringify(fileInfo));
       totalFileSize = fileInput.size;
       console.log('Sending', file);
-      sendFromRemote(file);
       setIsFileHistory(true);
-      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: '#0A82FD' }])
+      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: file.name, filesize: file.size / 1000000, color: '#0A82FD', sender: 'peerB', receiver: 'peerA', downloaded: false }])
     }
     setFileInput('');
+
   }
 
   async function handleSignalling(event) {
@@ -260,18 +300,34 @@ const Transfer = ({  localConnection, remoteConnection }) => {
       totalFileSize = fileInfo.file.size;
       worker.postMessage(receivedFileSize);
       setIsFileHistory(true);
-      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: fileInfo.file.name, filesize: fileInfo.file.size / 1000000, color: '#333333' }]);
+      val = sessionStorage.getItem('peerRole');
+      setDisableSendBtn(true);
+      setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: fileInfo.file.name, filesize: fileInfo.file.size / 1000000, color: '#333333', sender: val === 'peerA' ? 'peerB' : 'peerA', receiver: val, downloaded: false }]);
     }
     else {
+      setFileHistory(fileHistory => {
+        // Make a copy of the existing fileHistory array
+        const updatedFileHistory = [...fileHistory];
 
+        // Find the last item in the array
+        const lastIndex = updatedFileHistory.length - 1;
+
+        // Check if there are items in the array
+        if (lastIndex >= 0) {
+          // Modify the 'downloaded' property of the last item
+          updatedFileHistory[lastIndex].downloaded = true;
+        }
+
+        return updatedFileHistory;
+      });
       worker.postMessage(e.data);
       receivedSize += e.data.byteLength;
-
       setRecvFileProgress((receivedSize / totalFileSize) * 100);
       console.log(parseInt((receivedSize / totalFileSize) * 100));
       if (parseInt((receivedSize / totalFileSize) * 100) >= 100) {
         setRecvFileProgress(100)
         setTimeout(() => {
+          setFileDownloaded(false);
           setRecvFileProgress(0)
         }, 1000)
       }
@@ -280,7 +336,12 @@ const Transfer = ({  localConnection, remoteConnection }) => {
       }
     }
   }
-  function download(data) {
+  async function download(data) {
+
+    const db = firebase.firestore();
+    let userRef = db.collection('users').doc(`${id}`);
+    await userRef.update({ file: { verdict: '' } });
+
     setTimeout(() => {
       setFileProgress(0);
       setRecvFileProgress(0)
@@ -294,6 +355,7 @@ const Transfer = ({  localConnection, remoteConnection }) => {
     anchor.click();
     document.body.removeChild(anchor);
     URL.revokeObjectURL(url);
+    setFileDownloaded(true);
     return;
   }
 
@@ -436,6 +498,37 @@ const Transfer = ({  localConnection, remoteConnection }) => {
     }
 
   }
+  async function handleFileAccept(event) {
+    setDisableSendBtn(false);
+    event.preventDefault();
+    const db = firebase.firestore();
+    let userRef = db.collection('users').doc(`${id}`);
+    val = sessionStorage.getItem('peerRole');
+    const message = {
+      file: {
+        verdict: 'accepted',
+        clickedBy: val
+      }
+    };
+    await userRef.update(message);
+
+  }
+
+  async function handleFileReject(fileId) {
+    setDisableSendBtn(false);
+    const db = firebase.firestore();
+    let userRef = db.collection('users').doc(`${id}`);
+    val = sessionStorage.getItem('peerRole');
+    const message = {
+      file: {
+        verdict: 'rejected',
+        clickedBy: val
+      }
+    };
+    await userRef.update(message);
+    removeFileHistory(fileId);
+  }
+
   return (
     <>
       <div className={`shrinkable-div ${isShrunk ? 'shrink' : ''}`}>
@@ -475,7 +568,7 @@ const Transfer = ({  localConnection, remoteConnection }) => {
             <div className="buttons">
               <button disabled={!parseInt(fileProgress)} className='abort-sending-file' onClick={handleSendAbort}>Stop sending</button>
               {/* <button className='retry-btn' id='retry' onClick={retryConnect}> Retry Connection </button> */}
-              <button disabled={parseInt(fileProgress) || parseInt(recvFileProgress)} className='sendFileBtn' onClick={sendFile}>Send</button>
+              <button disabled={parseInt(fileProgress) || parseInt(recvFileProgress) || disableSendBtn} className='sendFileBtn' onClick={(sendFile)}>Send</button>
               <button disabled={!parseInt(recvFileProgress)} className='abort-receiving-file' onClick={handleReceiveAbort}>Stop receiving</button>
               {/* <button id='hangUpBtn' onClick={hangUp} style={{ backgroundColor: 'red' }} className='leaveBtn'> Leave Room </button> */}
             </div>
@@ -514,7 +607,22 @@ const Transfer = ({  localConnection, remoteConnection }) => {
                             <div className="file-size">  File Size : {fileSize}</div>
                           </div>
                           <div className="delete-file">
-                            <button className='delete-file-btn' onClick={() => removeFileHistory(v.id)}>X</button>
+                            {
+                              (val === 'peerA' && v.sender === 'peerA' && v.receiver === 'peerB') && <button className='reject-file-icon' onClick={() => removeFileHistory(v.id)}><CloseIcon /></button>
+                            }
+                            {
+                              (val === 'peerB' && v.sender === 'peerB' && v.receiver === 'peerA') && <button className='reject-file-icon' onClick={() => removeFileHistory(v.id)}><CloseIcon /></button>
+                            }
+                            {
+                              ((val === 'peerA' && v.receiver === 'peerA') || (val === 'peerB' && v.receiver === 'peerB')) && !v.downloaded && (<>
+                                <button className='accept-file-icon' onClick={handleFileAccept}><CheckIcon /></button>
+                                <button className='reject-file-icon' onClick={() => handleFileReject(v.id)}><CloseIcon /></button>
+                              </>)
+                            }
+                            {
+                              ((val === 'peerA' && v.receiver === 'peerA') || (val === 'peerB' && v.receiver === 'peerB')) && v.downloaded &&
+                              <button className='reject-file-icon' onClick={() => removeFileHistory(v.id)}><CloseIcon /></button>
+                            }
                           </div>
                         </div>
                       )

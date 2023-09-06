@@ -71,7 +71,7 @@
                 .video-off,
                 .mic-off {
                     color: rgb(26, 240, 161);
-                    transform: scale(1.5);
+                   font-size: 4vh;
                 }
             }
 
@@ -85,7 +85,8 @@
 
                 .end-call {
                     color: red;
-                    transform: scale(1.5);
+                    font-size: 4vh;
+                    transform: scale(1.2);
                 }
 
             }

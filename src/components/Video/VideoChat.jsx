@@ -60,11 +60,12 @@ let localConnection = null;
 let remoteConnection = null;
 let channel = null;
 let videoSignalChannel = null;
+let callConnected = false;
 
 
 const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     let { id } = useParams();
-    const [videoCaller, setVideoCaller] = useState('');
+
     const [flag, setFlag] = useState(true);
     const [isVideoOn, setIsVideoOn] = useState(true);
     const [isMicOn, setIsMicOn] = useState(true);
@@ -78,7 +79,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
             data = snapshot.data();
             if (data && data.videoCallHandle) {
                 setVideoCallButtonClicked(data.videoCallHandle);
-                if (data.videoCallHandle && data.videoCallHandle.clicked) {
+                if (data.videoCallHandle && data.videoCallHandle.clicked && !callConnected) {
                     setTimeout(async () => {
                         await openUserMedia();
                         val = sessionStorage.getItem('peerRole');
@@ -195,6 +196,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     function initializeChannelListeners(channel) {
         channel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
         channel.addEventListener('open', () => {
+
             if (channel.label === 'videoSignalChannel')
                 console.log('video signal channel opened');
         });
@@ -316,7 +318,6 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         let userRef = await dbUser.collection('users').doc(`${id}`);
         await userRef.set({ videoCallHandle: { clickedBy: null, clicked: false } });
 
-
         const dbVideo = firebase.firestore();
         const roomRef = await dbVideo.collection('videoCon').doc(`${id}`);
         const calleeCandidates = await roomRef.collection('calleeCandidates').get();
@@ -348,6 +349,12 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         });
 
         connection.addEventListener('connectionstatechange', () => {
+            if (connection.connectionState === 'connected') {
+                callConnected = true;
+            }
+            else if (connection.connectionState === 'disconnected') {
+                callConnected = false;
+            }
             console.log(`Connection state change: ${connection.connectionState}`);
         });
 

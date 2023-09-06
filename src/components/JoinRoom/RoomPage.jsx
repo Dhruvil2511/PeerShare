@@ -63,20 +63,6 @@ const RoomPage = () => {
             <div className="flex-room-box">
                 <div className="create-room-box">
                     <div className='content'>
-                        <div className="custom-room">
-                            <div className='custom-room-title'>Create Custom room</div>
-                            <div className='custom-room-description'>
-                                <p className='custom-room-description-text'>
-                                    Custom rooms allows you to create your own public room with custom name
-                                </p>
-
-                            </div>
-                            <input className='custom-room-input' placeholder='Room Name' type="text" onChange={(e) => setRoomName(e.target.value)} />
-                            <Link className='custom-room-join' onClick={handleCustomRoom} to={`/room/${roomName}`}>
-                                Join Room
-                            </Link>
-                        </div>
-                        <div><hr /></div>
                         <div className="instant-room">
                             <div className='instant-room-title'>Join instant room</div>
                             <div className='instant-room-description'>
@@ -102,6 +88,21 @@ const RoomPage = () => {
                                 </>
 
                             }
+                        </div>
+
+                        <div><hr /></div>
+                        <div className="custom-room">
+                            <div className='custom-room-title'>Create Custom room</div>
+                            <div className='custom-room-description'>
+                                <p className='custom-room-description-text'>
+                                    Custom rooms allows you to create your own public room with custom name
+                                </p>
+
+                            </div>
+                            <input className='custom-room-input' placeholder='Room Name' type="text" onChange={(e) => setRoomName(e.target.value)} />
+                            <Link className='custom-room-join' onClick={handleCustomRoom} to={`/room/${roomName}`}>
+                                Join Room
+                            </Link>
                         </div>
                     </div>
                 </div>

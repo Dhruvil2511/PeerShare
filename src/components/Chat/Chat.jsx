@@ -8,6 +8,9 @@ import { useParams } from 'react-router-dom';
 import '../Chat/Chat.scss'
 import VideoCallIcon from '@mui/icons-material/VideoCall';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import animation from './FINAL.json'
+import Lottie from 'lottie-react';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
@@ -24,7 +27,9 @@ firebase.initializeApp(firebaseConfig);
 
 
 let messageChannel;
+var scale = 'scale(1.5)';
 let channel;
+let d;
 // let message = null;
 
 const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, remoteConnection }) => {
@@ -59,7 +64,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         messageChannel.addEventListener('message', (event) => {
             if (event.data) {
                 console.log(event.data);
-                setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': event.data }]);
+                setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': event.data, time: fetchTime() }]);
             }
         });
 
@@ -79,10 +84,16 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
             channel.onclose = event => console.log(channel.label + " closed");
         });
     }
+    function fetchTime() {
+        const time = new Date();
+        let str = time.getHours();
+        time.getMinutes() < 10 ? str += ': 0' + time.getMinutes() : str += ':' + time.getMinutes();
+        return str;
+    }
 
     async function recieveMessage(e) {
         console.log('recieved message from peerA : ' + e.data);
-        setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': e.data }]);
+        setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': e.data, time: fetchTime() }]);
     }
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -91,11 +102,11 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         document.getElementById('input-field').value = '';
         let val = sessionStorage.getItem('peerRole');
         if (val === 'peerA') {
-            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': message }]);
+            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': message, time: fetchTime() }]);
             messageChannel.send(message);
 
         } else {
-            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': message }]);
+            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': message, time: fetchTime() }]);
             remoteConnection.messageChannel.send(message);
         }
         setTimeout(() => {
@@ -150,26 +161,55 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         document.querySelector('#input-field').focus();
     }
 
+    async function removeChat(event) {
+        event.preventDefault();
+        const response = window.confirm("Are you sure you want to clear chat?");
+
+        if (response) {
+            setMessageList([]);
+        } else {
+            return;
+        }
+
+    }
+
 
     return (
         <>
+
             <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '15px', height: '80vh', width: '30%', float: 'left' }}>
                 <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                        <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%' }} />
+                        <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%' ,borderRadius:'100%'}} />
                         <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>
                             {sessionStorage.getItem('peerRole') === 'peerA' ? peerBName : peerAName}
                         </span>
                     </div>
                     <div className="video-button">
-                        <button className='videoBtn' style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
-                            <VideoCallIcon style={{ transform: `scale(${2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                        <button className='videoBtn' title={'Video Call'} style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
+                            <VideoCallIcon style={{ transform: `scale(${1.4})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                        </button>
+                        <button className='videoBtn' title={'Clear chat'} style={{ background: 'transparent', border: 'none' }} onClick={removeChat}>
+                            <DeleteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
                     </div>
                 </div>
 
 
                 <div className="chatBox" style={{ height: '80%', overflow: 'scroll', overflowX: 'hidden', position: 'relative' }}>
+                    {
+                        messageList.length === 0 &&
+                        // <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: "100%" }}>
+                        <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '10%' }}>
+                            <Lottie style={{ height: '50%' }} animationData={animation} />
+                            <div style={{ height: '50%' }}>
+                                <span style={{ fontSize: '1.5vw', color: 'white' }}>IT'S EMPTY IN HERE!</span>
+                                <br />
+                                <span style={{ fontSize: '1vw', color: 'white' }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start chatting with your peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            </div>
+                        </div>
+                        // </div>
+                    }
                     {
                         messageList.map((value) => {
                             let checkPeerRole = sessionStorage.getItem('peerRole');
@@ -178,18 +218,21 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
-                                                {`${value.message}`}
-                                            </div>
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
+                                                <span style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
+                                                <span style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
 
+                                            </div>
                                         </div>
                                     )
                                 }
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>{`${value.message}`}</div>
-
+                                            <div key={value.id} style={{ maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
+                                                <span style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
+                                                <span style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
+                                            </div>
                                         </div>
                                     )
                                 }
@@ -198,8 +241,9 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
-                                                {`${value.message}`}
+                                            <div key={value.id} style={{ maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
+                                                <span style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
+                                                <span style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
                                             </div>
 
                                         </div>
@@ -208,7 +252,11 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ wordWrap: 'break-word', maxWidth: '70%', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>{`${value.message}`}</div>
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
+                                                <span style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
+                                                <span style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
+                                            </div>
+                                        
                                         </div>
                                     )
                                 }
@@ -225,9 +273,9 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                         </button>
                         <input id='input-field' style={{ fontSize: '1.2vw', color: 'white', width: '70%', backgroundColor: '#333333', border: 'none', borderRadius: '5px' }} type='text' value={message} onChange={handleChange}></input>
                         <button type="submit" id='sendBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginLeft: '4%' }}>
-                            <SendIcon style={{ transform: `scale(${1.5})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                            <SendIcon style={{ transform: `scale(${1.3})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
-                    </footer>z
+                    </footer>
                 </form>
             </div>
         </>
