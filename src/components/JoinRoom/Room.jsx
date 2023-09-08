@@ -13,8 +13,7 @@ import axios from 'axios';
 import { v4 } from 'uuid';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import CircleIcon from '@mui/icons-material/Circle';
-import logo from './icon.png'
-import {ReactComponent as ReactLogo} from './logo.svg';
+import { ReactComponent as ReactLogo } from './logo.svg';
 const configuration = {
     iceServers: [
         {
@@ -337,8 +336,7 @@ const Room = () => {
                 <div className="navbar">
                     <div className="logo">
                         <div className="logo_name">
-                            {/* <img src={logo} alt="X" /> */}
-                            <ReactLogo className='.img'/>
+                            <ReactLogo className='.img' />
                             <div className="name-motive">
                                 <span className='name'>PeerShare</span>
                                 <span className='motive'>Your Files, Your Way, PeerShare Today!</span>
@@ -365,7 +363,7 @@ const Room = () => {
                     <div className="connection-status">
                         <div className='status'>
                             {
-                                userConnected ? <><CircleIcon sx={{ fontSize: { xs: 5, sm: 8, md: 10, lg: 15 } }} color='success' style={{ marginBottom: '5%' }} /> <span style={{ fontSize: '1.1vw' }}>Connected</span> </> : <><CircleIcon sx={{ fontSize: { xs: 10, sm: 14, md: 22, lg: 28 } }} color='error' style={{ marginBottom: '5%' }} /> <span style={{ fontSize: '1.1vw' }}>Disconnected</span> </>
+                                userConnected ? <><CircleIcon sx={{ fontSize: { xs: 5, sm: 8, md: 10, lg: 15 } }} color='success' style={{ marginBottom: '5%' }} /> <span style={{ fontSize: '1.1vw' }}>Connected</span> </> : <><CircleIcon sx={{ fontSize: { xs: 5, sm: 8, md: 10, lg: 15 } }} color='error' style={{ marginBottom: '5%' }} /> <span style={{ fontSize: '1.1vw' }}>Disconnected</span> </>
                             }
                         </div>
                     </div>

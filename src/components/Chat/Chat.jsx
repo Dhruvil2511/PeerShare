@@ -150,7 +150,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         }
 
         let val = sessionStorage.getItem('peerRole');
-        val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true } });
+        val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true, verdict: '' } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true, verdict: '' } });
 
     }
 
@@ -180,16 +180,16 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
             <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '15px', height: '80vh', width: '30%', float: 'left' }}>
                 <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                        <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%' ,borderRadius:'100%'}} />
+                        <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%', borderRadius: '100%' }} />
                         <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>
                             {sessionStorage.getItem('peerRole') === 'peerA' ? peerBName : peerAName}
                         </span>
                     </div>
-                    <div className="video-button">
+                    <div className="video-button" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <button className='videoBtn' title={'Video Call'} style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
                             <VideoCallIcon style={{ transform: `scale(${1.4})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
-                        <button className='videoBtn' title={'Clear chat'} style={{ background: 'transparent', border: 'none' }} onClick={removeChat}>
+                        <button className='deleteChatBtn' title={'Clear chat'} style={{ background: 'transparent', border: 'none' }} onClick={removeChat}>
                             <DeleteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
                     </div>
@@ -256,7 +256,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                                 <span style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
                                                 <span style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
                                             </div>
-                                        
+
                                         </div>
                                     )
                                 }

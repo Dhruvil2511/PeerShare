@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import CallEndIcon from '@mui/icons-material/CallEnd';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
@@ -10,6 +9,8 @@ import MicIcon from '@mui/icons-material/Mic';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import axios from 'axios';
+import CallIcon from '@mui/icons-material/Call';
+import CallEndIcon from '@mui/icons-material/CallEnd';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
@@ -69,28 +70,27 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     const [flag, setFlag] = useState(true);
     const [isVideoOn, setIsVideoOn] = useState(true);
     const [isMicOn, setIsMicOn] = useState(true);
-    const [videoCallButtonClicked, setVideoCallButtonClicked] = useState({ clicked: false, clickedBy: null });
+    const [videoCallButtonClicked, setVideoCallButtonClicked] = useState({ clickedBy: null, clicked: false, verdict: '' });
+    const [callAccepted, setCallAccepted] = useState(false);
 
 
     useEffect(() => {
         const db = firebase.firestore();
         let userRef = db.collection('users').doc(`${id}`);
+        val = sessionStorage.getItem('peerRole');
         const unsubscribe = userRef.onSnapshot(async (snapshot) => {
             data = snapshot.data();
             if (data && data.videoCallHandle) {
-                setVideoCallButtonClicked(data.videoCallHandle);
-                if (data.videoCallHandle && data.videoCallHandle.clicked && !callConnected) {
+                setVideoCallButtonClicked(data.videoCallHandle); // clickedby ; peerA , clickted : true 
+                if (data.videoCallHandle.clicked && !callConnected) {
                     setTimeout(async () => {
-                        await openUserMedia();
-                        val = sessionStorage.getItem('peerRole');
-                        if ((data.videoCallHandle.clickedBy === 'peerA' && val === 'peerA') || (data.videoCallHandle.clickedBy === 'peerB' && val === 'peerB')) {
+                        if (((data.videoCallHandle.clickedBy === 'peerA' && val === 'peerA') || (data.videoCallHandle.clickedBy === 'peerB' && val === 'peerB')) && data.videoCallHandle.verdict === '') {
                             initializeLocalConnection();
                         }
                         else {
-                            setTimeout(() => {
+                            if (((data.videoCallHandle.clickedBy !== 'peerA' && val === 'peerA') || (data.videoCallHandle.clickedBy !== 'peerB' && val === 'peerB')) && data.videoCallHandle.verdict === 'accepted') {
                                 initializeRemoteConnection();
-                            }, 6000);
-
+                            }
                         }
                     }, 1000);
                 }
@@ -124,6 +124,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
 
 
     async function initializeLocalConnection() {
+        await openUserMedia();
         const db = firebase.firestore();
         const roomRef = await db.collection('videoCon').doc(`${id}`);
 
@@ -216,12 +217,15 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         });
 
         channel.addEventListener('close', (event) => {
-            if (channel.label === 'videoSignalChannel')
+            if (channel.label === 'videoSignalChannel') {
+                callConnected = false;
                 console.log('video signal channel closed');
+            }
         });
     }
     async function initializeRemoteConnection() {
         setFlag(false);
+        await openUserMedia();
         const db = firebase.firestore();
         const roomRef = await db.collection('videoCon').doc(`${id}`);
         const roomSnapshot = await roomRef.get();
@@ -314,9 +318,10 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         }
     }
     async function hangVideoCall() {
+        callConnected = false;
         const dbUser = firebase.firestore();
         let userRef = await dbUser.collection('users').doc(`${id}`);
-        await userRef.set({ videoCallHandle: { clickedBy: null, clicked: false } });
+        await userRef.set({ videoCallHandle: { clickedBy: null, clicked: false, verdict: '' } });
 
         const dbVideo = firebase.firestore();
         const roomRef = await dbVideo.collection('videoCon').doc(`${id}`);
@@ -396,6 +401,12 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         setIsMicOn(!isMicOn);
     }
 
+    async function handleAcceptCall() {
+        const dbUser = firebase.firestore();
+        let userRef = await dbUser.collection('users').doc(`${id}`);
+        await userRef.set({ videoCallHandle: { clickedBy: val === 'peerB' ? 'peerA' : 'peerB', clicked: true, verdict: 'accepted' } });
+    }
+
     return (
         <>
             {videoCallButtonClicked.clicked &&
@@ -416,26 +427,40 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
 
 
                     <div className="footer">
-                        <div className='footer-in'>
-                            {isVideoOn ?
-                                <button className='video-on-button' onClick={handleVideoOn}>
-                                    <VideocamIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='video-on' />
-                                </button> : <button className='video-off-button' onClick={handleVideoOn}>
-                                    <VideocamOffIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='video-off' />
+                        {((val === 'peerA' && videoCallButtonClicked.clickedBy === 'peerB') || (val === 'peerB' && videoCallButtonClicked.clickedBy === 'peerA')) && (!callAccepted) &&
+                            <div className="accept-reject">
+                                <button className='video-call-accept'>
+                                    <CallIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='accept-call' onClick={handleAcceptCall} />
                                 </button>
-                            }
-                            {isMicOn ?
-                                <button className='mic-on-button' onClick={handleMicOn}>
-                                    <MicIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='mic-on' />
-                                </button> : <button className='mic-off-button' onClick={handleMicOn}>
-                                    <MicOffIcon className='mic-off' sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} />
+                                <button className='end-call-button' onClick={hangVideoCall}>
+                                    <CallEndIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='end-call' />
                                 </button>
-                            }
+                            </div>
+                        }
+                        {
+                            ((val === 'peerA' && videoCallButtonClicked.clickedBy === 'peerA') || (val === 'peerB' && videoCallButtonClicked.clickedBy === 'peerB') || (callAccepted)) && <div className='footer-in'>
+                                {isVideoOn ?
+                                    <button className='video-on-button' onClick={handleVideoOn}>
+                                        <VideocamIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='video-on' />
+                                    </button> : <button className='video-off-button' onClick={handleVideoOn}>
+                                        <VideocamOffIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='video-off' />
+                                    </button>
+                                }
+                                {isMicOn ?
+                                    <button className='mic-on-button' onClick={handleMicOn}>
+                                        <MicIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='mic-on' />
+                                    </button> : <button className='mic-off-button' onClick={handleMicOn}>
+                                        <MicOffIcon className='mic-off' sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} />
+                                    </button>
+                                }
 
-                            <button className='end-call-button' onClick={hangVideoCall}>
-                                <CallEndIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='end-call' />
-                            </button>
-                        </div>
+                                <button className='end-call-button' onClick={hangVideoCall}>
+                                    <CallEndIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} className='end-call' />
+                                </button>
+                            </div>
+                        }
+
+
                     </div>
                 </div>
             }

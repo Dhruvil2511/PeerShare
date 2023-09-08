@@ -48,6 +48,40 @@
         overflow: hidden;
         margin: auto;
 
+        .accept-reject {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            background-color: #1a1a1a;
+            padding: 2%;
+
+            .video-call-accept {
+                background-color: green;
+                border: none;
+                border-radius: 100%;
+
+                .accept-call {
+                    color: white;
+                    font-size: 4.5vh;
+                }
+            }
+
+            .end-call-button {
+                background-color: red;
+                border: none;
+                border-radius: 100%;
+
+                .end-call {
+                    color: white;
+                    font-size: 4.5vh;
+                }
+
+            }
+
+        }
+
         .footer-in {
             height: 100%;
             width: 100%;
@@ -71,7 +105,7 @@
                 .video-off,
                 .mic-off {
                     color: rgb(26, 240, 161);
-                   font-size: 4vh;
+                    font-size: 4vh;
                 }
             }
 
