@@ -56,6 +56,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   const [fileAccept, setFileAccept] = useState(false);
   const [fileDownloaded, setFileDownloaded] = useState(false);
   const [disableSendBtn, setDisableSendBtn] = useState(false);
+  const [peerBClickedStopped, setpeerBClickedStopped] = useState(false);
   let { id } = useParams();
 
 
@@ -294,6 +295,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   }
   async function recieveData(e) {
     if (typeof (e.data) === 'string') {
+      setpeerBClickedStopped(false);
       fileInfo = JSON.parse(e.data);
       receivedFile = fileInfo.file.name;
       receivedFileSize = fileInfo.file.size;
@@ -305,6 +307,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
       setFileHistory(fileHistory => [...fileHistory, { id: v4(), filename: fileInfo.file.name, filesize: fileInfo.file.size / 1000000, color: '#333333', sender: val === 'peerA' ? 'peerB' : 'peerA', receiver: val, downloaded: false }]);
     }
     else {
+      if (peerBClickedStopped && val === 'peerB') return;
       setFileHistory(fileHistory => {
         // Make a copy of the existing fileHistory array
         const updatedFileHistory = [...fileHistory];
@@ -362,9 +365,8 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   function initializeDataChannelListeners(channel) {
     channel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
     channel.addEventListener('open', () => {
-      if (channel.label === 'fileChannel')
-        console.log('Data channel opened');
-      else console.log('signalling channel opened');
+      if (channel.label === 'fileChannel') console.log('Data channel opened');
+      else if(channel.label ==='signallingChannel') console.log('signalling channel opened');
     });
     channel.addEventListener('message', async (event) => {
 
@@ -406,7 +408,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
           initializeDataChannelListeners(dataChannel);
         }, 1000);
       }
-      else console.log('signalling channel closed');
+      else if(channel.label ==='signallingChannel') console.log('signalling channel closed');
     });
   }
 
@@ -474,6 +476,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
 
     val = sessionStorage.getItem('peerRole');
     if (val === 'peerB') {
+      setpeerBClickedStopped(true);
       const abortMessage = {
         type: 'peerB_aborted_receiving_file',
       };

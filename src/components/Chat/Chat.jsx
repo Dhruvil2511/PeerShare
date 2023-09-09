@@ -80,8 +80,14 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                 remoteConnection.messageChannel = channel;
                 channel.onmessage = recieveMessage;
             }
-            channel.onopen = event => console.log(channel.label + " opened");
-            channel.onclose = event => console.log(channel.label + " closed");
+            channel.onopen = event => {
+                if(channel.label ==='messageChannel')  console.log(channel.label + " opened");
+            }
+
+            channel.onclose = event => {
+                if(channel.label ==='messageChannel') console.log(channel.label + " closed");
+            }
+
         });
     }
     function fetchTime() {

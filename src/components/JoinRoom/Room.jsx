@@ -223,7 +223,6 @@ const Room = () => {
                 channel = event.channel;
                 if (channel.label === 'dummyChannel') {
                     remoteConnection.dummyChannel = channel;
-
                     channel.onmessage = async (e) => {
                         let details = JSON.parse(e.data);
                         peerAName = await details.name;
@@ -235,14 +234,18 @@ const Room = () => {
                 }
 
                 channel.onopen = async (e) => {
-                    console.log('dummy open hui? ');
-                    setTimeout(() => {
-                        const detail = {
-                            name: peerBName,
-                            id: peerBpfpId
-                        }
-                        remoteConnection.dummyChannel.send(JSON.stringify(detail));
-                    }, 500);
+                    if (channel.label === 'dummyChannel') {
+                        console.log('dummy open hui? ');
+                        setTimeout(() => {
+                            const detail = {
+                                name: peerBName,
+                                id: peerBpfpId
+                            }
+                            remoteConnection.dummyChannel.send(JSON.stringify(detail));
+                        }, 500);
+
+                    }
+
                 };
 
             });

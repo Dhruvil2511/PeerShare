@@ -218,7 +218,6 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
 
         channel.addEventListener('close', (event) => {
             if (channel.label === 'videoSignalChannel') {
-                callConnected = false;
                 console.log('video signal channel closed');
             }
         });
@@ -260,6 +259,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                 });
 
             });
+            
             localStream.getTracks().forEach(track => {
                 remoteConnection.addTrack(track, localStream);
             });
@@ -300,7 +300,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                 };
                 await roomRef.update(roomWithAnswer);
 
-            }
+            }   
 
 
             // Listening for remote ICE candidates below
@@ -319,6 +319,9 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     }
     async function hangVideoCall() {
         callConnected = false;
+        setCallAccepted(false);
+        setIsMicOn(true);
+        setIsVideoOn(true);
         const dbUser = firebase.firestore();
         let userRef = await dbUser.collection('users').doc(`${id}`);
         await userRef.set({ videoCallHandle: { clickedBy: null, clicked: false, verdict: '' } });
@@ -346,6 +349,11 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
             remoteStream.getTracks().forEach(track => track.stop());
             remoteStream.getVideoTracks()[0].stop();
         }
+
+        localConnection = null;
+        remoteConnection = null;
+        localStream = null;
+        remoteStream = null;
     }
     function registerPeerConnectionListeners(connection) {
         connection.addEventListener('icegatheringstatechange', () => {
@@ -356,9 +364,11 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         connection.addEventListener('connectionstatechange', () => {
             if (connection.connectionState === 'connected') {
                 callConnected = true;
+                setCallAccepted(true);
             }
             else if (connection.connectionState === 'disconnected') {
                 callConnected = false;
+                setCallAccepted(false);
             }
             console.log(`Connection state change: ${connection.connectionState}`);
         });
@@ -402,6 +412,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     }
 
     async function handleAcceptCall() {
+        setCallAccepted(true);
         const dbUser = firebase.firestore();
         let userRef = await dbUser.collection('users').doc(`${id}`);
         await userRef.set({ videoCallHandle: { clickedBy: val === 'peerB' ? 'peerA' : 'peerB', clicked: true, verdict: 'accepted' } });
