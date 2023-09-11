@@ -4,12 +4,13 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { json, useParams } from 'react-router-dom';
-import '../Transfer/Transfer.scss'
+import './TransferMobile.scss'
 import LinearProgress from '@mui/material/LinearProgress';
 import { v4 } from 'uuid';
 import { toast, ToastContainer } from 'react-toastify';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckIcon from '@mui/icons-material/Check';
+
 import CloseIcon from '@mui/icons-material/Close';
 
 
@@ -43,7 +44,7 @@ let signalChannel = null;
 let val = '';
 
 const worker = new Worker("../worker.js");
-const Transfer = ({ localConnection, remoteConnection }) => {
+const TransferMobile = ({ localConnection, remoteConnection }) => {
 
   const [fileInput, setFileInput] = useState('');
   const [isShrunk, setIsShrunk] = useState(false);
@@ -68,12 +69,10 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     });
     let checkPeerRole = sessionStorage.getItem('peerRole');
     if (checkPeerRole === 'peerA') {
-      setTimeout(() => {
-        dataChannel = localConnection.createDataChannel('fileChannel');
-        initializeDataChannelListeners(dataChannel);
-        signalChannel = localConnection.createDataChannel('signallingChannel');
-        initializeDataChannelListeners(signalChannel);
-      }, 1000);
+      signalChannel = localConnection.createDataChannel('signallingChannel');
+      dataChannel = localConnection.createDataChannel('fileChannel');
+      initializeDataChannelListeners(dataChannel);
+      initializeDataChannelListeners(signalChannel);
     }
     if (checkPeerRole === 'peerB') {
 
@@ -84,12 +83,15 @@ const Transfer = ({ localConnection, remoteConnection }) => {
         if (channel.label === 'fileChannel') {
           remoteConnection.dataChannel = channel;
           channel.onmessage = recieveData;
+          channel.onopen = event => console.log(channel.label + " opened");
+          channel.onclose = event => console.log(channel.label + " closed");
         }
         else if (channel.label === 'signallingChannel') {
           remoteConnection.signalChannel = channel;
           channel.onmessage = handleSignalling;
+          channel.onopen = event => console.log(channel.label + " opened");
+          channel.onclose = event => console.log(channel.label + " closed");
         }
-
       });
     }
   }, []);
@@ -307,7 +309,6 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     }
     else {
       if (peerBClickedStopped && val === 'peerB') return;
-      
       setFileHistory(fileHistory => {
         // Make a copy of the existing fileHistory array
         const updatedFileHistory = [...fileHistory];
@@ -364,11 +365,9 @@ const Transfer = ({ localConnection, remoteConnection }) => {
 
   function initializeDataChannelListeners(channel) {
     channel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
-
     channel.addEventListener('open', () => {
       if (channel.label === 'fileChannel') console.log('Data channel opened');
-      else if (channel.label === 'signallingChannel') console.log('signalling channel opened');
-
+      else if(channel.label ==='signallingChannel') console.log('signalling channel opened');
     });
     channel.addEventListener('message', async (event) => {
 
@@ -410,7 +409,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
           initializeDataChannelListeners(dataChannel);
         }, 1000);
       }
-      else if (channel.label === 'signallingChannel') console.log('signalling channel closed');
+      else if(channel.label ==='signallingChannel') console.log('signalling channel closed');
     });
   }
 
@@ -644,4 +643,4 @@ const Transfer = ({ localConnection, remoteConnection }) => {
   )
 }
 
-export default Transfer;
+export default TransferMobile;

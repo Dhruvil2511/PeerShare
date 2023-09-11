@@ -5,7 +5,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { useParams } from 'react-router-dom';
-import '../Chat/Chat.scss'
+import './ChatMobile.scss'
 import VideoCallIcon from '@mui/icons-material/VideoCall';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import animation from './FINAL.json'
@@ -32,7 +32,7 @@ let channel;
 let d;
 // let message = null;
 
-const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, remoteConnection }) => {
+const ChatMobile = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, remoteConnection }) => {
     let { id } = useParams();
     const [avatar, setAvatar] = useState(null);
     const [messageList, setMessageList] = useState([]);
@@ -80,6 +80,14 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                 remoteConnection.messageChannel = channel;
                 channel.onmessage = recieveMessage;
             }
+            channel.onopen = event => {
+                if(channel.label ==='messageChannel')  console.log(channel.label + " opened");
+            }
+
+            channel.onclose = event => {
+                if(channel.label ==='messageChannel') console.log(channel.label + " closed");
+            }
+
         });
     }
     function fetchTime() {
@@ -175,8 +183,8 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
     return (
         <>
 
-            <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '15px', height: '80vh', width: '30%', float: 'left' }}>
-                <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+            <div style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '15px', height: '75vh', width: '87%', float: 'left',marginLeft:'7%',marginTop:'10vh'}}>
+                <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '15%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                         <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%', borderRadius: '100%' }} />
                         <span style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>
@@ -184,9 +192,9 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                         </span>
                     </div>
                     <div className="video-button" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <button className='videoBtn' title={'Video Call'} style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
+                        {/* <button className='videoBtn' title={'Video Call'} style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
                             <VideoCallIcon style={{ transform: `scale(${1.4})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
-                        </button>
+                        </button> */}
                         <button className='deleteChatBtn' title={'Clear chat'} style={{ background: 'transparent', border: 'none' }} onClick={removeChat}>
                             <DeleteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
@@ -194,7 +202,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                 </div>
 
 
-                <div className="chatBox" style={{ height: '80%', overflow: 'scroll', overflowX: 'hidden', position: 'relative' }}>
+                <div className="chatBox" style={{ height: '70%', overflow: 'scroll', overflowX: 'hidden', position: 'relative' }}>
                     {
                         messageList.length === 0 &&
                         // <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: "100%" }}>
@@ -264,12 +272,12 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                     }
                 </div>
 
-                <form action="" onSubmit={sendMessage} style={{ backgroundColor: '#1a1a1a', width: '100%', height: '10%' }}>
+                <form action="" onSubmit={sendMessage} style={{ backgroundColor: '#1a1a1a', width: '100%', height: '15%' }}>
                     <footer style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
                         <button type='button' onClick={handleCopy} className='copyBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginRight: '4%' }}>
-                            <ContentPasteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                            <ContentPasteIcon style={{ transform: `scale(${1})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
-                        <input id='input-field' style={{ fontSize: '1.2vw', color: 'white', width: '70%', backgroundColor: '#333333', border: 'none', borderRadius: '5px' }} type='text' value={message} onChange={handleChange}></input>
+                        <input id='input-field' style={{ fontSize: '1.9vw', color: 'white', width: '70%', backgroundColor: '#333333', border: 'none', borderRadius: '5px' }} type='text' value={message} onChange={handleChange}></input>
                         <button type="submit" id='sendBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginLeft: '4%' }}>
                             <SendIcon style={{ transform: `scale(${1.3})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
@@ -280,4 +288,4 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
     );
 }
 
-export default Chat;
+export default ChatMobile;

@@ -3,7 +3,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { useParams } from 'react-router-dom';
-import '../Video/VideoChat.scss'
+import './VideoChatMobile.scss'
 import VideocamIcon from '@mui/icons-material/Videocam';
 import MicIcon from '@mui/icons-material/Mic';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
@@ -11,7 +11,7 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import axios from 'axios';
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-
+import VideoCallIcon from '@mui/icons-material/VideoCall';
 const firebaseConfig = {
     apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
     authDomain: "signalling-28129.firebaseapp.com",
@@ -64,7 +64,7 @@ let videoSignalChannel = null;
 let callConnected = false;
 
 
-const VideoChat = ({ peerApfpId, peerBpfpId }) => {
+const VideoChatMobile = ({ peerApfpId, peerBpfpId }) => {
     let { id } = useParams();
 
     const [flag, setFlag] = useState(true);
@@ -72,7 +72,8 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     const [isMicOn, setIsMicOn] = useState(true);
     const [videoCallButtonClicked, setVideoCallButtonClicked] = useState({ clickedBy: null, clicked: false, verdict: '' });
     const [callAccepted, setCallAccepted] = useState(false);
-
+    const [clickedBy,setClickedBy]=useState('')
+    const [videoCallButtonState, setVideoCallButtonState] = useState(true);
 
     useEffect(() => {
         const db = firebase.firestore();
@@ -94,47 +95,12 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                         }
                     }, 1000);
                 }
-                if (!data.videoCallHandle.clicked) {
-                    callConnected = false;
-                    setCallAccepted(false);
-                    setIsMicOn(true);
-                    setIsVideoOn(true);
-                    if (localConnection) localConnection.close();
-                    if (remoteConnection) remoteConnection.close();
-
-                    if (localStream) {
-                        localStream.getTracks().forEach(track => track.stop());
-                        localStream.getVideoTracks()[0].stop();
-                    }
-                    if (remoteStream) {
-                        remoteStream.getTracks().forEach(track => track.stop());
-                        remoteStream.getVideoTracks()[0].stop();
-                    }
-
-                    localConnection = null;
-                    remoteConnection = null;
-                    localStream = null;
-                    remoteStream = null;
-                    const dbVideo = firebase.firestore();
-                    const roomRef = await dbVideo.collection('videoCon').doc(`${id}`);
-                    const calleeCandidates = await roomRef.collection('calleeCandidates').get();
-                    calleeCandidates.forEach(async candidate => {
-                        await candidate.ref.delete();
-                    });
-                    const callerCandidates = await roomRef.collection('callerCandidates').get();
-                    callerCandidates.forEach(async candidate => {
-                        await candidate.ref.delete();
-                    });
-                    await roomRef.delete();
-                }
             }
         });
         return () => {
             unsubscribe();
         };
     }, []);
-
-
     async function openUserMedia() {
         const stream = await navigator.mediaDevices.getUserMedia(
             { video: true, audio: true });
@@ -143,7 +109,6 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         remoteStream = new MediaStream();
         document.querySelector('#remoteVideo').srcObject = remoteStream;
     }
-
     async function initializeLocalConnection() {
         await openUserMedia();
         const db = firebase.firestore();
@@ -200,7 +165,9 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                 await localConnection.setRemoteDescription(rtcSessionDescription);
             }
         });
+        // Listening for remote session description above
 
+        // Listen for remote ICE candidates below
         roomRef.collection('calleeCandidates').onSnapshot(snapshot => {
             snapshot.docChanges().forEach(async change => {
                 if (change.type === 'added') {
@@ -216,6 +183,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     function initializeChannelListeners(channel) {
         channel.bufferedAmountLowThreshold = 15 * 1024 * 1024;
         channel.addEventListener('open', () => {
+
             if (channel.label === 'videoSignalChannel')
                 console.log('video signal channel opened');
         });
@@ -277,7 +245,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                 });
 
             });
-
+            
             localStream.getTracks().forEach(track => {
                 remoteConnection.addTrack(track, localStream);
             });
@@ -318,7 +286,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                 };
                 await roomRef.update(roomWithAnswer);
 
-            }
+            }   
 
 
             // Listening for remote ICE candidates below
@@ -327,7 +295,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                     if (change.type === 'added') {
                         let data = change.doc.data();
                         console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
-                        if (remoteConnection) await remoteConnection.addIceCandidate(new RTCIceCandidate(data));
+                        await remoteConnection.addIceCandidate(new RTCIceCandidate(data));
                     }
                 });
             });
@@ -373,7 +341,6 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         localStream = null;
         remoteStream = null;
     }
-
     function registerPeerConnectionListeners(connection) {
         connection.addEventListener('icegatheringstatechange', () => {
             console.log(
@@ -388,8 +355,6 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
             else if (connection.connectionState === 'disconnected') {
                 callConnected = false;
                 setCallAccepted(false);
-                setIsMicOn(true);
-                setIsVideoOn(true);
             }
             console.log(`Connection state change: ${connection.connectionState}`);
         });
@@ -438,10 +403,36 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         let userRef = await dbUser.collection('users').doc(`${id}`);
         await userRef.set({ videoCallHandle: { clickedBy: val === 'peerB' ? 'peerA' : 'peerB', clicked: true, verdict: 'accepted' } });
     }
+    async function handlevideoCallButtonState(event) {
+        const db = firebase.firestore();
+        let userRef = db.collection('users').doc(`${id}`);
 
+        userRef.onSnapshot(async (snapshot) => {
+            var data = snapshot.data();
+            console.log(data);
+            if (data && data.videoCallHandle) {
+                if (data.videoCallHandle && data.videoCallHandle.clickedBy === null) {
+                    document.querySelector('.videoBtn').disabled = false;
+                    setVideoCallButtonState(false);
+                }
+            }
+        });
+
+        if (videoCallButtonState) {
+            document.querySelector('.videoBtn').disabled = true;
+        }
+
+        let val = sessionStorage.getItem('peerRole');
+        val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true, verdict: '' } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true, verdict: '' } });
+
+    }
     return (
         <>
-            {videoCallButtonClicked.clicked &&
+                <button className='videoBtn' title={'Video Call'} style={{ background: 'rgb(26, 240, 161)', border: '1px solid white' }} onClick={handlevideoCallButtonState}>
+                    {/* <VideoCallIcon style={{ transform: `scale(${1.4})`, width: '100%', color: 'rgb(26, 240, 161)' }} /> */}
+                    Start Video Call
+                </button>
+                {videoCallButtonClicked.clicked &&
                 <div className="video" >
                     <div className="first">
                         {
@@ -500,4 +491,4 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     )
 }
 
-export default VideoChat;
+export default VideoChatMobile;

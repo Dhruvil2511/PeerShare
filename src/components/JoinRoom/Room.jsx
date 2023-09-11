@@ -14,6 +14,9 @@ import { v4 } from 'uuid';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import CircleIcon from '@mui/icons-material/Circle';
 import { ReactComponent as ReactLogo } from './logo.svg';
+import { BrowserView, MobileView, isBrowser, isMobile } from 'react-device-detect';
+
+
 const configuration = {
     iceServers: [
         {
@@ -73,7 +76,8 @@ const Room = () => {
     const [avatar, setAvatar] = useState('');
     const [userConnected, setUserConnected] = useState(true);
     const [showChat, setShowChat] = useState(false);
-
+    const [mobileView, setMobileView] = useState(false);
+    const [chatLoaded, setChatLoaded] = useState(false);
     let checkPeerRole = sessionStorage.getItem('peerRole');
     useEffect(() => {
 
@@ -94,6 +98,28 @@ const Room = () => {
         }
     }, []);
 
+    useEffect(() => {
+        if (isMobile || window.screen.width <= 800) setMobileView(true);
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 800) setMobileView(true)
+            else setMobileView(false)
+        })
+    }, []);
+
+    useEffect(() => {
+        if (isConnected) {
+            if (checkPeerRole === 'peerB') {
+                setChatLoaded(true);
+            }
+            else {
+                setTimeout(() => {
+                    setChatLoaded(true);
+                }, 2000);
+            }
+        }
+
+    }, [isConnected]);
+
 
 
     async function fetchAvatar() {
@@ -110,6 +136,7 @@ const Room = () => {
         const db = firebase.firestore();
         userRef = await db.collection('users').doc(`${id}`);
         console.log('generate id called');
+
         console.log('Creating local connection');
 
         localConnection = new RTCPeerConnection(configuration);
@@ -221,6 +248,8 @@ const Room = () => {
 
             remoteConnection.addEventListener('datachannel', async (event) => {
                 channel = event.channel;
+
+
                 if (channel.label === 'dummyChannel') {
                     remoteConnection.dummyChannel = channel;
                     channel.onmessage = async (e) => {
@@ -234,8 +263,9 @@ const Room = () => {
                 }
 
                 channel.onopen = async (e) => {
+                    console.log(channel.label + ' opened');
+
                     if (channel.label === 'dummyChannel') {
-                        console.log('dummy open hui? ');
                         setTimeout(() => {
                             const detail = {
                                 name: peerBName,
@@ -334,8 +364,8 @@ const Room = () => {
     return (
         <>
             {!isConnected && <Preloader />}
-            {isConnected
-                &&
+
+            {isConnected && !mobileView &&
                 <div className="navbar">
                     <div className="logo">
                         <div className="logo_name">
@@ -372,15 +402,48 @@ const Room = () => {
                     </div>
                 </div>
             }
-            {/* {(isConnected && !peerAName || !peerApfpId || !peerBName || !peerBpfpId) && <Lottie animationData={connecting}/>} */}
-            <div className='room-wrapper' style={{ display: 'flex', padding: '1%' }}>
-                {isConnected && <audio autoPlay={true} src='/connection.mp3'></audio>}
-                {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
-                {isConnected && showChat && <VideoChat peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />}
-                {isConnected && showChat &&
-                    <Chat peerAName={peerAName} peerBName={peerBName} peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />
-                }
-            </div>
+            {
+                !mobileView &&
+                <div className='room-wrapper' style={{ display: 'flex', padding: '1%' }}>
+                    {isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}
+                    {isConnected && showChat && <VideoChat peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />}
+                    {isConnected && showChat &&
+                        chatLoaded &&
+                        <Chat peerAName={peerAName} peerBName={peerBName} peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />
+                    }
+                </div>
+            }
+            {
+                mobileView &&
+                <>
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <div id='mobTransfer' style={{ width: '100vw' }}>{isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}</div>
+                        <div id='mobChat' style={{ width: '100vw', display: 'none' }}>  {isConnected && showChat &&
+                            chatLoaded &&
+                            <Chat peerAName={peerAName} peerBName={peerBName} peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />
+                        }
+                        </div>
+                        <div id='mobVideoChat' style={{ width: '100vw', display: 'none' }}>  {isConnected && showChat && <VideoChat peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />}</div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <button onClick={() => {
+                            document.getElementById('mobTransfer').style.display = 'block';
+                            document.getElementById('mobChat').style.display = 'none';
+                            document.getElementById('mobVideoChat').style.display = 'none';
+                        }}>Transfer</button>
+                        <button onClick={() => {
+                            document.getElementById('mobTransfer').style.display = 'none'
+                            document.getElementById('mobChat').style.display = 'block'
+                            document.getElementById('mobVideoChat').style.display = 'none'
+                        }}>Chat</button>
+                        <button onClick={() => {
+                            document.getElementById('mobTransfer').style.display = 'none'
+                            document.getElementById('mobChat').style.display = 'none'
+                            document.getElementById('mobVideoChat').style.display = 'block'
+                        }}>Video Chat</button>
+                    </div>
+                </>
+            }
         </>
     )
 }
