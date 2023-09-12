@@ -1,4 +1,3 @@
-
 /* Hide scrollbar for IE, Edge and Firefox */
 .chatBox {
     // -ms-overflow-style: none !important;
@@ -30,3 +29,33 @@
 }
 
 /* width */
+
+
+@media only screen and (max-width: 800px) {
+
+    .daddy {
+        width: 100% !important;
+        border: none !important;
+    }
+
+    #user-name {
+        font-size: large !important;
+    }
+
+    #empty {
+        font-size: larger !important;
+        margin-left: 2% !important;
+    }
+
+    #start {
+        font-size: small !important;
+    }
+
+    #msg {
+        font-size: medium !important;
+    }
+
+    #time {
+        font-size: xx-small !important;
+    }
+}

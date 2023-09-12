@@ -307,7 +307,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     }
     else {
       if (peerBClickedStopped && val === 'peerB') return;
-      
+
       setFileHistory(fileHistory => {
         // Make a copy of the existing fileHistory array
         const updatedFileHistory = [...fileHistory];
@@ -562,8 +562,8 @@ const Transfer = ({ localConnection, remoteConnection }) => {
             }}
               htmlFor="actual-btn">
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <AddCircleOutlineIcon sx={{ fontSize: { xs: 20, sm: 25, md: 30, lg: 40 } }} color='primary' />
-                <span style={{ padding: '2% 5% 2% 5%', fontSize: '1vw' }}>
+                <AddCircleOutlineIcon sx={{ fontSize: { xs: 40, sm: 40, md: 40, lg: 50 } }} color='primary' />
+                <span className='inside' style={{ padding: '2% 5% 2% 5%', fontSize: '1vw' }}>
                   Click to browse or drag files to start sharing
                 </span>
               </div>
@@ -572,22 +572,20 @@ const Transfer = ({ localConnection, remoteConnection }) => {
             <div id='file-selected' style={{ alignSelf: 'center', fontSize: '1vw' }}>{fileInput && fileInput.name}{fileInput && convert(fileInput.size / 1000000)}</div>
             <div className="buttons">
               <button disabled={!parseInt(fileProgress)} className='abort-sending-file' onClick={handleSendAbort}>Stop sending</button>
-              {/* <button className='retry-btn' id='retry' onClick={retryConnect}> Retry Connection </button> */}
               <button disabled={parseInt(fileProgress) || parseInt(recvFileProgress) || disableSendBtn} className='sendFileBtn' onClick={(sendFile)}>Send</button>
               <button disabled={!parseInt(recvFileProgress)} className='abort-receiving-file' onClick={handleReceiveAbort}>Stop receiving</button>
-              {/* <button id='hangUpBtn' onClick={hangUp} style={{ backgroundColor: 'red' }} className='leaveBtn'> Leave Room </button> */}
             </div>
 
 
             <div className="progress-bar">
               <div className="send-bar">
-                <div className='sender-label'><pre style={{ margin: '0%' }}>Sender  </pre></div>
-                <LinearProgress variant="determinate" value={fileProgress} style={{ height: '30%', width: '72%', alignSelf: 'center' }} />
+                <div className='sender-label'><pre className='progress-label' style={{ margin: '0%' }}>Sender  </pre></div>
+                <LinearProgress className='progress' variant="determinate" value={fileProgress} style={{ height: '30%', width: '72%', alignSelf: 'center' }} />
                 <div className='sender-percentage'>{parseInt(fileProgress)} %</div>
               </div>
               <div className="receive-bar">
-                <div className='receiver-label'><pre style={{ margin: '0%' }}>Receiver</pre></div>
-                <LinearProgress variant="determinate" value={recvFileProgress} style={{ height: '30%', width: '72%', alignSelf: 'center' }} />
+                <div className='receiver-label'><pre className='progress-label' style={{ margin: '0%' }}>Receiver</pre></div>
+                <LinearProgress className='progress' variant="determinate" value={recvFileProgress} style={{ height: '30%', width: '72%', alignSelf: 'center' }} />
                 <div className='receiver-percentage'>{parseInt(recvFileProgress)} %</div>
               </div>
             </div>

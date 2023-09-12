@@ -14,7 +14,13 @@ import { v4 } from 'uuid';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import CircleIcon from '@mui/icons-material/Circle';
 import { ReactComponent as ReactLogo } from './logo.svg';
-import { BrowserView, MobileView, isBrowser, isMobile } from 'react-device-detect';
+// import Logo from '../Logo/Logo';
+import DuoIcon from '@mui/icons-material/Duo';
+import VideoChatIcon from '@mui/icons-material/VideoChat';
+import ChatIcon from '@mui/icons-material/Chat';
+import IosShareIcon from '@mui/icons-material/IosShare';
+import { isMobile } from 'react-device-detect';
+
 
 
 const configuration = {
@@ -365,7 +371,7 @@ const Room = () => {
         <>
             {!isConnected && <Preloader />}
 
-            {isConnected && !mobileView &&
+            {isConnected &&
                 <div className="navbar">
                     <div className="logo">
                         <div className="logo_name">
@@ -388,7 +394,7 @@ const Room = () => {
                             </span>
                             <div className="room-buttons">
                                 {/* <button className="retry-button" title='retry connection' onClick={retryConnect}><ReplayIcon /></button> */}
-                                <button className="leave-button" title='exit' onClick={leaveRoom}><PowerSettingsNewIcon sx={{ fontSize: { xs: 10, sm: 14, md: 22, lg: 28 } }} /></button>
+                                <button className="leave-button" title='exit' onClick={leaveRoom}><PowerSettingsNewIcon sx={{ fontSize: { xs: 8, sm: 14, md: 22, lg: 28 } }} /></button>
                             </div>
                         </div>
 
@@ -396,7 +402,7 @@ const Room = () => {
                     <div className="connection-status">
                         <div className='status'>
                             {
-                                userConnected ? <><CircleIcon sx={{ fontSize: { xs: 5, sm: 8, md: 10, lg: 15 } }} color='success' style={{ marginBottom: '5%' }} /> <span style={{ fontSize: '1.1vw' }}>Connected</span> </> : <><CircleIcon sx={{ fontSize: { xs: 5, sm: 8, md: 10, lg: 15 } }} color='error' style={{ marginBottom: '5%' }} /> <span style={{ fontSize: '1.1vw' }}>Disconnected</span> </>
+                                userConnected ? <><CircleIcon sx={{ fontSize: { xs: 5, sm: 8, md: 10, lg: 15 } }} color='success' style={{ marginBottom: '5%' }} /> <span id='status' style={{ fontSize: '1.1vw' }}>Connected</span> </> : <><CircleIcon sx={{ fontSize: { xs: 5, sm: 8, md: 10, lg: 15 } }} color='error' style={{ marginBottom: '5%' }} /> <span style={{ fontSize: '1.1vw' }}>Disconnected</span> </>
                             }
                         </div>
                     </div>
@@ -425,22 +431,50 @@ const Room = () => {
                         </div>
                         <div id='mobVideoChat' style={{ width: '100vw', display: 'none' }}>  {isConnected && showChat && <VideoChat peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />}</div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <button onClick={() => {
+                    <div className='bottom-nav-bar' style={{ display: 'flex', flexDirection: 'row' }}>
+
+
+                        <button className='nav-buttons active' id='fileshare' onClick={() => {
                             document.getElementById('mobTransfer').style.display = 'block';
                             document.getElementById('mobChat').style.display = 'none';
                             document.getElementById('mobVideoChat').style.display = 'none';
-                        }}>Transfer</button>
-                        <button onClick={() => {
+                            document.getElementById('fileshare').style.color = '#0A82FD';
+                            document.getElementById('chatmob').style.color = 'white';
+                            document.getElementById('videomob').style.color = 'white';
+
+                        }}>
+                            <IosShareIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
+                        </button>
+
+
+
+                        <button id='chatmob' className='nav-buttons' onClick={() => {
                             document.getElementById('mobTransfer').style.display = 'none'
                             document.getElementById('mobChat').style.display = 'block'
                             document.getElementById('mobVideoChat').style.display = 'none'
-                        }}>Chat</button>
-                        <button onClick={() => {
+                            document.getElementById('chatmob').style.color = '#0A82FD';
+                            document.getElementById('videomob').style.color = 'white';
+                            document.getElementById('fileshare').style.color = 'white';
+                            document.querySelector('.active').style.color = 'white';
+                        }}>
+                            <ChatIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
+                        </button>
+
+
+                        <button id='videomob' className='nav-buttons' onClick={() => {
                             document.getElementById('mobTransfer').style.display = 'none'
                             document.getElementById('mobChat').style.display = 'none'
                             document.getElementById('mobVideoChat').style.display = 'block'
-                        }}>Video Chat</button>
+                            document.getElementById('videomob').style.color = '#0A82FD';
+                            document.getElementById('chatmob').style.color = 'white';
+                            document.getElementById('fileshare').style.color = 'white';
+                            document.querySelector('.active').style.color = 'white';
+
+                        }}>
+                            <DuoIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
+                        </button>
+
+
                     </div>
                 </>
             }

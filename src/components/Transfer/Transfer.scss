@@ -3,7 +3,7 @@
   float: left;
   // padding-top: 2%;
   position: relative;
-  width: 70% ;
+  width: 70%;
   height: 80vh;
   transition: all 2s ease;
 
@@ -360,6 +360,64 @@
         }
 
       }
+    }
+  }
+}
+
+
+@media only screen and (max-width: 800px) {
+  .shrinkable-div {
+    width: 100% !important;
+  }
+
+  .input-div {
+    height: 60%;
+  }
+
+  .input-label {
+    width: 70% !important;
+  }
+  .progress-label{
+    font-size: small!important;
+  }
+  .progress-bar{
+    margin-top: 10% !important;
+  }
+  .inside {
+    font-size: 100% !important;
+  }
+
+  .buttons {
+    margin-top: 5% !important;
+  }
+
+  .abort-receiving-file,
+  .abort-sending-file,
+  .sendFileBtn {
+    height: 100% !important;
+    // font-size: 50% !important;
+    font-size: 10px !important;
+  }
+
+  #file-selected {
+    font-size: large !important;
+  }
+
+  .sendFileBtn {
+    width: 50% !important;
+    font-size: 15px !important;
+  }
+
+  .progress{
+    width: 50% !important;
+  }
+
+
+  .flexTransferBottom{
+    width: 100% !important;
+    height: 30vh !important;
+    .fileHistory{
+      width: 100% !important;
     }
   }
 }

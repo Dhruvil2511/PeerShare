@@ -23,7 +23,7 @@
             margin-left: 3%;
             width: 100%;
 
-            img {
+            .img {
                 height: 6vh;
                 width: 3vw;
             }
@@ -79,37 +79,25 @@
 
             .text {
                 font-size: 1.3vw;
+                font-weight: bolder;
                 color: #FFD700;
             }
 
         }
 
         .room-buttons {
-            display: flex;
-            width: fit-content;
-            justify-content: flex-end;
-            align-items: center;
+
             margin-left: 5%;
 
-            .retry-button {
-                width: auto;
-                border: none;
-                background: transparent;
-                color: #0A82FD;
-                padding: 0% 2% 0% 2%;
-                // margin-right: 20%;
-            }
-
             .leave-button {
+                // width: fit-content;
                 border: none;
                 padding: 5% !important;
                 border-radius: 100%;
                 color: white;
-                padding: 0% 2% 0% 2%;
                 background: red;
 
             }
-
 
         }
     }
@@ -123,11 +111,118 @@
         align-items: center;
 
         .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-right: 10%;
+
+            #status {
+                margin-left: 10px;
+            }
+
             width: fit-content;
             padding: 2%;
             color: white;
 
         }
     }
+}
+
+
+@media only screen and (max-width: 800px) {
+    #mobChat {
+        padding: 2% !important;
+        // border: none !important
+    }
+
+    .bottom-nav-bar {
+        width: 100%;
+        background-color: #1a1a1a;
+        display: flex;
+        border-top: 1px solid #333333 !important;
+        // justify-content: space-evenly;
+        // align-items: center;
+        height: 10vh !important;
+
+
+
+
+        // width: 100%;
+        //    justify-items: center;
+        .nav-buttons {
+            border: none;
+            background: none;
+            flex: 1;
+            // margin-bottom: 2%;
+            padding: 0% 10% 0% 10% !important;
+            // color: #0A82FD;
+            color: white;
+
+
+
+            &:hover {
+                // color: rgb(26, 240, 161) !important;
+                color: #0A82FD !important;
+            }
+        }
+
+        .active {
+            color: #0A82FD;
+        }
+
+
+    }
+
+    .navbar {
+        height: 10vh;
+    }
+
+    .name {
+        font-size: 3vw !important;
+        margin-left: 10% !important;
+    }
+
+    .logo {
+        width: 25% !important;
+    }
+
+    .motive {
+        display: none;
+    }
+
+    .both {
+        width: 55% !important;
+    }
+
+    .connection-status {
+        width: 20% !important;
+    }
+
+    .text {
+        font-size: 2vw !important;
+    }
+
+    .user-pfp {
+        height: 100% !important;
+        box-shadow: none !important;
+        -webkit-box-shadow: none;
+    }
+
+    .room-buttons {
+        margin-left: 5% !important;
+    }
+
+    .status {
+        font-size: 10vw !important;
+    }
+
+    #svg {
+        width: 30% !important;
+    }
+
+    #status {
+        font-size: 3vw !important;
+        margin-left: 5px !important;
+    }
+
 }
