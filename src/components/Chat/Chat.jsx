@@ -11,6 +11,7 @@ import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import animation from './FINAL.json'
 import Lottie from 'lottie-react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ReplyIcon from '@mui/icons-material/Reply';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
@@ -38,8 +39,12 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
     const [messageList, setMessageList] = useState([]);
     const [message, setMessage] = useState('');
     const [videoCallButtonState, setVideoCallButtonState] = useState(true);
-    // const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [resizeChatArea, setResizeChatArea] = useState(80);
+    const [replyResize, setReplySize] = useState(0);
+    const [displayReply, setDisplayReply] = useState('none')
+    const [messageReply, setMessageReply] = useState('')
     const chatbox = document.querySelector(".chatBox");
+    const [toReply, setToReply] = useState('')
 
     // let {id} = useParams();
 
@@ -64,7 +69,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         messageChannel.addEventListener('message', (event) => {
             if (event.data) {
                 console.log(event.data);
-                setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': event.data, time: fetchTime() }]);
+                setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': JSON.parse(event.data).message, time: fetchTime(), reply: JSON.parse(event.data).reply }]);
             }
         });
 
@@ -91,7 +96,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
 
     async function recieveMessage(e) {
         console.log('recieved message from peerA : ' + e.data);
-        setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': e.data, time: fetchTime() }]);
+        setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': JSON.parse(e.data).message, time: fetchTime(), reply: JSON.parse(e.data).reply }]);
     }
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -100,18 +105,36 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         document.getElementById('input-field').value = '';
         let val = sessionStorage.getItem('peerRole');
         if (val === 'peerA') {
-            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': message, time: fetchTime() }]);
-            messageChannel.send(message);
+            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': message, time: fetchTime(), reply: messageReply }]);
+
+            const sendingMessage = {
+                message: message,
+                reply: messageReply
+            }
+            messageChannel.send(JSON.stringify(sendingMessage));
+            setMessageReply('')
+            setReplySize(0);
+            setResizeChatArea(80)
+            setDisplayReply('none')
 
         } else {
-            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': message, time: fetchTime() }]);
-            remoteConnection.messageChannel.send(message);
+            const sendingMessage = {
+                message: message,
+                reply: messageReply
+            }
+            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': message, time: fetchTime(), reply: messageReply }]);
+            remoteConnection.messageChannel.send(JSON.stringify(sendingMessage));
+            setMessageReply('')
         }
         setTimeout(() => {
             chatbox.scrollTop = chatbox.scrollHeight;
         }, 100);
 
         setMessage('');
+        setMessage('');
+        setReplySize(0);
+        setResizeChatArea(80)
+        setDisplayReply('none')
     }
 
     const fetchAvatar = () => {
@@ -165,6 +188,10 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
 
         if (response) {
             setMessageList([]);
+            setMessageReply('')
+            setReplySize(0);
+            setResizeChatArea(80)
+            setDisplayReply('none')
         } else {
             return;
         }
@@ -175,7 +202,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
     return (
         <>
 
-            <div className='daddy' style={{ backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '15px', height: '80vh', width: '30%', float: 'left' }}>
+            <div className='daddy' style={{ resize: 'horizontal', backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '15px', height: '80vh', width: '30%', float: 'left' }}>
                 <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                         <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%', borderRadius: '100%' }} />
@@ -194,13 +221,13 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                 </div>
 
 
-                <div className="chatBox" style={{ height: '80%', overflow: 'scroll', overflowX: 'hidden', position: 'relative' }}>
+                <div className="chatBox" style={{ height: `${resizeChatArea}%`, overflow: 'scroll', overflowX: 'hidden', position: 'relative' }}>
                     {
                         messageList.length === 0 &&
                         // <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: "100%" }}>
                         <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '10%' }}>
                             <Lottie style={{ height: '50%' }} animationData={animation} />
-                            <div style={{ height: '50%', width: '100%' ,display:'flex' ,alignItems:'center',flexDirection:'column'}}>
+                            <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
                                 <span id='empty' style={{ fontSize: '1.5vw', color: 'white' }}>IT'S EMPTY IN HERE!</span>
                                 {/* <br /> */}
                                 <span id='start' style={{ fontSize: '1vw', color: 'white' }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start chatting with your peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -216,9 +243,36 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
-                                                <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
-                                                <span id='time'style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px', flexDirection: 'column' }}>
+                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>{value.reply}</div>}
+                                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                    <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <button style={{ justifySelf: 'flex-end', fontSize: '1vw', justifySelf: 'center', WebkitAlignSelf: 'flex-end', cursor: 'pointer', background: 'transparent', border: 'none', color: 'wheat', display: 'flex', justifyContent: 'flex-end' }} onClick={(e) => {
+                                                            e.preventDefault();
+                                                            let msg = '', cntSpace = 0;
+                                                            for (var i = 0; i < value.message.length; i++) {
+                                                                msg += value.message[i];
+                                                                if (value.message[i] === ' ') {
+                                                                    cntSpace++;
+                                                                    console.log(cntSpace)
+
+                                                                }
+                                                                if (cntSpace === 7) break;
+
+                                                            }
+                                                            if (cntSpace >= 7) msg += '..';
+                                                            setMessageReply(msg)
+                                                            document.querySelector('#input-field').focus();
+                                                            setResizeChatArea(64)
+                                                            setReplySize(16)
+                                                            setDisplayReply('flex')
+                                                            setToReply(value.role)
+
+                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: { xs: 5, sm: 5, md: 5, lg: 5 } }} /></button>
+                                                        <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
+                                                    </div>
+                                                </div>
 
                                             </div>
                                         </div>
@@ -227,9 +281,34 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
-                                                <span id='msg'style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
-                                                <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px', flexDirection: 'column' }}>
+                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>{value.reply}</div>}
+                                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                    <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <button style={{ justifySelf: 'flex-end', fontSize: '1vw', justifySelf: 'center', WebkitAlignSelf: 'flex-end', cursor: 'pointer', background: 'transparent', border: 'none', color: 'wheat', display: 'flex', justifyContent: 'flex-end' }} onClick={(e) => {
+                                                            e.preventDefault();
+                                                            let msg = '', cntSpace = 0;
+                                                            for (var i = 0; i < value.message.length; i++) {
+                                                                msg += value.message[i];
+                                                                if (value.message[i] === ' ') {
+                                                                    cntSpace++;
+                                                                    console.log(cntSpace)
+                                                                }
+                                                                if (cntSpace === 7) break;
+                                                            }
+                                                            if (cntSpace >= 7) msg += '..';
+                                                            setMessageReply(msg)
+                                                            document.querySelector('#input-field').focus();
+                                                            setResizeChatArea(64)
+                                                            setReplySize(16)
+                                                            setDisplayReply('flex')
+                                                            setToReply(value.role)
+                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: { xs: 5, sm: 5, md: 5, lg: 5 } }} /></button>
+
+                                                        <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     )
@@ -239,20 +318,68 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
-                                                <span id='msg'style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
-                                                <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px', flexDirection: 'column' }}>
+                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>{value.reply}</div>}
+                                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                    <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <button style={{ justifySelf: 'flex-end', fontSize: '1vw', justifySelf: 'center', WebkitAlignSelf: 'flex-end', cursor: 'pointer', background: 'transparent', border: 'none', color: 'wheat', display: 'flex' }} onClick={(e) => {
+                                                            e.preventDefault();
+                                                            let msg = '', cntSpace = 0;
+                                                            for (var i = 0; i < value.message.length; i++) {
+                                                                msg += value.message[i];
+                                                                if (value.message[i] === ' ') {
+                                                                    cntSpace++;
+                                                                    console.log(cntSpace)
+                                                                }
+                                                                if (cntSpace === 7) break;
+                                                            }
+                                                            if (cntSpace >= 7) msg += '.....';
+                                                            setMessageReply(msg)
+                                                            document.querySelector('#input-field').focus();
+                                                            setResizeChatArea(64)
+                                                            setReplySize(16)
+                                                            setDisplayReply('flex')
+                                                            setToReply(value.role)
+                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: { xs: 5, sm: 5, md: 5, lg: 5 } }} /></button>
+                                                        <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                        </div>
+                                        </div>  
                                     )
                                 }
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px' }}>
-                                                <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
-                                                <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px', flexDirection: 'column' }}>
+                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>{value.reply}</div>}
+                                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                    <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <button style={{ justifySelf: 'flex-end', fontSize: '1vw', justifySelf: 'center', WebkitAlignSelf: 'flex-end', cursor: 'pointer', background: 'transparent', border: 'none', color: 'wheat', display: 'flex' }} onClick={(e) => {
+                                                            e.preventDefault();
+                                                            let msg = '', cntSpace = 0;
+                                                            for (var i = 0; i < value.message.length; i++) {
+                                                                msg += value.message[i];
+                                                                if (value.message[i] === ' ') {
+                                                                    cntSpace++;
+                                                                    console.log(cntSpace)
+                                                                }
+                                                                if (cntSpace === 7) break;
+                                                            }
+                                                            if (cntSpace >= 7) msg += '.....';
+                                                            setMessageReply(msg)
+                                                            document.querySelector('#input-field').focus();
+                                                            setResizeChatArea(64)
+                                                            setReplySize(16)
+                                                            setDisplayReply('flex')
+                                                            setToReply(value.role)
+                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: { xs: 5, sm: 5, md: 5, lg: 5 } }} /></button>
+                                                        <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -262,6 +389,20 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                             }
                         })
                     }
+                </div>
+                <div style={{ height: `${replyResize}%`, backgroundColor: '#333333', display: displayReply, justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '90%' }}>
+                        {toReply === 'peerA' ? <div style={{ color: 'white', marginLeft: '4%' }}>{peerAName}</div> : <div style={{ color: 'white', marginLeft: '4%' }}>{peerBName}</div>}
+                        <div style={{ color: 'white', marginLeft: '3%', backgroundColor: '#1a1a1a', padding: '0.7%', borderRadius: '15px' }}><span style={{ padding: '2%' }}>{messageReply}</span></div>
+                    </div>
+                    <button onClick={() => {
+                        setReplySize(0);
+                        setMessageReply('')
+                        setResizeChatArea(80)
+                        setDisplayReply('none')
+                        document.querySelector('#input-field').focus();
+
+                    }} style={{ color: 'white', background: 'transparent', border: 'none' }}>X</button>
                 </div>
 
                 <form action="" onSubmit={sendMessage} style={{ backgroundColor: '#1a1a1a', width: '100%', height: '10%' }}>
