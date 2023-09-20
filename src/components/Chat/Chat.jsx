@@ -311,7 +311,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                                 </div>
                                             </div>
                                         </div>
-                                    )
+                                    ) 
                                 }
                             }
                             else {
