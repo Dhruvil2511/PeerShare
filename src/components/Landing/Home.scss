@@ -1,0 +1,262 @@
+.link {
+    &:hover {
+        color: #1AF1A0 !important;
+    }
+}
+
+span {
+    color: #0A82FD;
+}
+
+.join {
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+
+    cursor: pointer;
+    border-radius: 26px;
+
+    &:hover {
+        color: black;
+    }
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100vw;
+    height: 5vh;
+    margin-top: 0.5%;
+    margin-bottom: 2%;
+    // position: fixed;
+
+    .logo {
+        height: 100%;
+        width: 33%;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        .logo_name {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding-left: 3%;
+            margin-left: 3%;
+            width: 100%;
+
+            .img {
+                height: 6vh;
+                width: 3vw;
+            }
+
+
+            .name-motive {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                width: fit-content;
+                word-wrap: normal;
+                margin-left: 3%;
+
+                .name {
+                    font-weight: bold;
+                    font-size: 1.2vw;
+                    color: white;
+
+                }
+
+                .motive {
+                    font-size: 0.6vw;
+                    color: white;
+                }
+            }
+        }
+    }
+
+    .empty {
+        width: 33%;
+    }
+
+    .navigation {
+        width: 33%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        color: white;
+    }
+}
+
+.left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+
+    .content {
+        display: block;
+
+        p {
+            font-size: 1.1vw;
+        }
+    }
+
+    .features {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .feature-left,
+        .feature-right,
+        .feature-middle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            // flex: 1;
+        }
+    }
+}
+
+.details{
+    color: white;
+    text-align: center;
+    h2{
+        font-size: 5vw;
+    }
+}
+.how-it-works{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.scroll {
+    display: flex;
+    margin-top: 5%;
+    justify-content: center;
+    align-items: center;
+    -webkit-animation: mover 1s infinite alternate;
+    animation: mover 1s infinite alternate;
+}
+
+@-webkit-keyframes mover {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes mover {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-10px);
+    }
+}
+
+.right {
+    margin-left: 15%;
+
+}
+
+svg {
+    height: 70%;
+}
+
+@keyframes connectionLineAnimation {
+    from {
+        stroke-dashoffset: 2000;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.ConnectionLine {
+    animation-name: connectionLineAnimation, connectionLineAnimation;
+    animation-duration: 1s, 1s;
+    animation-delay: 0.5s, 7.8s;
+    animation-timing-function: ease-in-out, ease-in-out;
+    animation-direction: normal, reverse;
+    animation-fill-mode: forwards;
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+
+}
+
+.ConnectionStatus {
+    animation-name: flashAnimation, connectLightAnimation, disconnectLightAnimation;
+    animation-duration: 0.3s, 1s, 1s;
+    animation-delay: 1.5s, 3.2s, 7.6s;
+    animation-timing-function: ease-in-out, linear, linear;
+    animation-fill-mode: forwards;
+}
+
+
+
+@keyframes flashAnimation {
+    from {
+        fill: #ffd778;
+        opacity: 0;
+    }
+
+    to {
+        fill: #ffd778;
+    }
+}
+
+@keyframes connectLightAnimation {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        fill: #09e800;
+    }
+}
+
+@keyframes disconnectLightAnimation {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        fill: #ff829d;
+    }
+}
+
+.LineGraph,
+.BarGraph {
+    animation-name: graphAnimation;
+    animation-duration: 5s;
+    animation-delay: 3.2s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+    opacity: 0;
+}
+
+@keyframes graphAnimation {
+    20% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 1;
+    }
+}

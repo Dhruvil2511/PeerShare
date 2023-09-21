@@ -1,16 +1,26 @@
 .App {
   text-align: center;
- 
+
 }
 
 
-body {
+.room {
   font-family: sans-serif;
-  background-image: url('./background_grainy.jpg');
+  background-image: url('../src/assets/background_grainy.jpg');
   background-size: cover;
   background-repeat: repeat;
   overflow: hidden;
 
+}
+
+.landing {
+  /* background-color: #282c34; */
+  background-image: url('../src/assets/background_grainy.jpg');
+  background-size: cover;
+  background-repeat: repeat;
+  overflow-x: hidden;
+  height: 100vh;
+  width: 100vw;
 }
 
 .App-logo {

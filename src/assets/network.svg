@@ -1,0 +1,554 @@
+   <svg
+                                id="Components"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 2412.19 2244.17"
+                                width="600"
+                            >
+                                <g id="Laptop">
+                                    <polygon
+                                        points="1165.98 897.52 1679.88 600.82 2399.34 1016.2 1885.44 1312.9 1165.98 897.52"
+                                        fill="#4d4d4d"
+                                    />
+                                    <polygon
+                                        points="1165.98 897.52 1165.98 927.19 1885.44 1342.57 1885.44 1312.9 1165.98 897.52"
+                                        fill="#333"
+                                    />
+                                    <polygon
+                                        points="1885.44 1312.9 1885.44 1342.57 2399.34 1045.87 2399.34 1016.2 1885.44 1312.9"
+                                        fill="#1a1a1a"
+                                    />
+                                    <path
+                                        d="M2006.78,628.9"
+                                        transform="translate(-326.9 -28.08)"
+                                        fill="#1a1a1a"
+                                    />
+                                    <polygon
+                                        points="1679.88 600.82 1680.1 6.92 2399.34 422.8 2399.34 1016.2 1679.88 600.82"
+                                        fill="#333"
+                                    />
+                                    <polygon
+                                        points="2399.34 1016.2 2412.19 1008.78 2412.19 415.38 2399.34 422.8 2399.34 1016.2"
+                                        fill="#1a1a1a"
+                                    />
+                                    <polygon
+                                        points="2399.34 422.8 2412.19 415.38 1692.73 0 1679.88 7.42 2399.34 422.8"
+                                        fill="#4d4d4d"
+                                    />
+                                    <polygon
+                                        points="1654.19 1149.71 1795.51 1068.12 1589.95 945.73 1448.63 1031.03 1654.19 1149.71"
+                                        fill="#1a1a1a"
+                                    />
+                                    <polygon
+                                        points="1705.58 51.92 1705.58 585.98 2373.65 971.69 2373.65 437.63 1705.58 51.92"
+                                        fill="#1a1a1a"
+                                    />
+                                    <line
+                                        x1="1705.58"
+                                        y1="81.59"
+                                        x2="2373.65"
+                                        y2="467.3"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="2270.87"
+                                        y1="378.29"
+                                        x2="2270.87"
+                                        y2="407.96"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="2065.31"
+                                        y1="259.61"
+                                        x2="2065.31"
+                                        y2="289.28"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="1705.58"
+                                        y1="111.26"
+                                        x2="2373.65"
+                                        y2="496.97"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="1705.58"
+                                        y1="155.6"
+                                        x2="2373.65"
+                                        y2="541.31"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="2013.92"
+                                        y1="333.92"
+                                        x2="2013.92"
+                                        y2="764"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                </g>
+                                <polygon
+                                    class="ConnectionStatus"
+                                    points="2335.11 489.56 2335.11 504.39 2296.56 482.14 2296.56 467.3 2335.11 489.56"
+                                    fill="#ff829d"
+                                />
+                                <polygon
+                                    points="1783 170.11 1783 184.94 1744.46 162.69 1744.46 147.86 1783 170.11"
+                                    fill="#3fa9f5"
+                                />
+                                <g id="Phone">
+                                    <polygon
+                                        points="568.64 1468.9 221.76 1669.17 427.32 1787.85 774.2 1587.58 568.64 1468.9"
+                                        fill="#666"
+                                    />
+                                    <polygon
+                                        points="221.76 1669.17 221.76 1684.01 427.32 1802.69 427.32 1787.85 221.76 1669.17"
+                                        fill="#4d4d4d"
+                                    />
+                                    <polygon
+                                        points="427.32 1787.85 427.32 1802.69 774.2 1602.41 774.2 1587.58 427.32 1787.85"
+                                        fill="#333"
+                                    />
+                                    <polygon
+                                        points="555.8 1476.32 761.36 1595 465.86 1765.6 260.3 1646.92 555.8 1476.32"
+                                        fill="#1a1a1a"
+                                    />
+                                    <polygon
+                                        points="555.8 1491.15 735.66 1595 465.6 1750.42 286 1646.92 555.8 1491.15"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="517.25"
+                                        y1="1513.4"
+                                        x2="697.06"
+                                        y2="1617.21"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="401.63"
+                                        y1="1580.16"
+                                        x2="581.25"
+                                        y2="1683.86"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                </g>
+                                <polygon
+                                    points="542.95 1513.4 569.1 1528.92 581.1 1520.92 555.8 1505.99 542.95 1513.4"
+                                    fill="#3fa9f5"
+                                />
+                                <polygon
+                                    id="ConnectionStatus-2"
+                                    class="ConnectionStatus"
+                                    points="671.1 1587.92 696.56 1602.23 709.65 1594.67 684.1 1579.92 671.1 1587.92"
+                                    fill="#ff829d"
+                                />
+                                <g id="Tablet">
+                                    <polygon
+                                        points="1834.34 1695.28 1320.44 1991.98 1731.56 2229.34 2245.46 1932.64 1834.34 1695.28"
+                                        fill="#f2f2f2"
+                                    />
+                                    <polygon
+                                        points="1320.44 1991.98 1320.44 2006.81 1731.56 2244.17 1731.56 2229.34 1320.44 1991.98"
+                                        fill="#e6e6e6"
+                                    />
+                                    <polygon
+                                        points="1731.56 2229.34 1731.56 2244.17 2245.46 1947.47 2245.46 1932.64 1731.56 2229.34"
+                                        fill="#ccc"
+                                    />
+                                    <polygon
+                                        points="1384.68 1954.89 1795.8 2192.25 2219.77 1947.47 1808.65 1710.11 1384.68 1954.89"
+                                        fill="#1a1a1a"
+                                    />
+                                    <polygon
+                                        points="1808.65 1724.95 2194.07 1947.47 1795.8 2177.42 1410.38 1954.89 1808.65 1724.95"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="1770.11"
+                                        y1="1747.2"
+                                        x2="2155.53"
+                                        y2="1969.73"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="1603.09"
+                                        y1="1847.34"
+                                        x2="1988.51"
+                                        y2="2066.15"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                </g>
+                                <polygon
+                                    points="1795.93 1747.36 1827.1 1765.92 1840.1 1757.92 1808.77 1739.94 1795.93 1747.36"
+                                    fill="#3fa9f5"
+                                />
+                                <polygon
+                                    id="ConnectionStatus-3"
+                                    class="ConnectionStatus"
+                                    points="2123.1 1935.92 2155.22 1954.75 2168.32 1947.19 2137.1 1928.92 2123.1 1935.92"
+                                    fill="#ff829d"
+                                />
+                                <g id="Laptop-2" class="Laptop">
+                                    <polygon
+                                        points="777.1 868.68 456.65 683.66 8.01 942.69 328.47 1127.7 777.1 868.68"
+                                        fill="#4d4d4d"
+                                    />
+                                    <polygon
+                                        points="777.1 868.68 777.1 887.18 328.47 1146.2 328.47 1127.7 777.1 868.68"
+                                        fill="#333"
+                                    />
+                                    <polygon
+                                        points="328.47 1127.7 328.47 1146.2 8.01 961.19 8.01 942.69 328.47 1127.7"
+                                        fill="#1a1a1a"
+                                    />
+                                    <path
+                                        d="M783.55,711.75"
+                                        transform="translate(-326.9 -28.08)"
+                                        fill="#1a1a1a"
+                                    />
+                                    <polygon
+                                        points="456.65 683.66 456.51 313.32 8.01 572.66 8.01 942.69 456.65 683.66"
+                                        fill="#333"
+                                    />
+                                    <polygon
+                                        points="8.01 942.69 0 938.06 0 568.03 8.01 572.66 8.01 942.69"
+                                        fill="#1a1a1a"
+                                    />
+                                    <polygon
+                                        points="8.01 572.66 0 568.03 448.64 309.01 456.65 313.63 8.01 572.66"
+                                        fill="#4d4d4d"
+                                    />
+                                    <polygon
+                                        points="472.67 1025.94 384.55 975.06 512.73 898.75 600.85 951.94 472.67 1025.94"
+                                        fill="#1a1a1a"
+                                    />
+                                    <polygon
+                                        points="440.63 341.39 440.63 674.41 24.03 914.93 24.03 581.91 440.63 341.39"
+                                        fill="#1a1a1a"
+                                    />
+                                    <line
+                                        x1="440.63"
+                                        y1="359.89"
+                                        x2="24.03"
+                                        y2="600.41"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="88.13"
+                                        y1="544.9"
+                                        x2="88.13"
+                                        y2="563.41"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="216.31"
+                                        y1="470.9"
+                                        x2="216.31"
+                                        y2="489.4"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="440.63"
+                                        y1="378.39"
+                                        x2="24.03"
+                                        y2="618.91"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="440.63"
+                                        y1="406.04"
+                                        x2="24.03"
+                                        y2="646.56"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                    <line
+                                        x1="248.35"
+                                        y1="517.23"
+                                        x2="248.35"
+                                        y2="785.42"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                    />
+                                </g>
+                                <polygon
+                                    points="48.07 614.28 48.07 623.53 72.1 609.66 72.1 600.41 48.07 614.28"
+                                    fill="#3fa9f5"
+                                />
+                                <polygon
+                                    id="ConnectionStatus-4"
+                                    class="ConnectionStatus"
+                                    points="392.35 415.08 392.35 424.34 416.38 410.46 416.38 401.21 392.35 415.08"
+                                    fill="#ff7bac"
+                                />
+                                <polyline
+                                    class="ConnectionLine"
+                                    points="1345.7 1030.94 979.54 1246.56 571.47 1007.44"
+                                    fill="none"
+                                    stroke="#3fa9f5"
+                                    stroke-miterlimit="10"
+                                    stroke-width="5"
+                                />
+                                <polyline
+                                    id="ConnectionLine-2"
+                                    class="ConnectionLine"
+                                    points="1756.82 1268.31 767.56 1839.96 568.37 1721.25"
+                                    fill="none"
+                                    stroke="#3fa9f5"
+                                    stroke-miterlimit="10"
+                                    stroke-width="5"
+                                />
+                                <polyline
+                                    id="ConnectionLine-3"
+                                    class="ConnectionLine"
+                                    points="2132.6 1200.42 2315.68 1305.9 1493.44 1780.62 1589.8 1836.25"
+                                    fill="none"
+                                    stroke="#3fa9f5"
+                                    stroke-miterlimit="10"
+                                    stroke-width="5"
+                                />
+                                <g class="BarGraph">
+                                    <polygon
+                                        points="1751.67 492.35 1751.67 427.63 1770.48 438.5 1770.48 503.21 1751.67 492.35"
+                                        fill="#ffd778"
+                                    />
+                                    <polygon
+                                        points="1779.89 508.64 1779.89 411.57 1798.71 422.44 1798.71 519.51 1779.89 508.64"
+                                        fill="#6fcdcd"
+                                    />
+                                    <polygon
+                                        points="1808.12 524.94 1808.12 409 1826.94 419.86 1826.94 535.8 1808.12 524.94"
+                                        fill="#3fa9f5"
+                                    />
+                                    <polygon
+                                        points="1836.35 541.24 1836.35 468.43 1855.16 479.3 1855.16 552.1 1836.35 541.24"
+                                        fill="#ff829d"
+                                    />
+                                    <polygon
+                                        points="1864.57 557.53 1864.57 506.3 1883.39 517.17 1883.39 568.4 1864.57 557.53"
+                                        fill="#ffd778"
+                                    />
+                                    <polygon
+                                        points="1892.8 573.83 1892.8 479.46 1911.61 490.32 1911.61 584.69 1892.8 573.83"
+                                        fill="#6fcdcd"
+                                    />
+                                    <polygon
+                                        points="1921.02 590.13 1921.02 452.61 1939.84 463.47 1939.84 600.99 1921.02 590.13"
+                                        fill="#3fa9f5"
+                                    />
+                                    <polyline
+                                        points="1742.26 314.35 1742.26 486.92 1968.07 617.29"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                        stroke-width="5"
+                                    />
+                                </g>
+                                <g class="LineGraph">
+                                    <polyline
+                                        points="2048.9 647.54 2096.01 647.87 2119.61 580.34 2166.8 634.64 2190.39 567.11 2261.18 689.13 2308.37 689.33"
+                                        fill="none"
+                                        stroke="#3fa9f5"
+                                        stroke-miterlimit="10"
+                                        stroke-width="4"
+                                    />
+                                    <polyline
+                                        points="2048.9 431.14 2048.9 647.54 2332.05 811.02"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                        stroke-width="5"
+                                    />
+                                </g>
+                                <g id="BarGraph-2" class="BarGraph">
+                                    <polygon
+                                        points="58.62 824.86 58.62 773.29 73.61 764.63 73.61 816.21 58.62 824.86"
+                                        fill="#ffd778"
+                                    />
+                                    <polygon
+                                        points="81.11 811.88 81.11 734.52 96.11 725.86 96.11 803.22 81.11 811.88"
+                                        fill="#6fcdcd"
+                                    />
+                                    <polygon
+                                        points="103.6 798.89 103.6 706.49 118.6 697.83 118.6 790.23 103.6 798.89"
+                                        fill="#3fa9f5"
+                                    />
+                                    <polygon
+                                        points="126.1 785.9 126.1 727.88 141.09 719.23 141.09 777.25 126.1 785.9"
+                                        fill="#ff829d"
+                                    />
+                                    <polygon
+                                        points="148.59 772.92 148.59 732.09 163.59 723.43 163.59 764.26 148.59 772.92"
+                                        fill="#ffd778"
+                                    />
+                                    <polygon
+                                        points="171.09 759.93 171.09 684.72 186.08 676.06 186.08 751.27 171.09 759.93"
+                                        fill="#6fcdcd"
+                                    />
+                                    <polygon
+                                        points="193.58 746.94 193.58 637.35 208.58 628.69 208.58 738.28 193.58 746.94"
+                                        fill="#3fa9f5"
+                                    />
+                                    <polyline
+                                        points="51.12 691.67 51.12 829.19 231.07 725.3"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                        stroke-width="5"
+                                    />
+                                </g>
+                                <g id="LineGraph-2" class="LineGraph">
+                                    <polyline
+                                        points="270.74 586.61 270.74 701.07 420.52 614.6"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                        stroke-width="5"
+                                    />
+                                    <polyline
+                                        points="270.74 701.07 295.66 672.47 308.14 622.34 333.1 622.24 345.58 572.11 383.03 593.41 407.99 564.69"
+                                        fill="none"
+                                        stroke="#3fa9f5"
+                                        stroke-miterlimit="10"
+                                        stroke-width="4"
+                                    />
+                                </g>
+                                <g id="BarGraph-3" class="BarGraph">
+                                    <polygon
+                                        points="1725.08 1891.1 1772.72 1863.6 1788.72 1872.83 1741.07 1900.34 1725.08 1891.1"
+                                        fill="#ffd778"
+                                    />
+                                    <polygon
+                                        points="1749.07 1904.96 1820.54 1863.7 1836.53 1872.93 1765.07 1914.19 1749.07 1904.96"
+                                        fill="#6fcdcd"
+                                    />
+                                    <polygon
+                                        points="1773.07 1918.81 1858.43 1869.53 1874.43 1878.76 1789.06 1928.05 1773.07 1918.81"
+                                        fill="#3fa9f5"
+                                    />
+                                    <polygon
+                                        points="1797.06 1932.66 1850.66 1901.72 1866.66 1910.96 1813.06 1941.9 1797.06 1932.66"
+                                        fill="#ff829d"
+                                    />
+                                    <polygon
+                                        points="1821.06 1946.52 1858.78 1924.74 1874.77 1933.98 1837.06 1955.76 1821.06 1946.52"
+                                        fill="#ffd778"
+                                    />
+                                    <polygon
+                                        points="1845.05 1960.37 1914.53 1920.26 1930.53 1929.49 1861.05 1969.61 1845.05 1960.37"
+                                        fill="#6fcdcd"
+                                    />
+                                    <polygon
+                                        points="1869.05 1974.23 1970.29 1915.77 1986.29 1925.01 1885.05 1983.46 1869.05 1974.23"
+                                        fill="#3fa9f5"
+                                    />
+                                    <polyline
+                                        points="1844.13 1813.13 1717.08 1886.49 1909.04 1997.32"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                        stroke-width="5"
+                                    />
+                                </g>
+                                <g id="BarGraph-4" class="BarGraph">
+                                    <polygon
+                                        points="460.94 1588.14 490.8 1570.9 500.82 1576.69 470.97 1593.93 460.94 1588.14"
+                                        fill="#ffd778"
+                                    />
+                                    <polygon
+                                        points="475.98 1596.82 520.77 1570.96 530.79 1576.75 486 1602.61 475.98 1596.82"
+                                        fill="#6fcdcd"
+                                    />
+                                    <polygon
+                                        points="491.02 1605.5 544.51 1574.62 554.54 1580.41 501.04 1611.29 491.02 1605.5"
+                                        fill="#3fa9f5"
+                                    />
+                                    <polygon
+                                        points="506.06 1614.19 539.65 1594.79 549.67 1600.58 516.08 1619.97 506.06 1614.19"
+                                        fill="#ff829d"
+                                    />
+                                    <polygon
+                                        points="521.09 1622.87 544.73 1609.22 554.76 1615.01 531.12 1628.66 521.09 1622.87"
+                                        fill="#ffd778"
+                                    />
+                                    <polygon
+                                        points="536.13 1631.55 579.67 1606.41 589.7 1612.2 546.16 1637.34 536.13 1631.55"
+                                        fill="#6fcdcd"
+                                    />
+                                    <polygon
+                                        points="551.17 1640.23 614.62 1603.6 624.64 1609.39 561.2 1646.02 551.17 1640.23"
+                                        fill="#3fa9f5"
+                                    />
+                                    <polyline
+                                        points="535.55 1539.28 455.93 1585.24 576.23 1654.7"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                        stroke-width="5"
+                                    />
+                                </g>
+                                <g id="LineGraph-3" class="LineGraph">
+                                    <polyline
+                                        points="419.95 1608.37 338.33 1655.49 461.65 1726.69"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                        stroke-width="5"
+                                    />
+                                    <polyline
+                                        points="338.33 1655.49 368.99 1661.49 409.87 1649.75 420.22 1667.51 461.1 1655.77 461.33 1691.24 492.08 1697.22"
+                                        fill="none"
+                                        stroke="#3fa9f5"
+                                        stroke-miterlimit="10"
+                                        stroke-width="4"
+                                    />
+                                </g>
+                                <g id="LineGraph-4" class="LineGraph">
+                                    <polyline
+                                        points="1670.39 1919.01 1536.1 1996.55 1739.01 2113.69"
+                                        fill="none"
+                                        stroke="#f2f2f2"
+                                        stroke-miterlimit="10"
+                                        stroke-width="5"
+                                    />
+                                    <polyline
+                                        points="1536.1 1996.55 1586.54 2006.41 1653.81 1987.1 1670.84 2016.31 1738.1 1997 1738.47 2055.36 1789.07 2065.19"
+                                        fill="none"
+                                        stroke="#3fa9f5"
+                                        stroke-miterlimit="10"
+                                        stroke-width="4"
+                                    />
+                                </g>
+                            </svg>
