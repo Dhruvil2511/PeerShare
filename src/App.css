@@ -4,13 +4,12 @@
 }
 
 
-.room {
+#root {
   font-family: sans-serif;
   background-image: url('../src/assets/background_grainy.jpg');
   background-size: cover;
   background-repeat: repeat;
   overflow: hidden;
-
 }
 
 

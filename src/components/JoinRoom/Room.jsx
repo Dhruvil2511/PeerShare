@@ -54,14 +54,13 @@ const configuration = {
     iceCandidatePoolSize: 10,
 };
 const firebaseConfig = {
-    apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
-    authDomain: "signalling-28129.firebaseapp.com",
-    databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "signalling-28129",
-    storageBucket: "signalling-28129.appspot.com",
-    messagingSenderId: "985022221543",
-    appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
-    measurementId: "G-YJPJ8LZZXD"
+    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
+    authDomain: "peershare2425.firebaseapp.com",
+    projectId: "peershare2425",
+    storageBucket: "peershare2425.appspot.com",
+    messagingSenderId: "308108699413",
+    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
+    measurementId: "G-721QV10KH1"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -105,10 +104,16 @@ const Room = () => {
     }, []);
 
     useEffect(() => {
-        if (isMobile || window.screen.width <= 800) setMobileView(true);
+        if (isMobile || window.screen.width <= 800) {
+            setMobileView(true);
+        }
         window.addEventListener('resize', () => {
-            if (window.innerWidth <= 800) setMobileView(true)
-            else setMobileView(false)
+            if (window.innerWidth <= 800) {
+                setMobileView(true)
+            }
+            else {
+                setMobileView(false)
+            }
         })
     }, []);
 
@@ -372,7 +377,7 @@ const Room = () => {
             {!isConnected && <Preloader />}
 
             {isConnected &&
-                <div className="navbar">
+                <div className="navbar" id='navbarForId'>
                     <div className="logo">
                         <div className="logo_name">
                             <ReactLogo className='.img' />
@@ -422,6 +427,10 @@ const Room = () => {
             {
                 mobileView &&
                 <>
+                    <div id='mobdiv' style={{ display: 'flex', flexDirection: 'row', height: '5vh', justifyContent: 'center', margin: '2% 0% 2% 0%' }}>
+                        <img className='user-pfp' src={avatar} alt="X" />
+                        <div style={{ color: 'yellow', alignSelf: 'center', marginLeft: '2%' }}>{sessionStorage.getItem('peerRole') === 'peerA' ? peerAName : peerBName}</div>
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
                         <div id='mobTransfer' style={{ width: '100vw' }}>{isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}</div>
                         <div id='mobChat' style={{ width: '100vw', display: 'none' }}>  {isConnected && showChat &&
@@ -435,20 +444,20 @@ const Room = () => {
 
 
                         <button className='nav-buttons active' id='fileshare' onClick={() => {
+                            document.getElementById('mobdiv').style.display = 'flex';
                             document.getElementById('mobTransfer').style.display = 'block';
                             document.getElementById('mobChat').style.display = 'none';
                             document.getElementById('mobVideoChat').style.display = 'none';
                             document.getElementById('fileshare').style.color = '#0A82FD';
                             document.getElementById('chatmob').style.color = 'white';
                             document.getElementById('videomob').style.color = 'white';
-
                         }}>
                             <IosShareIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
                         </button>
 
 
-
                         <button id='chatmob' className='nav-buttons' onClick={() => {
+                            document.getElementById('mobdiv').style.display = 'none';
                             document.getElementById('mobTransfer').style.display = 'none'
                             document.getElementById('mobChat').style.display = 'block'
                             document.getElementById('mobVideoChat').style.display = 'none'
@@ -462,6 +471,7 @@ const Room = () => {
 
 
                         <button id='videomob' className='nav-buttons' onClick={() => {
+                            document.getElementById('mobdiv').style.display = 'flex';
                             document.getElementById('mobTransfer').style.display = 'none'
                             document.getElementById('mobChat').style.display = 'none'
                             document.getElementById('mobVideoChat').style.display = 'block'
@@ -469,6 +479,7 @@ const Room = () => {
                             document.getElementById('chatmob').style.color = 'white';
                             document.getElementById('fileshare').style.color = 'white';
                             document.querySelector('.active').style.color = 'white';
+                            // document.getElementById('navbarForId').style.display = 'none';
 
                         }}>
                             <DuoIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />

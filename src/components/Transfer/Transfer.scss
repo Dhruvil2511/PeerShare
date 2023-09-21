@@ -368,6 +368,7 @@
 @media only screen and (max-width: 800px) {
   .shrinkable-div {
     width: 100% !important;
+    height: 78vh;
   }
 
   .input-div {
@@ -377,12 +378,15 @@
   .input-label {
     width: 70% !important;
   }
-  .progress-label{
-    font-size: small!important;
+
+  .progress-label {
+    font-size: small !important;
   }
-  .progress-bar{
+
+  .progress-bar {
     margin-top: 10% !important;
   }
+
   .inside {
     font-size: 100% !important;
   }
@@ -408,15 +412,16 @@
     font-size: 15px !important;
   }
 
-  .progress{
+  .progress {
     width: 50% !important;
   }
 
 
-  .flexTransferBottom{
+  .flexTransferBottom {
     width: 100% !important;
     height: 30vh !important;
-    .fileHistory{
+
+    .fileHistory {
       width: 100% !important;
     }
   }

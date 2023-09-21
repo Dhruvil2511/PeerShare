@@ -12,16 +12,16 @@ import animation from './FINAL.json'
 import Lottie from 'lottie-react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReplyIcon from '@mui/icons-material/Reply';
+import { ReportGmailerrorred } from '@mui/icons-material';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
-    authDomain: "signalling-28129.firebaseapp.com",
-    databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "signalling-28129",
-    storageBucket: "signalling-28129.appspot.com",
-    messagingSenderId: "985022221543",
-    appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
-    measurementId: "G-YJPJ8LZZXD"
+    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
+    authDomain: "peershare2425.firebaseapp.com",
+    projectId: "peershare2425",
+    storageBucket: "peershare2425.appspot.com",
+    messagingSenderId: "308108699413",
+    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
+    measurementId: "G-721QV10KH1"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -45,6 +45,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
     const [messageReply, setMessageReply] = useState('')
     const chatbox = document.querySelector(".chatBox");
     const [toReply, setToReply] = useState('')
+    const [hideVidIcon, setHideVidIcon] = useState(false)
 
     // let {id} = useParams();
 
@@ -59,6 +60,14 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         fetchAvatar();
     }, []);
 
+    useEffect(() => {
+        if (hideVidIcon || window.screen.width <= 800) setHideVidIcon(true);
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 800) setHideVidIcon(true)
+            else setHideVidIcon(false)
+        })
+    }, []);
+
     async function initializeLocalConnection() {
         console.log(localConnection);
         messageChannel = localConnection.createDataChannel('messageChannel');
@@ -69,7 +78,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         messageChannel.addEventListener('message', (event) => {
             if (event.data) {
                 console.log(event.data);
-                setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': JSON.parse(event.data).message, time: fetchTime(), reply: JSON.parse(event.data).reply }]);
+                setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': JSON.parse(event.data).message, time: fetchTime(), reply: JSON.parse(event.data).reply, replyTo: JSON.parse(event.data).replyTo }]);
             }
         });
 
@@ -96,7 +105,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
 
     async function recieveMessage(e) {
         console.log('recieved message from peerA : ' + e.data);
-        setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': JSON.parse(e.data).message, time: fetchTime(), reply: JSON.parse(e.data).reply }]);
+        setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': JSON.parse(e.data).message, time: fetchTime(), reply: JSON.parse(e.data).reply, replyTo: JSON.parse(e.data).replyTo }]);
     }
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -105,11 +114,12 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         document.getElementById('input-field').value = '';
         let val = sessionStorage.getItem('peerRole');
         if (val === 'peerA') {
-            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': message, time: fetchTime(), reply: messageReply }]);
+            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerA', 'message': message, time: fetchTime(), reply: messageReply, replyTo: toReply }]);
 
             const sendingMessage = {
                 message: message,
-                reply: messageReply
+                reply: messageReply,
+                replyTo: toReply
             }
             messageChannel.send(JSON.stringify(sendingMessage));
             setMessageReply('')
@@ -120,9 +130,10 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         } else {
             const sendingMessage = {
                 message: message,
-                reply: messageReply
+                reply: messageReply,
+                replyTo: toReply
             }
-            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': message, time: fetchTime(), reply: messageReply }]);
+            setMessageList(prevList => [...prevList, { id: Math.floor(Math.random() * 100), 'role': 'peerB', 'message': message, time: fetchTime(), reply: messageReply, replyTo: toReply }]);
             remoteConnection.messageChannel.send(JSON.stringify(sendingMessage));
             setMessageReply('')
         }
@@ -211,9 +222,12 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                         </span>
                     </div>
                     <div className="video-button" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <button className='videoBtn' title={'Video Call'} style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
-                            <VideoCallIcon style={{ transform: `scale(${1.4})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
-                        </button>
+                        {
+                            !hideVidIcon &&
+                            <button className='videoBtn' title={'Video Call'} style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
+                                <VideoCallIcon style={{ transform: `scale(${1.4})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                            </button>
+                        }
                         <button className='deleteChatBtn' title={'Clear chat'} style={{ background: 'transparent', border: 'none' }} onClick={removeChat}>
                             <DeleteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
@@ -243,8 +257,11 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px', flexDirection: 'column' }}>
-                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>{value.reply}</div>}
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '0.5%', borderRadius: '15px', flexDirection: 'column' }} className='chatDiv'>
+                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>
+                                                    {value.replyTo === 'peerA' ? <div>You</div> : <div>Peer</div>}
+                                                    <div>{value.reply}</div>
+                                                </div>}
                                                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                                     <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
                                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -269,7 +286,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                                             setDisplayReply('flex')
                                                             setToReply(value.role)
 
-                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: { xs: 5, sm: 5, md: 5, lg: 5 } }} /></button>
+                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: '1.3vw' }} className='replyMob' /></button>
                                                         <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
                                                     </div>
                                                 </div>
@@ -281,8 +298,11 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px', flexDirection: 'column' }}>
-                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>{value.reply}</div>}
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '0.5%', borderRadius: '15px', flexDirection: 'column' }} className='chatDiv'>
+                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>
+                                                    {value.replyTo === 'peerA' ? <div>You</div> : <div>Peer</div>}
+                                                    <div>{value.reply}</div>
+                                                </div>}
                                                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                                     <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
                                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -304,22 +324,25 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                                             setReplySize(16)
                                                             setDisplayReply('flex')
                                                             setToReply(value.role)
-                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: { xs: 5, sm: 5, md: 5, lg: 5 } }} /></button>
+                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: '1.3vw' }} className='replyMob' /></button>
 
                                                         <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    ) 
+                                    )
                                 }
                             }
                             else {
                                 if (value.role === 'peerA') {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px', flexDirection: 'column' }}>
-                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>{value.reply}</div>}
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '0.5%', borderRadius: '15px', flexDirection: 'column' }}>
+                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>
+                                                    {value.replyTo === 'peerB' ? <div>You</div> : <div>Peer</div>}
+                                                    <div>{value.reply}</div>
+                                                </div>}
                                                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                                     <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
                                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -341,20 +364,23 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                                             setReplySize(16)
                                                             setDisplayReply('flex')
                                                             setToReply(value.role)
-                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: { xs: 5, sm: 5, md: 5, lg: 5 } }} /></button>
+                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: '1.3vw' }} className='replyMob' /></button>
                                                         <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                        </div>  
+                                        </div>
                                     )
                                 }
                                 else {
                                     return (
                                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '1.2%', borderRadius: '15px', flexDirection: 'column' }}>
-                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>{value.reply}</div>}
+                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '0.5%', borderRadius: '15px', flexDirection: 'column' }}>
+                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>
+                                                    <div>{value.replyTo === 'peerB' ? <div>You</div> : <div>Peer</div>}</div>
+                                                    <div>{value.reply}</div>
+                                                </div>}
                                                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                                                     <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
                                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -376,7 +402,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                                             setReplySize(16)
                                                             setDisplayReply('flex')
                                                             setToReply(value.role)
-                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: { xs: 5, sm: 5, md: 5, lg: 5 } }} /></button>
+                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: '1.3vw' }} className='replyMob' /></button>
                                                         <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
                                                     </div>
                                                 </div>

@@ -11,16 +11,15 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import axios from 'axios';
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-
+import VideoCallIcon from '@mui/icons-material/VideoCall';
 const firebaseConfig = {
-    apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
-    authDomain: "signalling-28129.firebaseapp.com",
-    databaseURL: "https://signalling-28129-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "signalling-28129",
-    storageBucket: "signalling-28129.appspot.com",
-    messagingSenderId: "985022221543",
-    appId: "1:985022221543:web:d08428c9ffe1beee9c2642",
-    measurementId: "G-YJPJ8LZZXD"
+    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
+    authDomain: "peershare2425.firebaseapp.com",
+    projectId: "peershare2425",
+    storageBucket: "peershare2425.appspot.com",
+    messagingSenderId: "308108699413",
+    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
+    measurementId: "G-721QV10KH1"
 };
 const configuration = {
     iceServers: [
@@ -72,7 +71,8 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     const [isMicOn, setIsMicOn] = useState(true);
     const [videoCallButtonClicked, setVideoCallButtonClicked] = useState({ clickedBy: null, clicked: false, verdict: '' });
     const [callAccepted, setCallAccepted] = useState(false);
-
+    const [showVidIcon, setShowVidIcon] = useState(false);
+    const [videoCallButtonState, setVideoCallButtonState] = useState(true);
 
     useEffect(() => {
         const db = firebase.firestore();
@@ -134,6 +134,13 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         };
     }, []);
 
+    useEffect(() => {
+        if (showVidIcon || window.screen.width <= 800) setShowVidIcon(true);
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 800) setShowVidIcon(true)
+            else setShowVidIcon(false)
+        })
+    }, []);
 
     async function openUserMedia() {
         const stream = await navigator.mediaDevices.getUserMedia(
@@ -439,8 +446,27 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         await userRef.set({ videoCallHandle: { clickedBy: val === 'peerB' ? 'peerA' : 'peerB', clicked: true, verdict: 'accepted' } });
     }
 
+    async function handlevideoCallButtonState(event) {
+        const db = firebase.firestore();
+        let userRef = db.collection('users').doc(`${id}`);
+
+        userRef.onSnapshot(async (snapshot) => {
+            var data = snapshot.data();
+            console.log(data);
+            if (data && data.videoCallHandle) {
+                if (data.videoCallHandle && data.videoCallHandle.clickedBy === null) {
+                    setVideoCallButtonState(false);
+                }
+            }
+        });
+
+        let val = sessionStorage.getItem('peerRole');
+        val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true, verdict: '' } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true, verdict: '' } });
+
+    }
     return (
         <>
+            {showVidIcon && !videoCallButtonClicked.clicked && <div style={{ height: '78vh', display: 'flex', alignItems: 'center' }}><button className='videoBtn2' title={'Video Call'} onClick={handlevideoCallButtonState}>Start Video Call</button></div>}
             {videoCallButtonClicked.clicked &&
                 <div className="video" >
                     <div className="first">

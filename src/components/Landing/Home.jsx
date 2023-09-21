@@ -44,31 +44,31 @@ const Home = () => {
                                     <div className="feature-left">
                                         <div className="peer">
                                             <PeopleAltIcon style={{ color: '#0A82FD' }} />
-                                            &nbsp;<span style={{ fontWeight: 'bolder' }}>Peer To Peer</span>
+                                            &nbsp;<span style={{ fontWeight: 'bolder', color: "#0A82FD" }}>Peer To Peer</span>
                                         </div>
                                         <div className="no-limit">
                                             <AllInclusiveIcon style={{ color: '#0A82FD' }} />
-                                            &nbsp;<span style={{ fontWeight: 'bolder' }}>No Size Limit</span>
+                                            &nbsp;<span style={{ fontWeight: 'bolder', color: "#0A82FD" }}>No Size Limit</span>
                                         </div>
                                     </div>
                                     <div className="feature-middle">
                                         <div className="chat-feature">
                                             <MessageIcon style={{ color: '#0A82FD' }} />
-                                            &nbsp;<span style={{ fontWeight: 'bolder' }}>Live Chat </span>
+                                            &nbsp;<span style={{ fontWeight: 'bolder', color: "#0A82FD" }}>Live Chat </span>
                                         </div>
                                         <div className="video-feature">
                                             <DuoIcon style={{ color: '#0A82FD' }} />
-                                            &nbsp;<span style={{ fontWeight: 'bolder' }}>Video Chat</span>
+                                            &nbsp;<span style={{ fontWeight: 'bolder', color: "#0A82FD" }}>Video Chat</span>
                                         </div>
                                     </div>
                                     <div className="feature-right">
                                         <div className="fast">
                                             <ElectricBoltIcon style={{ color: '#0A82FD' }} />
-                                            &nbsp;<span style={{ fontWeight: 'bolder' }}>Rapid Transfer</span>
+                                            &nbsp;<span style={{ fontWeight: 'bolder', color: "#0A82FD" }}>Rapid Transfer</span>
                                         </div>
                                         <div className="worldwide">
                                             <PublicIcon style={{ color: '#0A82FD' }} />&nbsp;
-                                            &nbsp;<span style={{ fontWeight: 'bolder' }}>World Wide</span>
+                                            &nbsp;<span style={{ fontWeight: 'bolder', color: "#0A82FD" }}>World Wide</span>
 
                                         </div>
                                     </div>

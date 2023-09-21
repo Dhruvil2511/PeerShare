@@ -15,9 +15,7 @@
     width: 100vw;
 }
 
-span {
-    color: #0A82FD;
-}
+
 
 .join {
     color: white;
@@ -200,6 +198,26 @@ svg {
     height: 70%;
 }
 
+
+.ConnectionLine {
+    animation-name: connectionLineAnimation;
+    animation-duration: 1s;
+    animation-delay: 0.5s;
+    animation-timing-function: ease-in-out;
+    animation-direction: normal;
+    animation-fill-mode: forwards;
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+}
+
+.ConnectionStatus {
+    animation-name: flashAnimation, connectLightAnimation;
+    animation-duration: 0.3s, 1s;
+    animation-delay: 1.5s, 3.2s ;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+}
+
 @keyframes connectionLineAnimation {
     from {
         stroke-dashoffset: 2000;
@@ -209,27 +227,6 @@ svg {
         stroke-dashoffset: 0;
     }
 }
-
-.ConnectionLine {
-    animation-name: connectionLineAnimation, connectionLineAnimation;
-    animation-duration: 1s, 1s;
-    animation-delay: 0.5s, 7.8s;
-    animation-timing-function: ease-in-out, ease-in-out;
-    animation-direction: normal, reverse;
-    animation-fill-mode: forwards;
-    stroke-dasharray: 2000;
-    stroke-dashoffset: 2000;
-
-}
-
-.ConnectionStatus {
-    animation-name: flashAnimation, connectLightAnimation, disconnectLightAnimation;
-    animation-duration: 0.3s, 1s, 1s;
-    animation-delay: 1.5s, 3.2s, 7.6s;
-    animation-timing-function: ease-in-out, linear, linear;
-    animation-fill-mode: forwards;
-}
-
 
 
 @keyframes flashAnimation {
@@ -253,15 +250,7 @@ svg {
     }
 }
 
-@keyframes disconnectLightAnimation {
-    from {
-        opacity: 0;
-    }
 
-    to {
-        fill: #ff829d;
-    }
-}
 
 .LineGraph,
 .BarGraph {
@@ -281,4 +270,9 @@ svg {
     80% {
         opacity: 1;
     }
+    100%{
+        opacity: 1;
+    }
 }
+
+
