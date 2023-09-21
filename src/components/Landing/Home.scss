@@ -1,7 +1,18 @@
 .link {
+    text-decoration: none;
     &:hover {
         color: #1AF1A0 !important;
+        border-bottom: 1px solid #1AF1A0;
     }
+}
+
+.landing {
+    background-image: url('../../assets/background_grainy.jpg');
+    background-size: cover;
+    background-repeat: repeat;
+    overflow-x: hidden;
+    height: 100vh;
+    width: 100vw;
 }
 
 span {
@@ -126,19 +137,30 @@ span {
     }
 }
 
-.details{
+.details {
     color: white;
     text-align: center;
-    h2{
-        font-size: 5vw;
-    }
-}
-.how-it-works{
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+
+    h2 {
+        font-size: 3vw;
+    }
 }
+
+.how-it-works {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    li {
+        text-align: start;
+        font-size: 1vw;
+    }
+}
+
 
 .scroll {
     display: flex;

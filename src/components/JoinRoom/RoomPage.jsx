@@ -10,6 +10,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Tooltip } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import LandingNavigation from '../Landing/LandingNavigation';
 const firebaseConfig = {
     apiKey: "AIzaSyCSOJm6G6RZFH46AlN9oeQmjfuyIIGXrG0",
     authDomain: "signalling-28129.firebaseapp.com",
@@ -60,7 +61,7 @@ const RoomPage = () => {
     return (
         <div className='main'>
             <ToastContainer />
-            <Navbar />
+            <LandingNavigation/>
             <div className="flex-room-box">
                 <div className="create-room-box">
                     <div className='content'>
