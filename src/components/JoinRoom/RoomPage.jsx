@@ -11,15 +11,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Tooltip } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-const firebaseConfig = {
-    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
-    authDomain: "peershare2425.firebaseapp.com",
-    projectId: "peershare2425",
-    storageBucket: "peershare2425.appspot.com",
-    messagingSenderId: "308108699413",
-    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
-    measurementId: "G-721QV10KH1"
-};
+import firebaseConfig from '../../config/firebaseconfig';
+
 firebase.initializeApp(firebaseConfig);
 let userRef = null;
 

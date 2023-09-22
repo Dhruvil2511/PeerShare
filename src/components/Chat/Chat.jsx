@@ -12,17 +12,7 @@ import animation from './FINAL.json'
 import Lottie from 'lottie-react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReplyIcon from '@mui/icons-material/Reply';
-import { ReportGmailerrorred } from '@mui/icons-material';
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
-    authDomain: "peershare2425.firebaseapp.com",
-    projectId: "peershare2425",
-    storageBucket: "peershare2425.appspot.com",
-    messagingSenderId: "308108699413",
-    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
-    measurementId: "G-721QV10KH1"
-};
+import firebaseConfig from '../../config/firebaseconfig';
 
 firebase.initializeApp(firebaseConfig);
 
@@ -151,7 +141,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
     const fetchAvatar = () => {
         let key = '';
         sessionStorage.getItem('peerRole') === 'peerA' ? key = peerBpfpId : key = peerApfpId
-        axios.get(`https://api.multiavatar.com/${key}.png?apikey=GlfxOwCHERyz56`).then((response) => {
+        axios.get(`https://api.multiavatar.com/${key}.png?apikey=${process.env.REACT_APP_AVATAR_API_KEY}`).then((response) => {
             setAvatar(response.config.url);
 
         }).catch((error) => {
@@ -209,10 +199,8 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
 
     }
 
-
     return (
         <>
-
             <div className='daddy' style={{ resize: 'horizontal', backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '15px', height: '80vh', width: '30%', float: 'left' }}>
                 <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -247,12 +235,10 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 <span id='start' style={{ fontSize: '1vw', color: 'white' }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start chatting with your peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                             </div>
                         </div>
-                        // </div>
                     }
                     {
                         messageList.map((value) => {
                             let checkPeerRole = sessionStorage.getItem('peerRole');
-                            // console.log(value);
                             if (checkPeerRole === 'peerA') {
                                 if (value.role === 'peerA') {
                                     return (
@@ -436,7 +422,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                         <button type='button' onClick={handleCopy} className='copyBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginRight: '4%' }}>
                             <ContentPasteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
-                        <input id='input-field' style={{ height: '50%', fontSize: '1.2vw', color: 'white', width: '70%', backgroundColor: '#333333', border: 'none', borderRadius: '5px' }} type='text' value={message} onChange={handleChange}></input>
+                        <input autocomplete="off" id='input-field' style={{ height: '50%', fontSize: '1.2vw', color: 'white', width: '70%', backgroundColor: '#333333', border: 'none', borderRadius: '5px' }} type='text' value={message} onChange={handleChange}></input>
                         <button type="submit" id='sendBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginLeft: '4%' }}>
                             <SendIcon style={{ transform: `scale(${1.3})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>

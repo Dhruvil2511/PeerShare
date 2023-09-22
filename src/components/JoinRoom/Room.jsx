@@ -14,56 +14,15 @@ import { v4 } from 'uuid';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import CircleIcon from '@mui/icons-material/Circle';
 import { ReactComponent as ReactLogo } from './logo.svg';
-// import Logo from '../Logo/Logo';
 import DuoIcon from '@mui/icons-material/Duo';
-import VideoChatIcon from '@mui/icons-material/VideoChat';
 import ChatIcon from '@mui/icons-material/Chat';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import { isMobile } from 'react-device-detect';
-
-
-
-const configuration = {
-    iceServers: [
-        {
-            urls: ["stun:stun.relay.metered.ca:80", 'stun:stun1.l.google.com:19302',
-                'stun:stun2.l.google.com:19302',],
-        },
-        {
-            urls: "turn:a.relay.metered.ca:80",
-            username: "a1682711142862882518afae",
-            credential: "RAx91eWI7uYEsYa7",
-        },
-        {
-            urls: "turn:a.relay.metered.ca:80?transport=tcp",
-            username: "a1682711142862882518afae",
-            credential: "RAx91eWI7uYEsYa7",
-        },
-        {
-            urls: "turn:a.relay.metered.ca:443",
-            username: "a1682711142862882518afae",
-            credential: "RAx91eWI7uYEsYa7",
-        },
-        {
-            urls: "turn:a.relay.metered.ca:443?transport=tcp",
-            username: "a1682711142862882518afae",
-            credential: "RAx91eWI7uYEsYa7",
-        },
-    ],
-    // To prefetch ice Candidate before setting local description range(0-255) more better but use more resource
-    iceCandidatePoolSize: 10,
-};
-const firebaseConfig = {
-    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
-    authDomain: "peershare2425.firebaseapp.com",
-    projectId: "peershare2425",
-    storageBucket: "peershare2425.appspot.com",
-    messagingSenderId: "308108699413",
-    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
-    measurementId: "G-721QV10KH1"
-};
+import firebaseConfig from '../../config/firebaseconfig';
+import configuration from '../../config/iceconfig';
 
 firebase.initializeApp(firebaseConfig);
+
 
 let userRef = null;
 let answer = null;
@@ -136,7 +95,7 @@ const Room = () => {
     async function fetchAvatar() {
         let key = '';
         sessionStorage.getItem('peerRole') === 'peerA' ? key = peerApfpId : key = peerBpfpId;
-        axios.get(`https://api.multiavatar.com/${key}.png?apikey=GlfxOwCHERyz56`).then((response) => {
+        axios.get(`https://api.multiavatar.com/${key}.png?apikey=${process.env.REACT_APP_AVATAR_API_KEY}`).then((response) => {
             setAvatar(response.config.url);
         }).catch((error) => {
             console.log(error)
@@ -149,7 +108,6 @@ const Room = () => {
         console.log('generate id called');
 
         console.log('Creating local connection');
-
         localConnection = new RTCPeerConnection(configuration);
         initializeIceListeners(localConnection);
 
@@ -374,9 +332,9 @@ const Room = () => {
 
     return (
         <>
-            {!isConnected && <Preloader />}
+            {!isConnected && !peerApfpId && !peerBpfpId && <Preloader />}
 
-            {isConnected &&
+            {isConnected && peerApfpId && peerBpfpId &&
                 <div className="navbar" id='navbarForId'>
                     <div className="logo">
                         <div className="logo_name">

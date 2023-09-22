@@ -8,48 +8,10 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import MicIcon from '@mui/icons-material/Mic';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import MicOffIcon from '@mui/icons-material/MicOff';
-import axios from 'axios';
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-import VideoCallIcon from '@mui/icons-material/VideoCall';
-const firebaseConfig = {
-    apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
-    authDomain: "peershare2425.firebaseapp.com",
-    projectId: "peershare2425",
-    storageBucket: "peershare2425.appspot.com",
-    messagingSenderId: "308108699413",
-    appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
-    measurementId: "G-721QV10KH1"
-};
-const configuration = {
-    iceServers: [
-        {
-            urls: ["stun:stun.relay.metered.ca:80", 'stun:stun1.l.google.com:19302',
-                'stun:stun2.l.google.com:19302',],
-        },
-        {
-            urls: "turn:a.relay.metered.ca:80",
-            username: "a1682711142862882518afae",
-            credential: "RAx91eWI7uYEsYa7",
-        },
-        {
-            urls: "turn:a.relay.metered.ca:80?transport=tcp",
-            username: "a1682711142862882518afae",
-            credential: "RAx91eWI7uYEsYa7",
-        },
-        {
-            urls: "turn:a.relay.metered.ca:443",
-            username: "a1682711142862882518afae",
-            credential: "RAx91eWI7uYEsYa7",
-        },
-        {
-            urls: "turn:a.relay.metered.ca:443?transport=tcp",
-            username: "a1682711142862882518afae",
-            credential: "RAx91eWI7uYEsYa7",
-        },
-    ],
-    iceCandidatePoolSize: 10,
-};
+import firebaseConfig from '../../config/firebaseconfig';
+import configuration from '../../config/iceconfig';
 
 firebase.initializeApp(firebaseConfig);
 let remoteStream = null;
@@ -471,14 +433,14 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                 <div className="video" >
                     <div className="first">
                         {
-                            sessionStorage.getItem('peerRole') === 'peerA' ? <img className='local-pfp' src={`https://api.multiavatar.com/${peerApfpId}.png?apikey=GlfxOwCHERyz56`} alt="X" /> : <img className='local-pfp' src={`https://api.multiavatar.com/${peerBpfpId}.png?apikey=GlfxOwCHERyz56`} alt="X" />
+                            sessionStorage.getItem('peerRole') === 'peerA' ? <img className='local-pfp' src={`https://api.multiavatar.com/${peerApfpId}.png?apikey=${process.env.REACT_APP_AVATAR_API_KEY}`} alt="X" /> : <img className='local-pfp' src={`https://api.multiavatar.com/${peerBpfpId}.png?apikey=${process.env.REACT_APP_AVATAR_API_KEY}`} alt="X" />
                         }
 
                         <video id="localVideo" muted autoPlay playsInline></video>
                     </div>
                     <div className="second">
                         {
-                            sessionStorage.getItem('peerRole') === 'peerA' ? <img className='remote-pfp' src={`https://api.multiavatar.com/${peerBpfpId}.png?apikey=GlfxOwCHERyz56`} alt="X" /> : <img className='remote-pfp' src={`https://api.multiavatar.com/${peerApfpId}.png?apikey=GlfxOwCHERyz56`} alt="X" />
+                            sessionStorage.getItem('peerRole') === 'peerA' ? <img className='remote-pfp' src={`https://api.multiavatar.com/${peerBpfpId}.png?apikey=${process.env.REACT_APP_AVATAR_API_KEY}`} alt="X" /> : <img className='remote-pfp' src={`https://api.multiavatar.com/${peerApfpId}.png?apikey=${process.env.REACT_APP_AVATAR_API_KEY}`} alt="X" />
                         }
                         <video id="remoteVideo" autoPlay playsInline></video>
                     </div>

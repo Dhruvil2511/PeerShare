@@ -11,17 +11,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import firebaseConfig from '../../config/firebaseconfig';
 
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDp2oKcwTulKcY-PGLSwNmCTqjtx8zyXiw",
-  authDomain: "peershare2425.firebaseapp.com",
-  projectId: "peershare2425",
-  storageBucket: "peershare2425.appspot.com",
-  messagingSenderId: "308108699413",
-  appId: "1:308108699413:web:94b0d16825b57b93d6ab1c",
-  measurementId: "G-721QV10KH1"
-};
 firebase.initializeApp(firebaseConfig);
 
 
