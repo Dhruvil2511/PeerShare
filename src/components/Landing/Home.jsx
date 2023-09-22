@@ -15,6 +15,7 @@ import animation from '../../assets/transfer.json'
 import earth from '../../assets/save_earth.json'
 import secure from '../../assets/secure.json'
 import globe from '../../assets/globe.json'
+import video from '../../assets/video.json'
 import Lottie from 'lottie-react';
 import LandingNavigation from './LandingNavigation';
 
@@ -33,7 +34,7 @@ const Home = () => {
 
                                     <h1>Your data, your control
                                         <br />
-                                        <h4>~no third-party servers involved.</h4>
+                                        <h4>One-One Collaboration Platform</h4>
                                     </h1>
                                     <br />
                                     <p>
@@ -108,15 +109,17 @@ const Home = () => {
                     </div>
                     <div className="container-fluid mt-5 how-it-works">
                         <div className="how-it-works-explain">
-                            <h3>Only the receiver can access your files</h3>
+                            <h3>Live Chat & Video Call</h3>
                             <ul style={{ listStyleType: 'none' }}>
-                                <li>Peer Share uses WebRtc Technology and it uses encryption to secure data transmission. </li>
-                                <li>Data is passed through channels and it is encrypted with <a href="https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security" target='_blank'>(DTLS)</a> Protcol.</li>
-                                <li>WebRTC supports end-to-end encryption, meaning that data is encrypted on the sender's device and only decrypted on the recipient's device.</li>
+                                <li>Experience Seamless Live Chat and Video Chat with Our App.</li>
+                                <li>In a world that's constantly evolving, communication has never been more critical.</li>
+                                <li>Our app offers you a seamless experience like no other, combining file-transfer, live  <br />chat & video calls  into one powerful platform.</li>
+                                <li>PeerShare has Cross-Platform Compatibility</li>
                             </ul>
                         </div>
-                        <Lottie animationData={secure} style={{ width: '50%' }} />
+                        <Lottie animationData={video} style={{ width: '30%' }} />
                     </div>
+
                     <div className="container-fluid mt-5 how-it-works">
                         <Lottie animationData={earth} style={{ width: '50%' }} />
                         <div className="how-it-works-explain">
@@ -130,6 +133,18 @@ const Home = () => {
                     </div>
                     <div className="container-fluid mt-5 how-it-works">
                         <div className="how-it-works-explain">
+                            <h3>Only the receiver can access your files</h3>
+                            <ul style={{ listStyleType: 'none' }}>
+                                <li>Peer Share uses WebRtc Technology and it uses encryption to secure data transmission. </li>
+                                <li>Data is passed through channels and it is encrypted with <a href="https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security" target='_blank' rel="noreferrer">(DTLS)</a> Protcol.</li>
+                                <li>WebRTC supports end-to-end encryption, meaning that data is encrypted on the sender's device and only decrypted on the recipient's device.</li>
+                            </ul>
+                        </div>
+                        <Lottie animationData={secure} style={{ width: '50%' }} />
+                    </div>
+                    <div className="container-fluid mt-5 how-it-works">
+                        <Lottie animationData={globe} style={{ width: '30%' }} />
+                        <div className="how-it-works-explain">
                             <h3>Share you files Anywhere around globe</h3>
                             <ul style={{ listStyleType: 'none' }}>
                                 <li>Peer Share is built on modern web technologies, allowing it to work on devices far away from each other.</li>
@@ -137,9 +152,9 @@ const Home = () => {
                                 <li>When you close the browser tab your files are no longer accessible, minimising the risk of anyone getting unwanted access.</li>
                             </ul>
                         </div>
-                        <Lottie animationData={globe} style={{ width: '30%' }} />
                     </div>
                 </div>
+
                 <hr style={{ color: '#1AF1A0' }} />
                 <div class="container-fluid-md  mt-5 ms-3 me-3 footer">
 

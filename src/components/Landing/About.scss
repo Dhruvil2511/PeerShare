@@ -1,0 +1,29 @@
+.about {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    .first {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .circle {
+        margin-right: 10%;
+        background-color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 15em;
+        height: 15em;
+    }
+
+    .circle-title {
+        width: 50%;
+        margin: 0%, 5%, 0%, 5%;
+        color: white;
+        font-size: 2vw;
+    }
+}
