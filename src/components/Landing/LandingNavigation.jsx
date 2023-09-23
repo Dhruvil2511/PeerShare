@@ -19,8 +19,8 @@ const LandingNavigation = () => {
 
     return (
         <>
-            <div className="container-fluid-md  ms-3 me-3">
-                <div className="navbar sticky">
+            <div className="container-fluid-md ms-3 me-3">
+                <div className="navbar ">
                     <div className="logo">
                         <div className="logo_name">
 
