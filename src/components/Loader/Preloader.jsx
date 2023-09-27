@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import anime from 'animejs';
+import { useParams } from 'react-router-dom'
 import '../Loader/Preloader.scss'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
 import { ToastContainer, toast } from 'react-toastify';
+import firebaseConfig from '../../config/firebaseconfig';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
+
+firebase.initializeApp(firebaseConfig);
+
 let val;
 const Preloader = () => {
+    let { id } = useParams();
     const [peer, setPeer] = useState('');
     useEffect(() => {
         val = sessionStorage.getItem('peerRole');
@@ -27,7 +36,10 @@ const Preloader = () => {
         return () => clearInterval(interval);
 
     }, []);
-    function handleBack(event) {
+    async function handleBack(event) {
+        const db = firebase.firestore();
+        const userRef = db.collection('users').doc(id);
+        await userRef.delete();
         window.history.back();
     }
     function handleRetry() {

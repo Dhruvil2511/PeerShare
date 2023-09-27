@@ -13,7 +13,6 @@
 }
 
 
-
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -39,6 +38,13 @@
 .App-link {
   color: #61dafb;
 }
+.warning{
+  /* margin-left: 5%; */
+  text-align: center;
+  .warning-text{
+    color: white;
+  }
+}
 
 @keyframes App-logo-spin {
   from {
@@ -47,5 +53,46 @@
 
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (-webkit-device-pixel-ratio: 1.50) {
+  .zoomer {
+    zoom: 0.8;
+  }
+}
+
+@media (-webkit-device-pixel-ratio: 1.25) {
+  .zoomer {
+    zoom: 0.9;
+  }
+}
+
+@media screen and (max-width: 1366px) {
+  .zoomer {
+    zoom: 0.8;
+
+  }
+}
+
+@media (min-width: 992px) {
+
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm {
+    max-width: 925px;
+  }
+}
+
+
+@media (min-width: 1200px) {
+
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 1250px;
   }
 }

@@ -185,3 +185,69 @@ $neon : rgb(26, 240, 161);
     visibility: visible;
     opacity: 1;
 }
+
+
+@media only screen and (max-width: 820px) {
+    .flex-room-box {
+        padding: 5% !important;
+        height: 70% !important;
+
+        .create-room-box {
+            height: 100% !important;
+            width: 100% !important;
+
+            .content {
+                height: 100% !important;
+
+                .instant-room {
+                    .instant-room-title {
+                        font-size: 8vw !important;
+                    }
+
+                    .instant-room-description {
+                        padding: 5% 0% 2% 5% !important;
+                        text-align: start !important;
+                    }
+
+                    .instant-room-description-text {
+                        font-size: 4.5vw !important;
+                    }
+
+                    .instant-room-join {
+                        font-size: 4vw !important;
+                        padding: 2% !important;
+                    }
+                }
+
+                .custom-room {
+                    height: 100% !important;
+
+                    .custom-room-title {
+                        font-size: 8vw !important;
+                    }
+
+                    .custom-room-description {
+                        padding: 5% 0% 2% 5% !important;
+                        text-align: start !important;
+                    }
+
+                    .custom-room-description-text {
+                        font-size: 4.5vw !important;
+                    }
+
+                    .custom-room-join,
+                    .custom-room-input {
+                        font-size: 4vw !important;
+                        padding: 2% !important;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (max-height: 768px) {
+    .flex-room-box {
+        height: 80% !important;
+    }
+}

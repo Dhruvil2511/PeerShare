@@ -26,7 +26,7 @@ const Home = () => {
         <>
             <div className="landing">
                 <LandingNavigation />
-                <div className="container mt-5">
+                <div className="container mt-5 zoomer">
                     <div className="row">
                         <div className="col left">
                             <div className="content">
@@ -225,7 +225,7 @@ const Home = () => {
                                     <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
                                         <h5>Subscribe?</h5>
                                         <h6>To get Latest Updates</h6>
-                                        <form action="/" method='POST'>
+                                        <form action="/" method='POST' className='d-flex'>
                                             <input type="text" name="email" id="" />
                                             <button class="ms-3" type="submit" style={{ padding: '2%', border: 'none', borderRadius: '26px', backgroundColor: '#1AF1A0', fontSize: '0.8vw' }}>Subscribe</button>
                                         </form>

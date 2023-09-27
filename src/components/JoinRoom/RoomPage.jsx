@@ -15,6 +15,7 @@ import firebaseConfig from '../../config/firebaseconfig';
 
 firebase.initializeApp(firebaseConfig);
 let userRef = null;
+let db = null;
 
 var scale = 'scale(1)';
 const RoomPage = () => {
@@ -22,12 +23,11 @@ const RoomPage = () => {
     const [id, setId] = useState(null);
     const [generateIDClicked, setGenerateIDClicked] = useState(false);
     useEffect(() => {
+        db = firebase.firestore();
         sessionStorage.clear();
     }, []);
 
     async function generateID(event) {
-
-        const db = firebase.firestore();
         userRef = await db.collection('users').doc();
         document.querySelector('.instant-room-join').hidden = true;
         setId(userRef.id);
@@ -39,11 +39,17 @@ const RoomPage = () => {
         navigator.clipboard.writeText(url);
         toast("URL copied to clipboard! ", { theme: 'dark' });
     }
-    function handleCustomRoom(event) {
+    async function handleCustomRoom(event) {
+        userRef = db.collection('users').doc(`${id}`);
+        const roomId = await userRef.get();
 
         if (roomName === '' || roomName === ' ') {
             toast('Room name cannot be blank! ', { theme: 'dark' });
-            event.preventDefault();
+            return;
+        }
+
+        if (roomId.exists) {
+            toast('This room is already in use!', { theme: 'dark' })
             return;
         }
         setId(roomName);

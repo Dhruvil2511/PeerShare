@@ -19,6 +19,9 @@ function App() {
           </Routes>
         </Router>
       </div>
+      <div className="warning"><span className='warning-text'>⚠️ <strong>Please note:</strong>
+        Closing this page means you are leaving room and room will be deleted
+        Simply keep this page open in the background to keep connected.</span></div>
     </>
   );
 }

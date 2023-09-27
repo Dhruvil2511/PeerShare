@@ -422,7 +422,7 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                         <button type='button' onClick={handleCopy} className='copyBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginRight: '4%' }}>
                             <ContentPasteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>
-                        <input autocomplete="off" id='input-field' style={{ height: '50%', fontSize: '1.2vw', color: 'white', width: '70%', backgroundColor: '#333333', border: 'none', borderRadius: '5px' }} type='text' value={message} onChange={handleChange}></input>
+                        <input autoFocus autocomplete="off" id='input-field' style={{ height: '50%', fontSize: '1.2vw', color: 'white', width: '70%', backgroundColor: '#333333', border: 'none', borderRadius: '5px' }} type='text' value={message} onChange={handleChange}></input>
                         <button type="submit" id='sendBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginLeft: '4%' }}>
                             <SendIcon style={{ transform: `scale(${1.3})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
                         </button>

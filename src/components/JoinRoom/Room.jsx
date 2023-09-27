@@ -290,7 +290,28 @@ const Room = () => {
             if (connection.connectionState === 'connected') {
                 setIsConnected(true);
             }
-            else if (connection.connectionState === 'disconnected') setUserConnected(false);
+            else if (connection.connectionState === 'disconnected') {
+                setUserConnected(false);
+                setTimeout(async () => {
+                    alert('Peer Left. Redirecting to Home');
+                    if (localConnection) localConnection.close();
+                    if (remoteConnection) remoteConnection.close();
+
+                    sessionStorage.clear();
+                    const db = firebase.firestore();
+                    const userRef = db.collection('users').doc(id);
+                    const peerA = await userRef.collection('peerA').get();
+                    peerA.forEach(async candidate => {
+                        await candidate.ref.delete();
+                    });
+                    const peerB = await userRef.collection('peerB').get();
+                    peerB.forEach(async candidate => {
+                        await candidate.ref.delete();
+                    });
+                    await userRef.delete();
+                    window.location.href = '/join';
+                }, 3000);
+            }
             console.log(`Connection state change: ${connection.connectionState}`);
         });
 
@@ -311,23 +332,21 @@ const Room = () => {
         if (localConnection) localConnection.close();
         if (remoteConnection) remoteConnection.close();
 
-        await sessionStorage.removeItem('peerRole');
+        sessionStorage.clear();
+        const db = firebase.firestore();
+        const userRef = db.collection('users').doc(id);
+        const peerA = await userRef.collection('peerA').get();
+        peerA.forEach(async candidate => {
+            await candidate.ref.delete();
+        });
+        const peerB = await userRef.collection('peerB').get();
+        peerB.forEach(async candidate => {
+            await candidate.ref.delete();
+        });
+        await userRef.delete();
+        alert('Disconnecting');
+        window.location.href = '/join';
 
-        if (id) {
-            const db = firebase.firestore();
-            const userRef = db.collection('users').doc(id);
-            const peerA = await userRef.collection('peerA').get();
-            peerA.forEach(async candidate => {
-                await candidate.ref.delete();
-            });
-            const peerB = await userRef.collection('peerB').get();
-            peerB.forEach(async candidate => {
-                await candidate.ref.delete();
-            });
-            await userRef.delete();
-            alert('Disconnecting');
-            window.location.href = '/join';
-        }
     }
 
     return (
@@ -382,6 +401,7 @@ const Room = () => {
                     }
                 </div>
             }
+
             {
                 mobileView &&
                 <>
