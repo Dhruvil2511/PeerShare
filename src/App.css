@@ -66,6 +66,9 @@
   .zoomer {
     zoom: 0.9;
   }
+  .scroll{
+    margin-top: 0% !important;
+  }
 }
 
 @media screen and (max-width: 1366px) {

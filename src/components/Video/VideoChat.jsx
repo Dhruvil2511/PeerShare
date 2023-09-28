@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom';
+
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { useParams } from 'react-router-dom';
-import '../Video/VideoChat.scss'
+
 import VideocamIcon from '@mui/icons-material/Videocam';
 import MicIcon from '@mui/icons-material/Mic';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
@@ -12,8 +13,11 @@ import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import firebaseConfig from '../../config/firebaseconfig';
 import configuration from '../../config/iceconfig';
+import '../Video/VideoChat.scss'
+import { toast } from 'react-toastify';
 
 firebase.initializeApp(firebaseConfig);
+
 let remoteStream = null;
 let localStream = null;
 let data = null;
@@ -23,7 +27,8 @@ let remoteConnection = null;
 let channel = null;
 let videoSignalChannel = null;
 let callConnected = false;
-
+let db, dbVideo = null;
+let userRef = null;
 
 const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     let { id } = useParams();
@@ -37,9 +42,11 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     const [videoCallButtonState, setVideoCallButtonState] = useState(true);
 
     useEffect(() => {
-        const db = firebase.firestore();
-        let userRef = db.collection('users').doc(`${id}`);
+        db = firebase.firestore();
+        dbVideo = firebase.firestore();
+        userRef = db.collection('users').doc(`${id}`);
         val = sessionStorage.getItem('peerRole');
+
         const unsubscribe = userRef.onSnapshot(async (snapshot) => {
             data = snapshot.data();
             if (data && data.videoCallHandle) {
@@ -77,7 +84,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                     remoteConnection = null;
                     localStream = null;
                     remoteStream = null;
-                    const dbVideo = firebase.firestore();
+
                     const roomRef = await dbVideo.collection('videoCon').doc(`${id}`);
                     const calleeCandidates = await roomRef.collection('calleeCandidates').get();
                     calleeCandidates.forEach(async candidate => {
@@ -105,17 +112,34 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     }, []);
 
     async function openUserMedia() {
-        const stream = await navigator.mediaDevices.getUserMedia(
-            { video: true, audio: true });
-        document.querySelector('#localVideo').srcObject = stream;
-        localStream = stream;
-        remoteStream = new MediaStream();
-        document.querySelector('#remoteVideo').srcObject = remoteStream;
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(
+                { video: true, audio: true });
+            document.querySelector('#localVideo').srcObject = stream;
+            localStream = stream;
+            remoteStream = new MediaStream();
+            document.querySelector('#remoteVideo').srcObject = remoteStream;
+        } catch (error) {
+            if (error.name === 'NotAllowedError') {
+                // User denied permission for audio and/or video
+                console.error('User denied permission for audio and/or video.');
+                toast('Please accept the permission for video and audio', { theme: 'dark' });
+            }
+            else if (error.name === 'NotFoundError') {
+                // The requested media was not found (e.g., no camera/microphone available)
+                console.error('Cannot find video or audio resource.');
+                toast('Cannot find video or audio source', { theme: 'dark' });
+            }
+            else {
+                // Handle other types of errors
+                console.error('Error accessing media devices:', error);
+            }
+        }
+
     }
 
     async function initializeLocalConnection() {
         await openUserMedia();
-        const db = firebase.firestore();
         const roomRef = await db.collection('videoCon').doc(`${id}`);
 
         console.log('Create local with configuration: ', configuration);
@@ -125,10 +149,12 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         videoSignalChannel = localConnection.createDataChannel('videoSignalChannel');
         initializeChannelListeners(videoSignalChannel);
 
+        if (localStream) {
 
-        localStream.getTracks().forEach(track => {
-            localConnection.addTrack(track, localStream);
-        });
+            localStream.getTracks().forEach(track => {
+                localConnection.addTrack(track, localStream);
+            });
+        }
 
         const callerCandidatesCollection = roomRef.collection('callerCandidates');
 
@@ -157,7 +183,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
             console.log('Got remote track:', event.streams[0]);
             event.streams[0].getTracks().forEach(track => {
                 console.log('Add a track to the remoteStream:', track);
-                remoteStream.addTrack(track);
+                if (remoteStream) remoteStream.addTrack(track);
             });
         });
 
@@ -212,15 +238,12 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     async function initializeRemoteConnection() {
         setFlag(false);
         await openUserMedia();
-        const db = firebase.firestore();
         const roomRef = await db.collection('videoCon').doc(`${id}`);
         const roomSnapshot = await roomRef.get();
 
         if (roomSnapshot.exists) {
             remoteConnection = new RTCPeerConnection(configuration);
             registerPeerConnectionListeners(remoteConnection);
-
-
 
             remoteConnection.addEventListener('datachannel', (event) => {
 
@@ -247,9 +270,12 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
 
             });
 
-            localStream.getTracks().forEach(track => {
-                remoteConnection.addTrack(track, localStream);
-            });
+            if (localStream) {
+                localStream.getTracks().forEach(track => {
+                    remoteConnection.addTrack(track, localStream);
+                });
+            }
+
             const calleeCandidatesCollection = roomRef.collection('calleeCandidates');
 
             remoteConnection.addEventListener('icecandidate', event => {
@@ -266,7 +292,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
                 console.log('Got remote track:', event.streams[0]);
                 event.streams[0].getTracks().forEach(track => {
                     console.log('Add a track to the remoteStream:', track);
-                    remoteStream.addTrack(track);
+                    if (remoteStream) remoteStream.addTrack(track);
                 });
             });
 
@@ -313,7 +339,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
         let userRef = await dbUser.collection('users').doc(`${id}`);
         await userRef.set({ videoCallHandle: { clickedBy: null, clicked: false, verdict: '' } });
 
-        const dbVideo = firebase.firestore();
+
         const roomRef = await dbVideo.collection('videoCon').doc(`${id}`);
         const calleeCandidates = await roomRef.collection('calleeCandidates').get();
         calleeCandidates.forEach(async candidate => {
@@ -374,7 +400,7 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     }
 
     async function handleVideoOn() {
-        let val = sessionStorage.getItem('peerRole');
+
         if (localStream) localStream.getVideoTracks()[0].enabled = !isVideoOn;
 
         let message;
@@ -409,7 +435,6 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
     }
 
     async function handlevideoCallButtonState(event) {
-        const db = firebase.firestore();
         let userRef = db.collection('users').doc(`${id}`);
 
         userRef.onSnapshot(async (snapshot) => {
@@ -422,7 +447,6 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
             }
         });
 
-        let val = sessionStorage.getItem('peerRole');
         val === 'peerA' ? await userRef.set({ videoCallHandle: { clickedBy: 'peerA', clicked: true, verdict: '' } }) : await userRef.set({ videoCallHandle: { clickedBy: 'peerB', clicked: true, verdict: '' } });
 
     }

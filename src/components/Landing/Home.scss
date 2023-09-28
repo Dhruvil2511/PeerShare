@@ -1,5 +1,9 @@
 .link {
     text-decoration: none;
+    font-size: 1.5rem;
+    color: white;
+
+    // padding: 10%;
     &:hover {
         color: #1AF1A0 !important;
         border-bottom: 1px solid #1AF1A0;
@@ -162,7 +166,7 @@
 
 .scroll {
     display: flex;
-    margin-top: 5%;
+    margin-top: 2%;
     justify-content: center;
     align-items: center;
     -webkit-animation: mover 1s infinite alternate;
@@ -213,7 +217,7 @@ svg {
 .ConnectionStatus {
     animation-name: flashAnimation, connectLightAnimation;
     animation-duration: 0.3s, 1s;
-    animation-delay: 1.5s, 3.2s ;
+    animation-delay: 1.5s, 3.2s;
     animation-timing-function: ease-in-out;
     animation-fill-mode: forwards;
 }
@@ -270,7 +274,8 @@ svg {
     80% {
         opacity: 1;
     }
-    100%{
+
+    100% {
         opacity: 1;
     }
 }
@@ -278,5 +283,62 @@ svg {
 
 .accordion-button:after {
     background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !important;
-  }
-  
+}
+
+
+@media (-webkit-device-pixel-ratio: 1.33) {
+    .zoomer {
+        zoom: 0.9;
+    }
+
+    .scroll {
+        margin-top: 0% !important;
+    }
+}
+
+@media only screen and (max-width: 991px) {
+    #navbarNav {
+        background-color: #121212 !important;
+    }
+
+    .navbar {
+        margin-top: 2% !important;
+    }
+
+    .row {
+        flex-direction: column !important;
+    }
+
+    .right {
+        width: 90% !important;
+        margin-left: 5% !important;
+    }
+
+    .ms-3 {
+        margin-left: 0% !important;
+    }
+
+    .me-3 {
+        margin-right: 0% !important;
+    }
+
+    .btn2 {
+        width: 50% !important;
+    }
+
+    li {
+        font-size: 2.2vw !important;
+    }
+
+    #footer-svg {
+        width: 10% !important;
+    }
+
+    .join {
+        margin-left: 0% !important;
+    }
+
+    .collapse {
+        margin-right: 0% !important;
+    }
+}

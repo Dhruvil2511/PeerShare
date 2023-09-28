@@ -27,7 +27,7 @@ const Home = () => {
             <div className="landing">
                 <LandingNavigation />
                 <div className="container mt-5 zoomer">
-                    <div className="row">
+                    <div className="row d-flex" >
                         <div className="col left">
                             <div className="content">
                                 <div className="info">
@@ -222,7 +222,7 @@ const Home = () => {
                                         <p><i class="fas fa-envelope mr-3 link"></i>Live Chat</p>
                                         <p><i class="fas fa-phone mr-3 link"></i>Video Chat</p>
                                     </div>
-                                    <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+                                    <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4" style={{width:'fit-content'}}>
                                         <h5>Subscribe?</h5>
                                         <h6>To get Latest Updates</h6>
                                         <form action="/" method='POST' className='d-flex'>

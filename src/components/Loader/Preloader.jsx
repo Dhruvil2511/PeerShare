@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import anime from 'animejs';
 import { useParams } from 'react-router-dom'
-import '../Loader/Preloader.scss'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
 import { ToastContainer, toast } from 'react-toastify';
@@ -9,6 +8,7 @@ import firebaseConfig from '../../config/firebaseconfig';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import '../Loader/Preloader.scss'
 
 firebase.initializeApp(firebaseConfig);
 
@@ -44,7 +44,7 @@ const Preloader = () => {
     }
     function handleRetry() {
         window.location.reload();
-    }
+    }   
 
     return (
         <>

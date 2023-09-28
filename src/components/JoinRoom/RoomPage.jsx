@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import Navbar from '../Navbar/Navbar';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Link, } from 'react-router-dom';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import firebase from 'firebase/compat/app';
 import '../JoinRoom/RoomPage.scss'
 import LandingNavigation from "../Landing/LandingNavigation"
-
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Tooltip } from '@mui/material';
@@ -75,7 +73,7 @@ const RoomPage = () => {
                                 generateIDClicked &&
                                 <>
                                     <div style={{ display: 'flex', justifyContent: 'center', width: '75%' }}>
-                                        <span style={{ color: 'rgb(239,209,118)', marginTop: '5px', fontSize: '1vw' }}>{`https://signalling-28129.web.app/room/${id}`}</span>
+                                        <span className='copy-link' style={{ color: 'rgb(239,209,118)', marginTop: '5px', fontSize: '1vw' }}>{`https://signalling-28129.web.app/room/${id}`}</span>
                                         <Tooltip title='Copy link'>
                                             <button onClick={copyURL} style={{ backgroundColor: 'rgb(26, 240, 161)', marginLeft: '2%', width: '8%', borderRadius: '10px' }} >
                                                 <ContentCopyIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} />

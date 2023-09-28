@@ -1,25 +1,26 @@
 import React, { useEffect, useState } from 'react'
-import Transfer from '../Transfer/Transfer'
-import Chat from '../Chat/Chat'
 import { useParams } from 'react-router-dom'
+import { isMobile } from 'react-device-detect';
+import { toast } from 'react-toastify';
+import { v4 } from 'uuid';
+import axios from 'axios';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import VideoChat from '../Video/VideoChat'
-import Preloader from '../Loader/Preloader'
-import { name } from '../../utils/name';
-import '../JoinRoom/Room.scss'
-import axios from 'axios';
-import { v4 } from 'uuid';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import CircleIcon from '@mui/icons-material/Circle';
-import { ReactComponent as ReactLogo } from './logo.svg';
 import DuoIcon from '@mui/icons-material/Duo';
 import ChatIcon from '@mui/icons-material/Chat';
 import IosShareIcon from '@mui/icons-material/IosShare';
-import { isMobile } from 'react-device-detect';
+import Transfer from '../Transfer/Transfer'
+import Chat from '../Chat/Chat'
+import VideoChat from '../Video/VideoChat'
+import Preloader from '../Loader/Preloader'
+import { name } from '../../utils/name';
+import { ReactComponent as ReactLogo } from '../../assets/logo.svg';
 import firebaseConfig from '../../config/firebaseconfig';
 import configuration from '../../config/iceconfig';
+import '../JoinRoom/Room.scss'
 
 firebase.initializeApp(firebaseConfig);
 
@@ -34,6 +35,7 @@ let peerAName = '';
 let peerApfpId = '';
 let peerBName = '';
 let peerBpfpId = '';
+let db = null;
 const Room = () => {
     let { id } = useParams();
     const [isConnected, setIsConnected] = useState(false);
@@ -44,6 +46,11 @@ const Room = () => {
     const [chatLoaded, setChatLoaded] = useState(false);
     let checkPeerRole = sessionStorage.getItem('peerRole');
     useEffect(() => {
+        try {
+            db = firebase.firestore();
+        } catch (error) {
+            console.error('Error intializing Database');
+        }
 
         if (checkPeerRole === 'peerA') {
             generateID();
@@ -98,14 +105,13 @@ const Room = () => {
         axios.get(`https://api.multiavatar.com/${key}.png?apikey=${process.env.REACT_APP_AVATAR_API_KEY}`).then((response) => {
             setAvatar(response.config.url);
         }).catch((error) => {
-            console.log(error)
+            console.log('Something Wrong in profile api' + error.message)
         });
     }
     async function generateID() {
-
-        const db = firebase.firestore();
+        console.log('Peer A');
         userRef = await db.collection('users').doc(`${id}`);
-        console.log('generate id called');
+
 
         console.log('Creating local connection');
         localConnection = new RTCPeerConnection(configuration);
@@ -121,7 +127,12 @@ const Room = () => {
                 name: peerAName,
                 id: peerApfpId
             }
-            dummyChannel.send(JSON.stringify(detail));
+            try {
+                dummyChannel.send(JSON.stringify(detail));
+            } catch (error) {
+                console.error('Exchange Channel is not open!');
+                toast('Please try to make new room!', { theme: 'dark' });
+            }
             fetchAvatar();
         });
 
@@ -157,9 +168,7 @@ const Room = () => {
                 sdp: offer.sdp
             },
         };
-        // setting offer in firestore for roomID
-        const btn = { 'peerAVideoClick': false };
-        // userRef.set(btn);
+
         await userRef.set(peerOffer);
         // await userRef.set({ 'peerAVideoClick': false });
         // setConnectionId(userRef.id);
@@ -190,12 +199,12 @@ const Room = () => {
 
 
     async function joinRoom() {
-        // steps 1: create databse var and create fireebase instance
-        const db = firebase.firestore();
+
         // check if id exists 
         userRef = db.collection('users').doc(`${id}`);
         const peerB = userRef.collection('peerB');
         const roomId = await userRef.get();
+
         console.log('Got room:', roomId.exists);
 
         if (roomId.exists) {
@@ -240,7 +249,11 @@ const Room = () => {
                                 name: peerBName,
                                 id: peerBpfpId
                             }
-                            remoteConnection.dummyChannel.send(JSON.stringify(detail));
+                            try {
+                                remoteConnection.dummyChannel.send(JSON.stringify(detail));
+                            } catch (error) {
+                                console.error('Exchange Channel doesnot exists');
+                            }
                         }, 500);
 
                     }
@@ -265,6 +278,9 @@ const Room = () => {
                 await userRef.update(peerAnswer);
 
             }
+            else {
+                console.error('Unable to receive SDP Offer from peer A. Try to make connection Again');
+            }
 
             // console.log(remoteConnection);
             userRef.collection('peerA').onSnapshot(snapshot => {
@@ -276,6 +292,9 @@ const Room = () => {
                     }
                 });
             });
+        } else {
+            toast('Room not found. Try creating room again!', { theme: 'dark' });
+            return;
         }
     }
 
@@ -298,8 +317,7 @@ const Room = () => {
                     if (remoteConnection) remoteConnection.close();
 
                     sessionStorage.clear();
-                    const db = firebase.firestore();
-                    const userRef = db.collection('users').doc(id);
+                    userRef = db.collection('users').doc(id);
                     const peerA = await userRef.collection('peerA').get();
                     peerA.forEach(async candidate => {
                         await candidate.ref.delete();
@@ -333,8 +351,7 @@ const Room = () => {
         if (remoteConnection) remoteConnection.close();
 
         sessionStorage.clear();
-        const db = firebase.firestore();
-        const userRef = db.collection('users').doc(id);
+        userRef = db.collection('users').doc(id);
         const peerA = await userRef.collection('peerA').get();
         peerA.forEach(async candidate => {
             await candidate.ref.delete();
@@ -346,7 +363,6 @@ const Room = () => {
         await userRef.delete();
         alert('Disconnecting');
         window.location.href = '/join';
-
     }
 
     return (
@@ -375,7 +391,6 @@ const Room = () => {
                                 }
                             </span>
                             <div className="room-buttons">
-                                {/* <button className="retry-button" title='retry connection' onClick={retryConnect}><ReplayIcon /></button> */}
                                 <button className="leave-button" title='exit' onClick={leaveRoom}><PowerSettingsNewIcon sx={{ fontSize: { xs: 8, sm: 14, md: 22, lg: 28 } }} /></button>
                             </div>
                         </div>
@@ -403,69 +418,69 @@ const Room = () => {
             }
 
             {
-                mobileView &&
-                <>
-                    <div id='mobdiv' style={{ display: 'flex', flexDirection: 'row', height: '5vh', justifyContent: 'center', margin: '2% 0% 2% 0%' }}>
-                        <img className='user-pfp' src={avatar} alt="X" />
-                        <div style={{ color: 'yellow', alignSelf: 'center', marginLeft: '2%' }}>{sessionStorage.getItem('peerRole') === 'peerA' ? peerAName : peerBName}</div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <div id='mobTransfer' style={{ width: '100vw' }}>{isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}</div>
-                        <div id='mobChat' style={{ width: '100vw', display: 'none' }}>  {isConnected && showChat &&
-                            chatLoaded &&
-                            <Chat peerAName={peerAName} peerBName={peerBName} peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />
-                        }
+                (!isConnected && !peerBpfpId) ? <Preloader /> :
+                    mobileView &&
+
+                    <>
+                        <div id='mobdiv' style={{ display: 'flex', flexDirection: 'row', height: '5vh', justifyContent: 'center', margin: '2% 0% 2% 0%' }}>
+                            <img className='user-pfp' src={avatar} alt="X" />
+                            <div style={{ color: 'yellow', alignSelf: 'center', marginLeft: '2%' }}>{sessionStorage.getItem('peerRole') === 'peerA' ? peerAName : peerBName}</div>
                         </div>
-                        <div id='mobVideoChat' style={{ width: '100vw', display: 'none' }}>  {isConnected && showChat && <VideoChat peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />}</div>
-                    </div>
-                    <div className='bottom-nav-bar' style={{ display: 'flex', flexDirection: 'row' }}>
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            <div id='mobTransfer' style={{ width: '100vw' }}>{isConnected && <Transfer localConnection={localConnection} remoteConnection={remoteConnection} />}</div>
+                            <div id='mobChat' style={{ width: '100vw', display: 'none' }}>  {isConnected && showChat &&
+                                chatLoaded &&
+                                <Chat peerAName={peerAName} peerBName={peerBName} peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />
+                            }
+                            </div>
+                            <div id='mobVideoChat' style={{ width: '100vw', display: 'none' }}>  {isConnected && showChat && <VideoChat peerApfpId={peerApfpId} peerBpfpId={peerBpfpId} localConnection={localConnection} remoteConnection={remoteConnection} />}</div>
+                        </div>
+                        <div className='bottom-nav-bar' style={{ display: 'flex', flexDirection: 'row' }}>
 
 
-                        <button className='nav-buttons active' id='fileshare' onClick={() => {
-                            document.getElementById('mobdiv').style.display = 'flex';
-                            document.getElementById('mobTransfer').style.display = 'block';
-                            document.getElementById('mobChat').style.display = 'none';
-                            document.getElementById('mobVideoChat').style.display = 'none';
-                            document.getElementById('fileshare').style.color = '#0A82FD';
-                            document.getElementById('chatmob').style.color = 'white';
-                            document.getElementById('videomob').style.color = 'white';
-                        }}>
-                            <IosShareIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
-                        </button>
+                            <button className='nav-buttons active' id='fileshare' onClick={() => {
+                                document.getElementById('mobdiv').style.display = 'flex';
+                                document.getElementById('mobTransfer').style.display = 'block';
+                                document.getElementById('mobChat').style.display = 'none';
+                                document.getElementById('mobVideoChat').style.display = 'none';
+                                document.getElementById('fileshare').style.color = '#0A82FD';
+                                document.getElementById('chatmob').style.color = 'white';
+                                document.getElementById('videomob').style.color = 'white';
+                            }}>
+                                <IosShareIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
+                            </button>
 
 
-                        <button id='chatmob' className='nav-buttons' onClick={() => {
-                            document.getElementById('mobdiv').style.display = 'none';
-                            document.getElementById('mobTransfer').style.display = 'none'
-                            document.getElementById('mobChat').style.display = 'block'
-                            document.getElementById('mobVideoChat').style.display = 'none'
-                            document.getElementById('chatmob').style.color = '#0A82FD';
-                            document.getElementById('videomob').style.color = 'white';
-                            document.getElementById('fileshare').style.color = 'white';
-                            document.querySelector('.active').style.color = 'white';
-                        }}>
-                            <ChatIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
-                        </button>
+                            <button id='chatmob' className='nav-buttons' onClick={() => {
+                                document.getElementById('mobdiv').style.display = 'none';
+                                document.getElementById('mobTransfer').style.display = 'none'
+                                document.getElementById('mobChat').style.display = 'block'
+                                document.getElementById('mobVideoChat').style.display = 'none'
+                                document.getElementById('chatmob').style.color = '#0A82FD';
+                                document.getElementById('videomob').style.color = 'white';
+                                document.getElementById('fileshare').style.color = 'white';
+                                document.querySelector('.active').style.color = 'white';
+                            }}>
+                                <ChatIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
+                            </button>
 
 
-                        <button id='videomob' className='nav-buttons' onClick={() => {
-                            document.getElementById('mobdiv').style.display = 'flex';
-                            document.getElementById('mobTransfer').style.display = 'none'
-                            document.getElementById('mobChat').style.display = 'none'
-                            document.getElementById('mobVideoChat').style.display = 'block'
-                            document.getElementById('videomob').style.color = '#0A82FD';
-                            document.getElementById('chatmob').style.color = 'white';
-                            document.getElementById('fileshare').style.color = 'white';
-                            document.querySelector('.active').style.color = 'white';
-                            // document.getElementById('navbarForId').style.display = 'none';
-
-                        }}>
-                            <DuoIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
-                        </button>
+                            <button id='videomob' className='nav-buttons' onClick={() => {
+                                document.getElementById('mobdiv').style.display = 'flex';
+                                document.getElementById('mobTransfer').style.display = 'none'
+                                document.getElementById('mobChat').style.display = 'none'
+                                document.getElementById('mobVideoChat').style.display = 'block'
+                                document.getElementById('videomob').style.color = '#0A82FD';
+                                document.getElementById('chatmob').style.color = 'white';
+                                document.getElementById('fileshare').style.color = 'white';
+                                document.querySelector('.active').style.color = 'white';
+                            }}>
+                                <DuoIcon sx={{ fontSize: { xs: 25, sm: 25, md: 40, lg: 50 } }} />
+                            </button>
 
 
-                    </div>
-                </>
+                        </div>
+                    </>
             }
         </>
     )

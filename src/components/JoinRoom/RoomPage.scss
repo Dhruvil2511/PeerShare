@@ -190,10 +190,10 @@ $neon : rgb(26, 240, 161);
 @media only screen and (max-width: 820px) {
     .flex-room-box {
         padding: 5% !important;
-        height: 70% !important;
+        height: 65% !important;
 
         .create-room-box {
-            height: 100% !important;
+            height: 90% !important;
             width: 100% !important;
 
             .content {
@@ -210,11 +210,11 @@ $neon : rgb(26, 240, 161);
                     }
 
                     .instant-room-description-text {
-                        font-size: 4.5vw !important;
+                        font-size: 4vw !important;
                     }
 
                     .instant-room-join {
-                        font-size: 4vw !important;
+                        font-size: 3vw !important;
                         padding: 2% !important;
                     }
                 }
@@ -232,21 +232,25 @@ $neon : rgb(26, 240, 161);
                     }
 
                     .custom-room-description-text {
-                        font-size: 4.5vw !important;
+                        font-size: 4vw !important;
                     }
 
                     .custom-room-join,
                     .custom-room-input {
-                        font-size: 4vw !important;
+                        font-size: 3vw !important;
                         padding: 2% !important;
                     }
                 }
             }
         }
     }
+
+    .copy-link {
+        font-size: 2.5vw !important;
+    }
 }
 
-@media only screen and (max-height: 768px) {
+@media only screen and (max-height: 769px) {
     .flex-room-box {
         height: 80% !important;
     }
