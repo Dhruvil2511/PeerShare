@@ -231,6 +231,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
     };
     let fileInfo;
     if (dataChannel || remoteConnection.dataChannel) {
+      
       file = fileInput;
       fileInfo = {
         'file': {
@@ -238,6 +239,7 @@ const Transfer = ({ localConnection, remoteConnection }) => {
           size: file.size
         },
       };
+
       console.log(fileInput.size, typeof (fileInput.size))
       totalFileSize = fileInput.size;
       if (dataChannel) {

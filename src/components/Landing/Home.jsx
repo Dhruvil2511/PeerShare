@@ -204,13 +204,13 @@ const Home = () => {
                                         <hr class="mb-4 mt-0 d-inline-block mx-auto" style={{ width: " 60px", backgroundColor: "#7c4dff", height: "2px" }} />
 
                                         <p>
-                                            <a href="#!" class="text-white link">Report Bug</a>
+                                            <a href="mailto:" class="text-white link">Report Bug</a>
                                         </p>
                                         <p>
-                                            <a href="#!" class="text-white link">Feedback form</a>
+                                            <a href="/feedback" class="text-white link">Feedback form</a>
                                         </p>
                                         <p>
-                                            <a href="#!" class="text-white link">Contact us</a>
+                                            <a href="mailto:" class="text-white link">Contact us</a>
                                         </p>
                                     </div>
 
@@ -222,7 +222,7 @@ const Home = () => {
                                         <p><i class="fas fa-envelope mr-3 link"></i>Live Chat</p>
                                         <p><i class="fas fa-phone mr-3 link"></i>Video Chat</p>
                                     </div>
-                                    <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4" style={{width:'fit-content'}}>
+                                    <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4" style={{ width: 'fit-content' }}>
                                         <h5>Subscribe?</h5>
                                         <h6>To get Latest Updates</h6>
                                         <form action="/" method='POST' className='d-flex'>

@@ -1,77 +1,56 @@
 const express = require('express');
-const http = require('http');
-const path = require('path');
-const { Server } = require('socket.io');
-
-// Create an Express app
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
-
-// Create an HTTP server
-const server = http.createServer(app);
-
-// Create a Socket.IO server
-const io = new Server(server);
-
-app.get('/room/:roomId', (req, res) => {
-    // Get the room ID from the URL parameter
-    const roomId = req.params.roomId;
-    // res.render('index', { roomId });
-    res.sendFile(path.join(__dirname + '/index.html'));
-
-    // Check if the room exists and has less than two users
-
-    // const room = io.sockets.adapter.rooms.get(roomId);
-    // console.log(room);
-    // if (room && room.size < 2) {
-    //     // Render the chat page with the room ID
-        
-    // } else {
-    //     // Redirect to the home page
-    //     // res.redirect('/');
-    //     res.send(roomId);
-    // }
+const nodemailer = require('nodemailer');
+app.use(cors());
+app.use(bodyParser.json());
+mongoose.connect('mongodb+srv://priyanshu24052:bleqFyixRr2tnaXW@cluster0.qqyzxn9.mongodb.net/PeerShare?retryWrites=true&w=majority').then(() => { console.log('Starting') });
+const UserSchema = new mongoose.Schema({
+    eid: String,
+    fname: { type: String, required: true },
+    lname: { type: String, required: true },
+    emoji1: String,
+    emoji2: String,
+    review: String,
+    suggestion: String,
+    find: String,
 });
+const User = new mongoose.model('User', UserSchema);
 
-// Handle socket connections
-io.on('connection', (socket) => {
-    console.log('a user connected');
+// app.post('/mail', async (req, res) => {
 
-    // Handle join room event
-    socket.on('join room', (roomId) => {
-        // Join the room
-        socket.join(roomId);
-        console.log(`user joined room ${roomId}`);
-
-        // Emit a message to the room
-        socket.to(roomId).emit('message', 'A user has joined the chat');
-    });
-
-    // Handle leave room event
-    socket.on('leave room', (roomId) => {
-        // Leave the room
-        socket.leave(roomId);
-        console.log(`user left room ${roomId}`);
-
-        // Emit a message to the room
-        socket.to(roomId).emit('message', 'A user has left the chat');
-    });
-
-    // Handle message event
-    socket.on('message', (data) => {
-        // Get the room ID and the message from the data object
-        const { roomId, message } = data;
-
-        // Emit the message to the room
-        socket.to(roomId).emit('message', message);
-    });
-
-    // Handle disconnect event
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
-    });
+//     var trans = await nodemailer.createTransport({
+//         host: 'smtp.ethereal.email',
+//         port: 587,
+//         auth: {
+//             user: 'johnpaul.schamberger@ethereal.email',
+//             pass: 'YRXqmTccNntRh3qzAk'
+//         }
+//     });
+//     fromEmail = await req.body.email;
+//     console.log(fromEmail)
+//     var mailoption = {
+//         from: '<priyanshu24052@gmail.com>',
+//         to: fromEmail,
+//         subject: 'Add On The Mailing List',
+//         text: 'Add Me In Mailing List Senpai'
+//     }
+//     await trans.sendMail(mailoption, (err, info) => {
+//         if (err) { console.log(err) }
+//         else { console.log('Success:' + info.response) }
+//     })
+//     res.send()
+// })
+app.post('/process', async (req, res) => {
+    try {
+        const { eid, fname, lname, emoji1, emoji2, review, suggestion, find } = req.body;
+        const newUser = new User({ eid, fname, lname, emoji1, emoji2, review, suggestion, find });
+        await newUser.save();
+        res.send();
+    } catch (error) {
+        res.send(error);
+    }
 });
-
-// Listen on port 3000
-server.listen(6969, () => {
-    console.log('listening on *:6969');
-})
+app.listen(8000);

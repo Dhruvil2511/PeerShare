@@ -1,28 +1,24 @@
 import React, { useEffect, useState } from 'react'
+import Lottie from 'lottie-react';
+import { useParams } from 'react-router-dom';
 import { v4 } from 'uuid';
 import axios from 'axios';
-import SendIcon from '@mui/icons-material/Send';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { useParams } from 'react-router-dom';
-import '../Chat/Chat.scss'
+import firebaseConfig from '../../config/firebaseconfig';
+import SendIcon from '@mui/icons-material/Send';
 import VideoCallIcon from '@mui/icons-material/VideoCall';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import animation from '../../assets/FINAL.json'
-import Lottie from 'lottie-react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReplyIcon from '@mui/icons-material/Reply';
-import firebaseConfig from '../../config/firebaseconfig';
+import animation from '../../assets/FINAL.json'
+import '../Chat/Chat.scss'
 
 firebase.initializeApp(firebaseConfig);
 
-
 let messageChannel;
-var scale = 'scale(1.5)';
 let channel;
-let d;
-// let message = null;
 
 const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, remoteConnection }) => {
     let { id } = useParams();
@@ -78,7 +74,6 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         });
     }
     async function initializeRemoteConnection() {
-
         remoteConnection.addEventListener('datachannel', async (event) => {
             channel = event.channel;
             if (channel.label === 'messageChannel') {
@@ -131,7 +126,6 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
         setTimeout(() => {
             chatbox.scrollTop = chatbox.scrollHeight;
         }, 100);
-
         setMessage('');
         setMessage('');
         setReplySize(0);
@@ -156,7 +150,6 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
     async function handlevideoCallButtonState(event) {
         const db = firebase.firestore();
         let userRef = db.collection('users').doc(`${id}`);
-
         userRef.onSnapshot(async (snapshot) => {
             var data = snapshot.data();
             console.log(data);
@@ -187,7 +180,6 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
     async function removeChat(event) {
         event.preventDefault();
         const response = window.confirm("Are you sure you want to clear chat?");
-
         if (response) {
             setMessageList([]);
             setMessageReply('')
@@ -200,40 +192,64 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
 
     }
 
+    function handleReply(e, value) {
+        e.preventDefault();
+        let msg = '', cntSpace = 0;
+        for (var i = 0; i < value.message.length; i++) {
+            msg += value.message[i];
+            if (value.message[i] === ' ') {
+                cntSpace++;
+                console.log(cntSpace)
+            }
+            if (cntSpace === 7) break;
+        }
+        if (cntSpace >= 7) msg += '.....';
+        setMessageReply(msg)
+        document.querySelector('#input-field').focus();
+        setResizeChatArea(64)
+        setReplySize(16)
+        setDisplayReply('flex')
+        setToReply(value.role)
+    }
+    function replyClose() {
+        setReplySize(0);
+        setMessageReply('')
+        setResizeChatArea(80)
+        setDisplayReply('none')
+        document.querySelector('#input-field').focus();
+    }
     return (
         <>
-            <div className='daddy' style={{ resize: 'horizontal', backgroundColor: 'transparent', overflow: 'hidden', border: '1px solid white', borderRadius: '15px', height: '80vh', width: '30%', float: 'left' }}>
-                <div style={{ backgroundColor: '#1a1a1a', flexDirection: 'row', borderBottom: '1px solid white', height: '10%', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
-                    <div style={{ height: '100%', width: '75%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                        <img src={avatar} alt="avatar" style={{ height: '80%', marginRight: '5%', borderRadius: '100%' }} />
-                        <span id='user-name' style={{ color: 'white', fontSize: '1.2vw', marginLeft: '1.5%', marginRight: '-1%' }}>
+            <div className='daddy'>
+                <div className='navBarChat'>
+                    <div className='NameImageNav' >
+                        <img src={avatar} alt="avatar" className="navImage" />
+                        <span id='user-name'>
                             {sessionStorage.getItem('peerRole') === 'peerA' ? peerBName : peerAName}
                         </span>
                     </div>
-                    <div className="video-button" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div className="video-button">
                         {
                             !hideVidIcon &&
-                            <button className='videoBtn' title={'Video Call'} style={{ background: 'transparent', border: 'none' }} onClick={handlevideoCallButtonState}>
-                                <VideoCallIcon style={{ transform: `scale(${1.4})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                            <button className='videoBtn' title={'Video Call'} onClick={handlevideoCallButtonState}>
+                                <VideoCallIcon className='videoCallIcon' />
                             </button>
                         }
-                        <button className='deleteChatBtn' title={'Clear chat'} style={{ background: 'transparent', border: 'none' }} onClick={removeChat}>
-                            <DeleteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                        <button className='deleteChatBtn' title={'Clear chat'} onClick={removeChat}>
+                            <DeleteIcon className='deleteIcon' />
                         </button>
                     </div>
                 </div>
 
 
-                <div className="chatBox" style={{ height: `${resizeChatArea}%`, overflow: 'scroll', overflowX: 'hidden', position: 'relative' }}>
+                <div className="chatBox" style={{ height: `${resizeChatArea}%` }}>
                     {
                         messageList.length === 0 &&
-                        // <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: "100%" }}>
-                        <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '10%' }}>
-                            <Lottie style={{ height: '50%' }} animationData={animation} />
-                            <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                                <span id='empty' style={{ fontSize: '1.5vw', color: 'white' }}>IT'S EMPTY IN HERE!</span>
-                                {/* <br /> */}
-                                <span id='start' style={{ fontSize: '1vw', color: 'white' }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start chatting with your peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        <div className='emptyChat'>
+                            <Lottie animationData={animation} className='roboAnimation' />
+                            <div className='textBelowRobo'>
+                                <span id='empty'>IT'S EMPTY IN HERE!</span>
+                                <span id='start'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start Chatting With Your Peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                             </div>
                         </div>
                     }
@@ -243,38 +259,19 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                             if (checkPeerRole === 'peerA') {
                                 if (value.role === 'peerA') {
                                     return (
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '0.5%', borderRadius: '15px', flexDirection: 'column' }} className='chatDiv'>
-                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>
+                                        <div className='peer1Orientation'>
+                                            <div key={value.id} className='chatDiv1 chatDiv'>
+                                                {value.reply !== '' && <div className='replyOuter'>
                                                     {value.replyTo === 'peerA' ? <div>You</div> : <div>Peer</div>}
-                                                    <div style={{ color: 'white' }}>{value.reply}</div>
+                                                    <div className='reply'>{value.reply}</div>
                                                 </div>}
-                                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                <div className='bottomMessage'>
                                                     <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
-                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                        <button style={{ justifySelf: 'flex-end', fontSize: '1vw', justifySelf: 'center', WebkitAlignSelf: 'flex-end', cursor: 'pointer', background: 'transparent', border: 'none', color: 'wheat', display: 'flex', justifyContent: 'flex-end' }} onClick={(e) => {
-                                                            e.preventDefault();
-                                                            let msg = '', cntSpace = 0;
-                                                            for (var i = 0; i < value.message.length; i++) {
-                                                                msg += value.message[i];
-                                                                if (value.message[i] === ' ') {
-                                                                    cntSpace++;
-                                                                    console.log(cntSpace)
-
-                                                                }
-                                                                if (cntSpace === 7) break;
-
-                                                            }
-                                                            if (cntSpace >= 7) msg += '..';
-                                                            setMessageReply(msg)
-                                                            document.querySelector('#input-field').focus();
-                                                            setResizeChatArea(64)
-                                                            setReplySize(16)
-                                                            setDisplayReply('flex')
-                                                            setToReply(value.role)
-
-                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: '1.3vw' }} className='replyMob' /></button>
-                                                        <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
+                                                    <div className="shareTime">
+                                                        <button className='replyBtn' onClick={(e) => { handleReply(e, value) }} title={'Reply'}>&nbsp;&nbsp;&nbsp;
+                                                            <ReplyIcon className='replyMob' />
+                                                        </button>
+                                                        <span id='time'> &nbsp;&nbsp;&nbsp;{value.time}</span>
                                                     </div>
                                                 </div>
 
@@ -284,36 +281,19 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 }
                                 else {
                                     return (
-                                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '0.5%', borderRadius: '15px', flexDirection: 'column' }} className='chatDiv'>
-                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>
+                                        <div className='peer2Orientation'>
+                                            <div key={value.id} className='chatDiv2 chatDiv'>
+                                                {value.reply !== '' && <div className='replyOuter'>
                                                     {value.replyTo === 'peerA' ? <div>You</div> : <div>Peer</div>}
-                                                    <div style={{ color: 'white' }}>{value.reply}</div>
+                                                    <div>{value.reply}</div>
                                                 </div>}
-                                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                <div className='bottomMessage'>
                                                     <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
-                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                        <button style={{ justifySelf: 'flex-end', fontSize: '1vw', justifySelf: 'center', WebkitAlignSelf: 'flex-end', cursor: 'pointer', background: 'transparent', border: 'none', color: 'wheat', display: 'flex', justifyContent: 'flex-end' }} onClick={(e) => {
-                                                            e.preventDefault();
-                                                            let msg = '', cntSpace = 0;
-                                                            for (var i = 0; i < value.message.length; i++) {
-                                                                msg += value.message[i];
-                                                                if (value.message[i] === ' ') {
-                                                                    cntSpace++;
-                                                                    console.log(cntSpace)
-                                                                }
-                                                                if (cntSpace === 7) break;
-                                                            }
-                                                            if (cntSpace >= 7) msg += '..';
-                                                            setMessageReply(msg)
-                                                            document.querySelector('#input-field').focus();
-                                                            setResizeChatArea(64)
-                                                            setReplySize(16)
-                                                            setDisplayReply('flex')
-                                                            setToReply(value.role)
-                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: '1.3vw' }} className='replyMob' /></button>
-
-                                                        <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp; {value.time}</span>
+                                                    <div className="shareTime">
+                                                        <button className='replyBtn' onClick={(e) => { handleReply(e, value) }} title={'Reply'}>
+                                                            &nbsp;&nbsp;&nbsp;<ReplyIcon className='replyMob' />
+                                                        </button>
+                                                        <span id='time'> &nbsp;&nbsp;&nbsp; {value.time}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -324,35 +304,19 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                             else {
                                 if (value.role === 'peerA') {
                                     return (
-                                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#333333', color: 'white', padding: '1.5%', margin: '0.5%', borderRadius: '15px', flexDirection: 'column' }}>
-                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>
+                                        <div className='peer2Orientation'>
+                                            <div key={value.id} className='chatDiv chatDiv2'>
+                                                {value.reply !== '' && <div className='replyOuter'>
                                                     {value.replyTo === 'peerB' ? <div>You</div> : <div>Peer</div>}
-                                                    <div style={{ color: 'white' }}>{value.reply}</div>
+                                                    <div className='reply'>{value.reply}</div>
                                                 </div>}
-                                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                <div className='bottomMessage'>
                                                     <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
-                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                        <button style={{ justifySelf: 'flex-end', fontSize: '1vw', justifySelf: 'center', WebkitAlignSelf: 'flex-end', cursor: 'pointer', background: 'transparent', border: 'none', color: 'wheat', display: 'flex' }} onClick={(e) => {
-                                                            e.preventDefault();
-                                                            let msg = '', cntSpace = 0;
-                                                            for (var i = 0; i < value.message.length; i++) {
-                                                                msg += value.message[i];
-                                                                if (value.message[i] === ' ') {
-                                                                    cntSpace++;
-                                                                    console.log(cntSpace)
-                                                                }
-                                                                if (cntSpace === 7) break;
-                                                            }
-                                                            if (cntSpace >= 7) msg += '.....';
-                                                            setMessageReply(msg)
-                                                            document.querySelector('#input-field').focus();
-                                                            setResizeChatArea(64)
-                                                            setReplySize(16)
-                                                            setDisplayReply('flex')
-                                                            setToReply(value.role)
-                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: '1.3vw' }} className='replyMob' /></button>
-                                                        <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
+                                                    <div className="shareTime">
+                                                        <button className='replyBtn' onClick={(e) => { handleReply(e, value) }} title={'Reply'}>
+                                                            &nbsp;&nbsp;&nbsp;<ReplyIcon className='replyMob' />
+                                                        </button>
+                                                        <span id='time'> &nbsp;&nbsp;&nbsp;{value.time}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -362,35 +326,19 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                                 }
                                 else {
                                     return (
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <div key={value.id} style={{ display: 'flex', maxWidth: '70%', maxHeight: 'fit-content', backgroundColor: '#0A82FD', color: 'white', padding: '1.5%', margin: '0.5%', borderRadius: '15px', flexDirection: 'column' }}>
-                                                {value.reply !== '' && <div style={{ backgroundColor: 'lightblue', maxWidth: '100%', color: 'black', borderRadius: '15px', padding: '1% 0% 1% 6%' }}>
+                                        <div className="peer1Orientation">
+                                            <div key={value.id} className='chatDiv chatDiv1'>
+                                                {value.reply !== '' && <div className='replyOuter'>
                                                     <div>{value.replyTo === 'peerB' ? <div>You</div> : <div>Peer</div>}</div>
-                                                    <div style={{ color: 'white' }}>{value.reply}</div>
+                                                    <div className='reply'>{value.reply}</div>
                                                 </div>}
-                                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                <div className='bottomMessage'>
                                                     <span id='msg' style={{ wordWrap: 'anywhere' }}>{`${value.message}`}</span>
-                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                        <button style={{ justifySelf: 'flex-end', fontSize: '1vw', justifySelf: 'center', WebkitAlignSelf: 'flex-end', cursor: 'pointer', background: 'transparent', border: 'none', color: 'wheat', display: 'flex' }} onClick={(e) => {
-                                                            e.preventDefault();
-                                                            let msg = '', cntSpace = 0;
-                                                            for (var i = 0; i < value.message.length; i++) {
-                                                                msg += value.message[i];
-                                                                if (value.message[i] === ' ') {
-                                                                    cntSpace++;
-                                                                    console.log(cntSpace)
-                                                                }
-                                                                if (cntSpace === 7) break;
-                                                            }
-                                                            if (cntSpace >= 7) msg += '.....';
-                                                            setMessageReply(msg)
-                                                            document.querySelector('#input-field').focus();
-                                                            setResizeChatArea(64)
-                                                            setReplySize(16)
-                                                            setDisplayReply('flex')
-                                                            setToReply(value.role)
-                                                        }} title={'Reply'}>&nbsp;&nbsp;&nbsp;<ReplyIcon style={{ fontSize: '1.3vw' }} className='replyMob' /></button>
-                                                        <span id='time' style={{ color: 'wheat', fontSize: '0.6vw', justifySelf: 'flex-end', WebkitAlignSelf: 'flex-end' }}> &nbsp;&nbsp;&nbsp;{value.time}</span>
+                                                    <div className="shareTime">
+                                                        <button className='replyBtn' onClick={(e) => { handleReply(e, value) }} title={'Reply'}>
+                                                            &nbsp;&nbsp;&nbsp;<ReplyIcon className='replyMob' />
+                                                        </button>
+                                                        <span id='time'> &nbsp;&nbsp;&nbsp;{value.time}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -403,29 +351,21 @@ const Chat = ({ peerAName, peerBName, peerApfpId, peerBpfpId, localConnection, r
                         })
                     }
                 </div>
-                <div style={{ height: `${replyResize}%`, backgroundColor: '#333333', display: displayReply, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ height: `${replyResize}%`, display: displayReply}} className='replyDiv'>
                     <div style={{ display: 'flex', flexDirection: 'column', width: '90%' }}>
-                        {toReply === 'peerA' ? <div style={{ color: 'white', marginLeft: '4%' }}>{peerAName}</div> : <div style={{ color: 'white', marginLeft: '4%' }}>{peerBName}</div>}
-                        <div style={{ color: 'white', marginLeft: '3%', backgroundColor: '#1a1a1a', padding: '0.7%', borderRadius: '15px' }}><span style={{ padding: '2%' }}>{messageReply}</span></div>
+                        {toReply === 'peerA' ? <div className='Name'>{peerAName}</div> : <div className='Name'>{peerBName}</div>}
+                        <div className='msgOuter'><span className='msgInner'>{messageReply}</span></div>
                     </div>
-                    <button onClick={() => {
-                        setReplySize(0);
-                        setMessageReply('')
-                        setResizeChatArea(80)
-                        setDisplayReply('none')
-                        document.querySelector('#input-field').focus();
-
-                    }} style={{ color: 'white', background: 'transparent', border: 'none' }}>X</button>
+                    <button onClick={() => { replyClose()}} className='cross'>X</button>
                 </div>
-
-                <form action="" onSubmit={sendMessage} style={{ backgroundColor: '#1a1a1a', width: '100%', height: '10%' }}>
-                    <footer style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                        <button type='button' onClick={handleCopy} className='copyBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginRight: '4%' }}>
-                            <ContentPasteIcon style={{ transform: `scale(${1.2})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                <form action="" className="navbarBottom" onSubmit={sendMessage}>
+                    <footer className='footer'>
+                        <button type='button' onClick={handleCopy} className='copyBtn commonBottom'>
+                            <ContentPasteIcon className='commonIcon' />
                         </button>
-                        <input autoFocus autoComplete="off" id='input-field' style={{ height: '50%', fontSize: '1.2vw', color: 'white', width: '70%', backgroundColor: '#333333', border: 'none', borderRadius: '5px' }} type='text' value={message} onChange={handleChange}></input>
-                        <button type="submit" id='sendBtn' style={{ padding: '2%', background: 'transparent', border: 'none', borderRadius: '5px', marginLeft: '4%' }}>
-                            <SendIcon style={{ transform: `scale(${1.3})`, width: '100%', color: 'rgb(26, 240, 161)' }} />
+                        <input autoFocus autoComplete="off" id='input-field' type='text' value={message} onChange={handleChange}/>
+                        <button type="submit" id='sendBtn' className='commonBottom'>
+                            <SendIcon className='commonIcon' />
                         </button>
                     </footer>
                 </form>

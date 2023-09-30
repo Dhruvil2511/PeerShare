@@ -1,6 +1,6 @@
 import React from 'react'
 import LandingNavigation from './LandingNavigation'
-import visual from '../../assets/visual.png'
+import visual from '../../assets/peershare_visual.png'
 import chrome from '../../assets/chrome.png'
 import edge from '../../assets/microsoft.png'
 import firefox from '../../assets/firefox.png'

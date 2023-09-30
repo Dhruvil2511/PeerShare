@@ -22,6 +22,7 @@ import firebaseConfig from '../../config/firebaseconfig';
 import configuration from '../../config/iceconfig';
 import '../JoinRoom/Room.scss'
 
+
 firebase.initializeApp(firebaseConfig);
 
 
@@ -45,7 +46,7 @@ const Room = () => {
     const [mobileView, setMobileView] = useState(false);
     const [chatLoaded, setChatLoaded] = useState(false);
     let checkPeerRole = sessionStorage.getItem('peerRole');
-    useEffect(() => {
+    useEffect(async () => {
         try {
             db = firebase.firestore();
         } catch (error) {
