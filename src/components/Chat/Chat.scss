@@ -5,6 +5,10 @@ $chat-blue:#0A82FD;
 $chat-grey:#333333;
 $dark-black:#1a1a1a;
 $weak-grey:#5a5a5a;
+$neon-col:rgb(26, 240, 161);
+$chat-blue:#0A82FD;
+$chat-grey:#333333;
+$dark-black:#1a1a1a;
 .daddy{
     resize:horizontal;
     background-color: transparent;
@@ -121,6 +125,7 @@ $weak-grey:#5a5a5a;
                 padding:1% 0% 1% 6%;
                 .reply{
                     color:$weak-grey;
+                    color:white;
                 }
             }
             .bottomMessage{
