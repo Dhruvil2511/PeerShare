@@ -414,9 +414,13 @@ const VideoChat = ({ peerApfpId, peerBpfpId }) => {
             document.getElementById('localVideo').style.display = "block";
             message = 'video_on';
         }
+        try {
 
-        if (val === 'peerA') videoSignalChannel.send(message);
-        else remoteConnection.videoSignalChannel.send(message);
+            if (val === 'peerA') videoSignalChannel.send(message);
+            else remoteConnection.videoSignalChannel.send(message);
+        } catch (error) {
+            console.error('Error applying pfp');
+        }
 
         setIsVideoOn(!isVideoOn);
     }
