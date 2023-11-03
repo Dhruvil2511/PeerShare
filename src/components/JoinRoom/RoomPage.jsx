@@ -74,7 +74,7 @@ const RoomPage = () => {
                                 generateIDClicked &&
                                 <>
                                     <div style={{ display: 'flex', justifyContent: 'center', width: '75%' }}>
-                                        <span className='copy-link' style={{ color: 'rgb(239,209,118)', marginTop: '5px', fontSize: '1vw' }}>{`https://signalling-28129.web.app/room/${id}`}</span>
+                                        <span className='copy-link' style={{ color: 'rgb(239,209,118)', marginTop: '5px', fontSize: '1vw' }}>{`https://peershare-x.web.app/room/${id}`}</span>
                                         <Tooltip title='Copy link'>
                                             <button onClick={copyURL} style={{ backgroundColor: 'rgb(26, 240, 161)', marginLeft: '2%', width: '8%', borderRadius: '10px' }} >
                                                 <ContentCopyIcon sx={{ fontSize: { xs: 12, sm: 16, md: 25, lg: 30 } }} />
