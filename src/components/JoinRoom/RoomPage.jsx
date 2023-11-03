@@ -33,7 +33,8 @@ const RoomPage = () => {
         sessionStorage.setItem('peerRole', 'peerA');
     }
     function copyURL() {
-        var url = `https://signalling-28129.web.app/room/${id}`;
+        
+        var url = `https://peershare-x.web.app/room/${id}`;
         navigator.clipboard.writeText(url);
         toast("URL copied to clipboard! ", { theme: 'dark' });
     }
